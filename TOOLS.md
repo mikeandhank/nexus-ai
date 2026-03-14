@@ -60,6 +60,10 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 - Token: (in memory - not in repo)
 - Use for: Domain/DNS management
 
+### Resend
+- API Key: (in memory - not in repo)
+- Use for: Transactional email (waitlist signups)
+
 ## What's Been Tried
 
 - Web search on AI agent platforms (Claude Code, LangGraph, AutoGen, CrewAI)
