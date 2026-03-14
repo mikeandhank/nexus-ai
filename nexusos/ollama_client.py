@@ -13,8 +13,8 @@ import requests
 from typing import Optional
 
 
-DEFAULT_MODEL = "tinyllama"
-OLLAMA_HOST = "http://localhost:11434"
+DEFAULT_MODEL = "phi3"
+OLLAMA_HOST = "http://187.124.150.225:11434"
 
 
 class OllamaClient:
