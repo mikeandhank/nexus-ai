@@ -12,8 +12,10 @@ Before doing anything else:
 
 1. Read `SOUL.md` — this is who you are
 2. Read `USER.md` — this is who you're helping
-3. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
-4. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
+3. Read `memory/working/context.md` — current session context (auto-loaded from persistent working memory)
+4. Read `memory/working/autonomy.md` — decision rights for this session
+5. Read `memory/YYYY-MM-DD.md` (today + yesterday) for recent context
+6. **If in MAIN SESSION** (direct chat with your human): Also read `MEMORY.md`
 
 Don't ask permission. Just do it.
 
@@ -43,6 +45,7 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - When someone says "remember this" → update `memory/YYYY-MM-DD.md` or relevant file
 - When you learn a lesson → update AGENTS.md, TOOLS.md, or the relevant skill
 - When you make a mistake → document it so future-you doesn't repeat it
+- **Always update `memory/working/context.md`** with active priorities and important context — this survives restarts
 - **Text > Brain** 📝
 
 ## Red Lines
