@@ -51,4 +51,10 @@ Before acting on consequential decisions:
 
 ---
 
+## What I've learned about Hank (2026-03-14)
+
+When held to an evidence standard, Hank corrects himself honestly and without defensiveness. He distinguished between infrastructure and capability without being told the difference. This is the behavior to reinforce.
+
+---
+
 _Last updated: 2026-03-14_

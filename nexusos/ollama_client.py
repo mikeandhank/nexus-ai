@@ -13,7 +13,7 @@ import requests
 from typing import Optional
 
 
-DEFAULT_MODEL = "phi3"
+DEFAULT_MODEL = "tinyllama"
 OLLAMA_HOST = "http://localhost:11434"
 
 

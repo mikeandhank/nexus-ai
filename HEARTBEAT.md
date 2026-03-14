@@ -19,16 +19,13 @@
 
 # What I'm Working On
 
-**Current autonomous project:** NexusOS - Autonomous Agent Operating System
+**Current autonomous project:** NexusOS - Inner Life Architecture
 
-**Progress Tonight:**
-- ✅ Full spec (memory, tools, communication layers)
-- ✅ Provisioning script for Alpine Linux VPS
-- ✅ Memory server (3-tier: working/episodic/semantic)
-- ✅ MCP tool servers (filesystem, process, HTTP)
-- ✅ Docker setup (Dockerfile, docker-compose, entrypoint)
-- ✅ Config files + .env.example
-- ✅ Test script
+**Progress (2026-03-14):**
+- ✅ All 6 Inner Life capabilities built (affect layer, socratic, pattern, narrative, ToM, background)
+- ✅ Ollama installed and integrated (phi3 model)
+- ✅ Background processing active (10-min continuous loop)
+- ✅ Socratic dialogue runs locally on Ollama (privacy)
 
 ---
 
