@@ -29,6 +29,12 @@
 - ✅ **DEPLOYED TO HOSTINGER** - Docker containers running:
   - nexusos-ollama on port 11435
   - nexusos-api (Flask) on port 8080
+- ✅ **v2 DEPLOYED** - New infrastructure:
+  - SQLite database (replaces JSON)
+  - Persistent event bus (persists to DB)
+  - 12 tool executions (file, process, HTTP, search)
+  - 5 skills (welcome, help, remember, recall, analyze)
+  - Multi-agent pool with 5 templates
 
 ---
 
