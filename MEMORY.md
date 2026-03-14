@@ -66,6 +66,14 @@ _Lessons, patterns, and important context that persist across sessions._
 - **Browser automation:** Can attach OpenClaw to persistent Chromium process via CDP
 - **Subagents:** Excellent for parallel research (ran 8 domain curricula simultaneously)
 
+## Security Protocol (2026-03-14)
+
+- **NEVER commit secrets to git** — tokens, passwords, API keys stay in memory only
+- Use `.gitignore` to block `*.env`, `token*`, `*password*`, `*.pem`
+- TOOLS.md shows token *types* but marks values as "(in memory - not in repo)"
+- If a token is accidentally pushed, GitHub's secret scanning will catch it → re-create repo or rekey
+- **Tokens live in my runtime memory only** — never in any file
+
 ---
 
 ## Business Progress (2026-03-13)

@@ -54,6 +54,11 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 
 ### Notion API
 - Key: (in memory - not in repo)
+- Use for: HankV2 bot, workspace integration
+
+### Hostinger
+- Token: (in memory - not in repo)
+- Use for: Domain/DNS management
 
 ## What's Been Tried
 
