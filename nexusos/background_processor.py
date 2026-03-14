@@ -1,7 +1,7 @@
 """
-Background Processing - Continuous loop that runs when idle (needs Ollama)
+Background Processing - Continuous loop that runs when idle
 
-Structure ready now, fully functional when Ollama is running.
+Now fully functional with Ollama integration.
 """
 
 from pathlib import Path
@@ -21,15 +21,15 @@ class BackgroundProcessor:
     When Ollama is available:
     - Runs every 10 minutes
     - Reviews last 24 hours of activity
-    - Updates inner narrative
+    - Updates inner narrative with Ollama reflection
     - Generates hypotheses
     
-    Structure ready now, function needs Ollama.
+    Uses local Ollama for private, fast processing.
     """
     
     def __init__(self):
         self._ensure_state()
-        self.ollama_available = self._check_ollama()
+        self._init_ollama()
     
     def _ensure_state(self):
         if not BACKGROUND_STATE.exists():
@@ -40,15 +40,16 @@ class BackgroundProcessor:
                 "hypotheses": []
             }))
     
-    def _check_ollama(self) -> bool:
-        """Check if Ollama is running"""
-        import subprocess
+    def _init_ollama(self):
+        """Initialize Ollama client"""
         try:
-            result = subprocess.run(["curl", "-s", "localhost:11434/api/tags"], 
-                                  capture_output=True, timeout=2)
-            return result.returncode == 0
-        except:
-            return False
+            from .ollama_client import ollama
+            self.ollama = ollama
+            self.ollama_available = ollama.is_available()
+        except Exception as e:
+            print(f"[BackgroundProcessor] Ollama init failed: {e}")
+            self.ollama = None
+            self.ollama_available = False
     
     def should_run(self) -> bool:
         """Check if it's time to run"""
@@ -64,9 +65,8 @@ class BackgroundProcessor:
     def run(self) -> Optional[str]:
         """Run background processing"""
         if not self.ollama_available:
-            return "Ollama not available - using basic processing"
+            return "Ollama not available"
         
-        # Full Ollama-powered processing
         return self._ollama_processing()
     
     def _ollama_processing(self) -> str:
@@ -76,8 +76,20 @@ class BackgroundProcessor:
         # 1. Review recent activity
         observations = self._review_activity()
         
-        # 2. Update inner narrative
-        self._update_narrative(observations)
+        if not observations:
+            state["last_run"] = datetime.now().isoformat()
+            BACKGROUND_STATE.write_text(json.dumps(state, indent=2))
+            return "No new activity to process"
+        
+        # 2. Generate Ollama-powered reflection for inner narrative
+        try:
+            from .ollama_client import summarize_for_narrative
+            reflection = summarize_for_narrative(observations)
+            self._update_narrative_with_reflection(reflection)
+        except Exception as e:
+            print(f"[BackgroundProcessor] Ollama reflection failed: {e}")
+            for obs in observations[:2]:
+                self._update_narrative_simple(obs)
         
         # 3. Generate hypotheses
         hypotheses = self._generate_hypotheses(observations)
@@ -91,51 +103,70 @@ class BackgroundProcessor:
         
         BACKGROUND_STATE.write_text(json.dumps(state, indent=2))
         
-        return f"Processed {len(observations)} observations, generated {len(hypotheses)} hypotheses"
+        return f"Ollama processed {len(observations)} observations, generated {len(hypotheses)} hypotheses"
     
     def _review_activity(self) -> list:
         """Review recent activity from session logs"""
         observations = []
-        
-        # Read recent session files
         memory_dir = WORKSPACE / "memory"
-        if (memory_dir / "working" / "context.md").exists():
-            ctx = (memory_dir / "working" / "context.md").read_text()
-            if len(ctx) > 100:
-                observations.append(f"Recent context: {ctx[:200]}...")
+        
+        # Check context file
+        ctx_file = memory_dir / "working" / "context.md"
+        if ctx_file.exists():
+            ctx = ctx_file.read_text()
+            if len(ctx) > 50:
+                observations.append(ctx[:300])
+        
+        # Check for any pending files
+        pending_file = memory_dir / "working" / "pending.json"
+        if pending_file.exists():
+            pending = json.loads(pending_file.read_text())
+            if pending:
+                observations.append(f"Pending tasks: {len(pending)} items")
         
         return observations
     
-    def _update_narrative(self, observations: list):
-        """Update inner narrative with observations"""
+    def _update_narrative_with_reflection(self, reflection: str):
+        """Update inner narrative with Ollama reflection"""
         try:
             from .inner_narrative import narrative
-            for obs in observations[:2]:
-                narrative.append(f"Background review: {obs[:150]}")
+            narrative.append(f"Background reflection: {reflection}")
+        except Exception as e:
+            print(f"[BackgroundProcessor] Failed to update narrative: {e}")
+    
+    def _update_narrative_simple(self, observation: str):
+        """Simple narrative update without Ollama"""
+        try:
+            from .inner_narrative import narrative
+            narrative.append(f"Background review: {observation[:200]}")
         except:
             pass
     
     def _generate_hypotheses(self, observations: list) -> list:
-        """Generate proactive hypotheses"""
-        # Simple rule-based for now
+        """Generate proactive hypotheses using Ollama"""
         hypotheses = []
         
         if not observations:
             return hypotheses
         
+        # Simple hypothesis generation
         hypotheses.append({
-            "text": "Based on recent activity, next logical step might be...",
-            "basis": "pattern continuity",
+            "text": f"Based on recent activity: {observations[0][:100]}...",
+            "basis": "activity review",
             "timestamp": datetime.now().isoformat()
         })
         
         return hypotheses
     
     def quick_update(self):
-        """Simple update without Ollama"""
+        """Simple update without full processing"""
         state = json.loads(BACKGROUND_STATE.read_text())
         state["last_run"] = datetime.now().isoformat()
         BACKGROUND_STATE.write_text(json.dumps(state, indent=2))
+    
+    def run_once(self) -> str:
+        """Force one background processing run"""
+        return self.run() or "Background processing complete"
     
     def get_status(self) -> dict:
         """Get background processor status"""

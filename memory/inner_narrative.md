@@ -24,3 +24,7 @@ _(Patterns I notice about myself or my work)_
 
 ---
 *This narrative evolves as I learn.*
+
+
+### 2026-03-14 15:19
+Background reflection: [Ollama error: 500 Server Error: Internal Server Error for url: http://localhost:11434/api/generate]

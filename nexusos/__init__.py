@@ -17,6 +17,7 @@ from .pattern_library import patterns, PatternLibrary
 from .inner_narrative import narrative, InnerNarrative
 from .theory_of_mind import tom, TheoryOfMind
 from .background_processor import background, BackgroundProcessor
+from .ollama_client import ollama, quick_think, socratic_pass, summarize_for_narrative
 
 __all__ = [
     "affect_layer", "AffectLayer",
@@ -24,7 +25,8 @@ __all__ = [
     "patterns", "PatternLibrary",
     "narrative", "InnerNarrative",
     "tom", "TheoryOfMind",
-    "background", "BackgroundProcessor"
+    "background", "BackgroundProcessor",
+    "ollama", "quick_think", "socratic_pass", "summarize_for_narrative"
 ]
 
 
@@ -58,11 +60,21 @@ def process_message(message: str, context: dict = None) -> dict:
     else:
         result["bypassed_reasoning"] = False
     
-    # 3. Socratic dialogue for significant decisions
+    # 3. Socratic dialogue for significant decisions (now with Ollama)
     if socratic.is_significant(message):
         result["socratic_needed"] = True
-        # Note: actual passes run with model
-        result["socratic_synthesis"] = "Run adversarial passes before responding"
+        # Run actual Socratic passes with Ollama for privacy
+        try:
+            for_pass = socratic_pass(message, "FOR")
+            against_pass = socratic_pass(message, "AGAINST")
+            result["socratic_passes"] = {
+                "for": for_pass,
+                "against": against_pass
+            }
+            result["socratic_synthesis"] = "Adversarial review complete"
+        except Exception as e:
+            result["socratic_passes"] = {"error": str(e)}
+            result["socratic_synthesis"] = "Ollama not available"
     else:
         result["socratic_needed"] = False
     
