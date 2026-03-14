@@ -25,6 +25,8 @@
 - Just fixed hardcoded API key issue in landing page
 - Vercel deployment in progress
 - Waiting for Resend domain verification
+- Built NexusOS scripts (startup, failures, pending, reasoning)
+- Added pending task: test waitlist form
 
 ---
 

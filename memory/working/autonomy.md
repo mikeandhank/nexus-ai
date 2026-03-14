@@ -84,6 +84,13 @@
 - Heartbeat checks (email, calendar, etc.)
 - Background task monitoring
 - Memory consolidation
+- **ALWAYS run `scripts/nexusos-startup.sh` on session start**
+
+### Session Startup (BINDING)
+1. Run `scripts/nexusos-startup.sh`
+2. Load failures into working memory
+3. Review pending tasks
+4. Resume any interrupted work
 
 ### When to Alert Michael
 - Urgent email received
