@@ -26,6 +26,9 @@
 - ✅ Ollama installed and integrated (phi3 model)
 - ✅ Background processing active (10-min continuous loop)
 - ✅ Socratic dialogue runs locally on Ollama (privacy)
+- ✅ **DEPLOYED TO HOSTINGER** - Docker containers running:
+  - nexusos-ollama on port 11435
+  - nexusos-api (Flask) on port 8080
 
 ---
 
