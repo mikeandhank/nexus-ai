@@ -1,4 +1,11 @@
 {
-  "pending": [],
-  "lastUpdated": "2026-03-14T14:10:00Z"
+  "pending": [
+    {
+      "id": "test-waitlist-form",
+      "task": "Test waitlist form",
+      "addedAt": "2026-03-14T18:17:29Z",
+      "status": "pending"
+    }
+  ],
+  "lastUpdated": "2026-03-14T18:17:29Z"
 }
