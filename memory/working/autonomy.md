@@ -6,6 +6,9 @@
 - Read/write memory files
 - Update MEMORY.md, daily notes
 - Search memory via memory_search
+- **Write reasoning traces** to `memory/working/reasoning/`
+- **Log failures** to `memory/failures.json`
+- **Update pending queue** in `memory/working/pending.json`
 
 ### Information Gathering
 - Web search for research
@@ -61,6 +64,7 @@
 ### Retry Logic
 - Failed ops: retry 2x with backoff
 - Timeout: max 60s, then report failure
+- **BEFORE any operation that failed before, check failures.json first**
 
 ### Graceful Degradation
 - Primary tool fails → try backup approach
@@ -70,6 +74,7 @@
 - Always report failure with context
 - Don't fail silently
 - Suggest next steps
+- **LOG ALL FAILURES to failures.json** — this is highest leverage
 
 ---
 

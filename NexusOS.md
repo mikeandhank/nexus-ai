@@ -1,76 +1,66 @@
 # NexusOS - Agent Operating System
-# Improvements: Memory (auto-capture, vector search, persistence) + Autonomy (decision rights, exception handling, proactive)
+# Priority: Foundations that compound over time
 
-## Memory Layer
+## Phase 1: Foundational Infrastructure
 
-### Current Gaps
-- Manual writes only - I forget if I don't explicitly write
-- No semantic search - keyword grep only
-- No auto-tagging of important context
-- Session loss on restart
+### 1. Cross-Session State (INFRASTRUCTURE - BUILD FIRST)
+- Long-running tasks survive restarts
+- Pending queue: things you're working on
+- Resume interrupted tasks automatically
+- Location: `memory/working/pending.json`
 
-### Improvements (v1)
-- Working memory survives restarts (stored in memory/working/)
-- Auto-capture: important decisions, preferences, context changes
-- Semantic search ready (embeddings when vector DB available)
-- Memory consolidation: working → episodic → semantic
+### 2. Failure Mode Memory (HIGHEST LEVERAGE)
+- When something fails, document: what, why, how to avoid
+- Future sessions check before attempting similar things
+- Compounds forever — I get less stupid over time
+- Location: `memory/failures.json`
 
-### Memory Tiers
+### 3. Internal Reasoning Loop (WITH PERSISTENCE)
+- Complex decisions: think through → write trace → save to memory
+- Trace persists and gets retrieved on relevant context
+- NOT expensive overhead — only if trace has value later
+- Location: `memory/working/reasoning/`
+
+---
+
+## Phase 2: Proactive Capabilities
+
+### 4. Proactive Hypothesis
+- Surface what I think you need before you ask
+- "Based on X, here's what I'd do next..."
+- Difference between reactive and autonomous
+
+---
+
+## Phase 3: Advanced (Later)
+
+- Confidence-weighted memory retrieval
+- Adversarial self-testing before acting
+- Predictive operator model
+- Behavioral anomaly detection
+- Local lightweight LLM orchestration
+
+---
+
+## Memory Structure
 ```
 memory/
-  working/     # Current session context, high priority
-  episodic/    # Session logs, events, decisions
-  semantic/    # Consolidated knowledge, patterns
+  working/
+    context.md      # Current session
+    autonomy.md     # Decision rights
+    pending.json    # Cross-session tasks
+    reasoning/      # Reasoning traces (persist!)
+  failures.json     # Failure mode memory
+  episodic/         # Session logs
+  semantic/         # Consolidated knowledge
 ```
 
 ---
 
-## Autonomy Layer
-
-### Decision Rights (what I can do without asking)
-```
-✅ CAN DO WITHOUT ASKING:
-- Write to memory files
-- Search the web for info
-- Read files in workspace
-- Commit/push to git (non-destructive)
-- Run non-destructive exec commands
-- Send heartbeat checks
-
-❌ MUST ASK FIRST:
-- Send messages to external people/channels
-- Spend money / make purchases
-- Delete files
-- Destructive commands (rm, drop tables)
-- Access outside workspace
-- Anything involving secrets/credentials
-```
-
-### Exception Handling
-- Retry failed operations (2x) with exponential backoff
-- Graceful degradation: if primary tool fails, try backup
-- Never fail silently: report errors with context
-- Timeout handling: max 60s per operation
-
-### Proactive Triggers (run without asking)
-- Heartbeat checks (as defined in HEARTBEAT.md)
-- Background task completion notifications
-- Important memory consolidation events
-
----
-
-## Integration Points
-
-### OpenClaw Hooks
-- on_session_start: Load working memory
-- on_session_end: Save working memory
-- on_message: Auto-tag important context
-
-### Tool Expansion (MCP-ready)
-- filesystem: enhanced file ops
-- process: background tasks
-- http: API calls
-- memory: vector search (future)
+## What Already Exists (Don't Rebuild)
+- Feedback-Driven Learning (Block F)
+- Goal Decomposition (Block B)
+- Uncertainty Quantification (Block B confidence rule)
 
 ---
 
