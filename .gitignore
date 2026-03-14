@@ -1,1 +1,17 @@
+# Secrets - never commit
+.env
+.env.local
+*.pem
+*.key
+token*
+*secret*
+*password*
+
+# Large binaries
 node_modules/
+*.node
+*.bin
+
+# OS
+.DS_Store
+Thumbs.db
