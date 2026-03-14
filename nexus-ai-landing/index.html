@@ -72,7 +72,7 @@
             <li>No coding required — set up in minutes</li>
         </ul>
 
-        <form id="waitlist-form" action="https://forms.gle/YOUR_FORM_ID" method="POST" target="_blank">
+        <form id="waitlist-form">
             <div class="form-group">
                 <input type="email" name="email" placeholder="Enter your email" required>
             </div>
@@ -107,9 +107,30 @@
     </div>
 
     <script>
-        document.getElementById('waitlist-form').addEventListener('submit', function(e) {
+        document.getElementById('waitlist-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            alert('Thanks! We\'ll be in touch.');
+            const email = this.email.value;
+            const btn = this.querySelector('button');
+            btn.textContent = 'Joining...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch('/api/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                if (res.ok) {
+                    alert('You\'re in! Check your email for confirmation.');
+                    this.reset();
+                } else {
+                    alert('Something went wrong. Please try again.');
+                }
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+            btn.textContent = 'Join the Waitlist';
+            btn.disabled = false;
         });
     </script>
 </body>
