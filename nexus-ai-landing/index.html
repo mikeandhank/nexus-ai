@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus AI — Autonomous Agents for SMBs</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: #fafafa;
+        }
+        .container { max-width: 680px; margin: 0 auto; padding: 60px 20px; }
+        h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.02em; }
+        .tagline { font-size: 1.25rem; color: #666; margin-bottom: 40px; }
+        .value-props { margin-bottom: 48px; }
+        .value-props li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            list-style: none;
+        }
+        .value-props li:before { content: "✓"; color: #22c55e; margin-right: 12px; font-weight: 600; }
+        .cta {
+            background: #1a1a1a;
+            color: white;
+            padding: 20px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+        .cta:hover { background: #333; }
+        .form-group { margin-bottom: 16px; }
+        input[type="email"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+        .pricing { margin-top: 48px; padding-top: 32px; border-top: 1px solid #eee; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+        .tier {
+            background: white;
+            padding: 24px 16px;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            text-align: center;
+        }
+        .tier.featured { border-color: #1a1a1a; background: #fafafa; }
+        .tier h3 { font-size: 0.875rem; text-transform: uppercase; color: #666; margin-bottom: 8px; }
+        .tier .price { font-size: 1.75rem; font-weight: 700; }
+        .tier .desc { font-size: 0.875rem; color: #666; margin-top: 8px; }
+        footer { margin-top: 60px; text-align: center; color: #999; font-size: 0.875rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Nexus AI</h1>
+        <p class="tagline">Autonomous agents that actually work for your business.</p>
+        
+        <ul class="value-props">
+            <li>58% of SMBs now use AI — don't get left behind</li>
+            <li>Pre-built agents for sales, support, and operations</li>
+            <li>Connects to your existing tools (CRM, email, Slack)</li>
+            <li>No coding required — set up in minutes</li>
+        </ul>
+
+        <form id="waitlist-form" action="https://forms.gle/YOUR_FORM_ID" method="POST" target="_blank">
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <button type="submit" class="cta">Join the Waitlist</button>
+        </form>
+        <p style="margin-top: 12px; font-size: 0.875rem; color: #666; text-align: center;">No spam. Early access only.</p>
+
+        <div class="pricing">
+            <h2 style="font-size: 1.25rem;">Pricing</h2>
+            <div class="pricing-grid">
+                <div class="tier">
+                    <h3>Starter</h3>
+                    <div class="price">$99</div>
+                    <div class="desc">1 agent<br>500 runs/mo</div>
+                </div>
+                <div class="tier featured">
+                    <h3>Growth</h3>
+                    <div class="price">$249</div>
+                    <div class="desc">3 agents<br>2K runs/mo</div>
+                </div>
+                <div class="tier">
+                    <h3>Scale</h3>
+                    <div class="price">$499</div>
+                    <div class="desc">Unlimited agents<br>Unlimited runs</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Built for SMBs that want results, not complexity.
+        </footer>
+    </div>
+
+    <script>
+        document.getElementById('waitlist-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Thanks! We\'ll be in touch.');
+        });
+    </script>
+</body>
+</html>
