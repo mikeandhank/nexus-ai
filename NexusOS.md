@@ -1,6 +1,6 @@
 # NexusOS - Agent Operating System
 
-## Status: IN PROGRESS (as of 2026-03-14)
+## Status: SHIPPING (as of 2026-03-14)
 
 Platform for AI agents with inner life. Built on OpenClaw (MIT licensed).
 
@@ -9,93 +9,96 @@ Platform for AI agents with inner life. Built on OpenClaw (MIT licensed).
 ## What's Built
 
 ### Inner Life Capabilities
-| Capability | Status | Evidence |
-|------------|--------|----------|
-| Affect Layer | ✅ Working | Returns directives for real messages |
-| Socratic Dialogue | ✅ Working | Passes run locally with phi3 |
+| Capability | Status | Notes |
+|------------|--------|-------|
+| Affect Layer | ✅ Working | Analyzes context before responding |
+| Socratic Dialogue | ✅ Working | Adversarial reasoning available |
 | Pattern Library | ⚠️ Empty | Needs real interactions |
 | Inner Narrative | ⚠️ Basic | Exists, minimal content |
-| Theory of Mind | ⚠️ Empty | Needs real interactions |
-| Background Processing | ✅ Working | 10-min loop running |
+| Theory of Mind | ⚠️ Empty | Needs real data |
+| Background Processing | ✅ Working | 10-min continuous loop |
 
-### Infrastructure
-- **Hostinger VPS**: 187.124.150.225
-- **Web UI**: http://187.124.150.225:8080/
-- **Ollama API**: http://187.124.150.225:11435/
-- **Model**: phi3 (3.8B params)
-- **OpenClaw**: Running on port 47052
+### Product Features
+| Feature | Status | Notes |
+|---------|--------|-------|
+| **User Auth** | ✅ Live | Simple token-based, works |
+| **Per-User Memory** | ✅ Live | Conversations stored per user |
+| **Multi-LLM Support** | ✅ Live | Ollama (free) + BYOK (paid) |
+| **Web UI** | ✅ Live | http://187.124.150.225:8080 |
 
-### Integration
-- `nexusos/openclaw_integration.py` bridges inner life to response flow
-- Maps directives to thinking levels
-- Ready to wire into actual agent
-
----
-
-## What Needs Building (Product-Ready)
-
-### 1. Wire Into Response Flow
-- **Status**: Integration code exists, not yet live
-- **Next**: Add to OpenClaw hooks or agent prompt
-
-### 2. User Authentication
-- **Status**: Not started
-- **Need**: Simple auth for web UI (per-user accounts)
-- **Options**: Simple token-based, or integrate with auth providers
-
-### 3. Per-User Conversation Memory
-- **Status**: Not started
-- **Need**: Each user gets separate memory/context
-- **Approach**: User ID → separate memory stores
+### LLM Options
+| Backend | Type | Cost | Models |
+|---------|------|------|--------|
+| Ollama | Local | Free | phi3, llama2, mistral |
+| OpenAI | BYOK | User pays | gpt-4o, gpt-4o-mini |
+| Anthropic | BYOK | User pays | claude-sonnet, claude-haiku |
 
 ---
 
-## Platform Architecture
+## Usage
+
+### Web Interface
+```
+http://187.124.150.225:8080/
+```
+- Enter name/email to create account
+- Chat with Ollama (free) or add OpenAI/Anthropic API key
+- Conversations persist per user
+
+### API
+```bash
+# List available models
+curl http://187.124.150.225:8080/api/models
+
+# Chat (requires user_id from login)
+curl -X POST http://187.124.150.225:8080/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_id": "YOUR_USER_ID", "message": "Hello"}'
+```
+
+---
+
+## Architecture
 
 ```
 ┌─────────────────────────────────────────┐
-│           User (Web/Telegram/etc)       │
+│           Web Browser / API             │
 └────────────────┬────────────────────────┘
                  │
 ┌────────────────▼────────────────────────┐
-│         NexusOS Web UI (8080)           │
-│  - Auth                                 │
+│         NexusOS API (8080)              │
+│  - Auth (token-based)                   │
+│  - User memory (per-user JSON)          │
+│  - Multi-LLM router                     │
 │  - Chat interface                       │
-│  - User memory                          │
 └────────────────┬────────────────────────┘
                  │
-┌────────────────▼────────────────────────┐
-│    NexusOS Inner Life (OpenClaw)        │
-│  - Affect Layer                         │
-│  - Socratic Dialogue                    │
-│  - Pattern Library                      │
-│  - Theory of Mind                       │
-│  - Background Processing                │
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│      Ollama (phi3) - Hostinger          │
-│  - Local LLM                            │
-│  - Private reasoning                    │
-└─────────────────────────────────────────┘
+    ┌────────────┴────────────┐
+    │                         │
+┌───▼───┐              ┌──────▼──────┐
+│Ollama │              │ BYOK (OpenAI│
+│(free) │              │  Anthropic) │
+└───────┘              └─────────────┘
 ```
 
 ---
 
-## Foundation Knowledge (Configurable, Not Hardcoded)
+## Monetization Model
 
-- Capacity for knowledge exists
-- Per-user/configurable:
-  - Goals
-  - Communication style
-  - Domain expertise
-  - Product context
-- Universal:
-  - Conversation patterns
-  - Memory architecture
-  - Learning from feedback
-  - Tool usage
-  - Safety guidelines
+| Tier | LLM Cost | Our Margin |
+|------|----------|------------|
+| Free (Ollama) | $0 | $0 |
+| BYOK | User pays | $0 (yet) |
+| **Future: OOTB** | We pay | 20-30% margin |
+
+---
+
+## What's Next
+
+1. Wire NexusOS inner life into response flow (affect, socratic, etc.)
+2. Add paid tier with our API keys (upcharge 20-30%)
+3. Improve memory (patterns, lessons learned)
+4. Add more free LLMs (local alternatives)
 
 ---
 
