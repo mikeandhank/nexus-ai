@@ -27,6 +27,33 @@ _People with documented AI agent memory pain points_
 
 ---
 
+## GitHub Copilot Users (via Discussions)
+- **Source:** GitHub Discussions - Copilot Agent context loss
+- **Problem:** Context loss after "Summarized conversation history", infinite loops, forgets problem context mid-task
+- **Status:** Researching
+- **Lead Score:** 4
+- **Last updated:** 2026-03-14
+
+---
+
+## VSCode AI Agent Users
+- **Source:** GitHub issues - VSCode AI Agent history refresh bugs
+- **Problem:** History reverts unexpectedly, conversations lost during code changes
+- **Status:** Researching
+- **Lead Score:** 4
+- **Last updated:** 2026-03-14
+
+---
+
+## Kiro Users
+- **Source:** GitHub issues - Kiro AI summarization context loss
+- **Problem:** Summarization loses critical context during sessions
+- **Status:** Researching
+- **Lead Score:** 3
+- **Last updated:** 2026-03-14
+
+---
+
 ## [Next prospect - auto-populated by social listening]
 - **Source:** 
 - **Problem:** 
