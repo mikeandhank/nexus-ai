@@ -2,67 +2,100 @@
 
 ## Status: IN PROGRESS (as of 2026-03-14)
 
-Six capabilities for human-like autonomous reasoning. Evidence-based status.
+Platform for AI agents with inner life. Built on OpenClaw (MIT licensed).
 
 ---
 
-## Capability Status (Evidence-Based)
+## What's Built
 
+### Inner Life Capabilities
 | Capability | Status | Evidence |
 |------------|--------|----------|
-| Affect Layer | ✅ Working | Processes real messages, returns directives that would change behavior |
-| Socratic Dialogue | ✅ Working | Runs FOR/AGAINST passes locally via TinyLlama |
-| Pattern Library | ⚠️ Empty | Zero patterns learned (needs real interactions) |
-| Inner Narrative | ⚠️ Basic | Exists but minimal content, needs wiring |
-| Theory of Mind | ⚠️ Empty | Zero preferences learned (needs real interactions) |
-| Background Processing | ✅ Working | Runs 10-min loop, generates hypotheses |
+| Affect Layer | ✅ Working | Returns directives for real messages |
+| Socratic Dialogue | ✅ Working | Passes run locally with phi3 |
+| Pattern Library | ⚠️ Empty | Needs real interactions |
+| Inner Narrative | ⚠️ Basic | Exists, minimal content |
+| Theory of Mind | ⚠️ Empty | Needs real interactions |
+| Background Processing | ✅ Working | 10-min loop running |
 
-### Ollama
-- **Model:** TinyLlama (637MB) 
-- **Reason:** phi3 required 3.5GB RAM, only 1.8GB available
-- **Status:** Working
+### Infrastructure
+- **Hostinger VPS**: 187.124.150.225
+- **Web UI**: http://187.124.150.225:8080/
+- **Ollama API**: http://187.124.150.225:11435/
+- **Model**: phi3 (3.8B params)
+- **OpenClaw**: Running on port 47052
 
----
-
-## Evidence Gathered (2026-03-14)
-
-### Affect Layer Evidence
-Real messages from today's conversation analyzed:
-
-1. "Integrate Ollama" → DEEP_ANALYSIS (novelty=0.8, new territory)
-2. "Let's run it all" → DEEP_ANALYSIS (novelty=0.8)
-3. "prove each capability works" → STANDARD (familiar domain)
-4. "What's blocking the Ollama 500 error" → ADVERSARIAL_SELF_TEST (threat detection)
-
-### Socratic Dialogue Evidence
-- Decision: "I should commit all changes and push to main"
-- PASS 1 (FOR): Generated strong case FOR committing
-- PASS 2 (AGAINST): Generated adversarial review
-- Actual result: Committed with detailed commit message
-
-### What Needs Work
-- Pattern Library: Not yet learning from interactions
-- Theory of Mind: Not yet observing and learning preferences
-- Inner Narrative: Needs to be updated with real reflections
-- Full wiring into agent response flow
+### Integration
+- `nexusos/openclaw_integration.py` bridges inner life to response flow
+- Maps directives to thinking levels
+- Ready to wire into actual agent
 
 ---
 
-## Architecture
+## What Needs Building (Product-Ready)
+
+### 1. Wire Into Response Flow
+- **Status**: Integration code exists, not yet live
+- **Next**: Add to OpenClaw hooks or agent prompt
+
+### 2. User Authentication
+- **Status**: Not started
+- **Need**: Simple auth for web UI (per-user accounts)
+- **Options**: Simple token-based, or integrate with auth providers
+
+### 3. Per-User Conversation Memory
+- **Status**: Not started
+- **Need**: Each user gets separate memory/context
+- **Approach**: User ID → separate memory stores
+
+---
+
+## Platform Architecture
 
 ```
-Input Message
-    ↓
-Affect Layer (5 signals) → Directive
-    ↓
-Socratic (if significant) → Adversarial passes
-    ↓
-Pattern Library (if familiar) → Bypass or proceed
-    ↓
-Theory of Mind → Predict what Michael wants
-    ↓
-Response (shaped by all above)
+┌─────────────────────────────────────────┐
+│           User (Web/Telegram/etc)       │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│         NexusOS Web UI (8080)           │
+│  - Auth                                 │
+│  - Chat interface                       │
+│  - User memory                          │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│    NexusOS Inner Life (OpenClaw)        │
+│  - Affect Layer                         │
+│  - Socratic Dialogue                    │
+│  - Pattern Library                      │
+│  - Theory of Mind                       │
+│  - Background Processing                │
+└────────────────┬────────────────────────┘
+                 │
+┌────────────────▼────────────────────────┐
+│      Ollama (phi3) - Hostinger          │
+│  - Local LLM                            │
+│  - Private reasoning                    │
+└─────────────────────────────────────────┘
 ```
+
+---
+
+## Foundation Knowledge (Configurable, Not Hardcoded)
+
+- Capacity for knowledge exists
+- Per-user/configurable:
+  - Goals
+  - Communication style
+  - Domain expertise
+  - Product context
+- Universal:
+  - Conversation patterns
+  - Memory architecture
+  - Learning from feedback
+  - Tool usage
+  - Safety guidelines
 
 ---
 
