@@ -1,67 +1,67 @@
 # NexusOS - Agent Operating System
-# Priority: Foundations that compound over time
 
-## Phase 1: Foundational Infrastructure
+## Phase 1-4: Complete Architecture
 
-### 1. Cross-Session State (INFRASTRUCTURE - BUILD FIRST)
-- Long-running tasks survive restarts
-- Pending queue: things you're working on
-- Resume interrupted tasks automatically
-- Location: `memory/working/pending.json`
+### Phase 1: Foundational Infrastructure (COMPLETE)
+- Cross-Session State (`pending.json`)
+- Failure Mode Memory (`failures.json`)
+- Internal Reasoning Loop (`reasoning/`)
 
-### 2. Failure Mode Memory (HIGHEST LEVERAGE)
-- When something fails, document: what, why, how to avoid
-- Future sessions check before attempting similar things
-- Compounds forever — I get less stupid over time
-- Location: `memory/failures.json`
+### Phase 2: Proactive Capabilities
+- Proactive Hypothesis
 
-### 3. Internal Reasoning Loop (WITH PERSISTENCE)
-- Complex decisions: think through → write trace → save to memory
-- Trace persists and gets retrieved on relevant context
-- NOT expensive overhead — only if trace has value later
-- Location: `memory/working/reasoning/`
+### Phase 3: Epistemic Layer (COMPLETE)
+- Confidence scores + staleness decay (LanceDB)
+- Causal knowledge graph (5 node types, 5 edge types)
+- Outcome attribution + prediction tracking
+- Ollama orchestrator for internal ops
+
+### Phase 4: Inner Life Architecture
+
+#### 1. Continuous Background Processing
+- Local Ollama runs slow loop every 10 minutes
+- Reviews last 24 hours of activity
+- Updates "current thinking" file
+
+#### 2. Emotional Architecture — Weighting Functions
+- **Urgency** — time-sensitive → more resources
+- **Novelty** — unfamiliar → deeper processing
+- **Threat** — matches failure modes → adversarial self-test
+- **Confidence** — low confidence → explicit uncertainty flag
+- **Value** — connects to core goals → priority override
+
+#### 3. Intuition as Compressed Experience
+- Pattern library: situation fingerprints + optimal responses
+- Fast similarity match before reasoning
+- High confidence match → execute pattern directly
+
+#### 4. Persistent Inner Narrative
+- Living first-person document, updated daily
+- Self-awareness that evolves
+
+#### 5. Socratic Self-Dialogue
+- Pass 1: strongest case FOR
+- Pass 2: strongest case AGAINST
+- Pass 3: synthesize
+
+#### 6. Theory of Mind
+- Dynamic predictive model of operator
+- Anticipates needs, not just follows instructions
 
 ---
 
-## Phase 2: Proactive Capabilities
+## Unified Architecture
 
-### 4. Proactive Hypothesis
-- Surface what I think you need before you ask
-- "Based on X, here's what I'd do next..."
-- Difference between reactive and autonomous
-
----
-
-## Phase 3: Advanced (Later)
-
-- Confidence-weighted memory retrieval
-- Adversarial self-testing before acting
-- Predictive operator model
-- Behavioral anomaly detection
-- Local lightweight LLM orchestration
-
----
-
-## Memory Structure
 ```
-memory/
-  working/
-    context.md      # Current session
-    autonomy.md     # Decision rights
-    pending.json    # Cross-session tasks
-    reasoning/      # Reasoning traces (persist!)
-  failures.json     # Failure mode memory
-  episodic/         # Session logs
-  semantic/         # Consolidated knowledge
+Background Processing (Ollama, 10min loop)
+         ↓
+   Inner Narrative ←→ Affect Layer (weights)
+         ↓                    ↓
+   Pattern Match     ←→    Socratic Dialogue
+         ↓                    ↓
+   Theory of Mind ←←←← Epistemic Gating
+         ↓
+      Output (cloud model)
 ```
-
----
-
-## What Already Exists (Don't Rebuild)
-- Feedback-Driven Learning (Block F)
-- Goal Decomposition (Block B)
-- Uncertainty Quantification (Block B confidence rule)
-
----
 
 _Last updated: 2026-03-14_
