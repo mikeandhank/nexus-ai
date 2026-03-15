@@ -769,6 +769,13 @@ try:
     try:
         from plugin_system import setup_plugin_routes
         setup_plugin_routes(app)
+    
+    # Setup dashboard
+    try:
+        from dashboard_api import setup_dashboard_routes
+        setup_dashboard_routes(app)
+    except Exception as e:
+        print(f"[NexusOS] Dashboard not available: {e}")
     except Exception as e:
         print(f"[NexusOS] Plugin system not available: {e}")
 except Exception as e:
