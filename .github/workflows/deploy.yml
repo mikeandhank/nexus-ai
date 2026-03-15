@@ -56,7 +56,22 @@ jobs:
           
       - name: Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "cd /root/nexus-ai && git pull origin main && cd nexusos-v2 && docker build -t nexusos-latest . && docker rm -f nexusos-api || true && docker run -d --name nexusos-api --network host -e DATABASE_URL='postgresql://nexusos:nexusos@172.19.0.4:5432/nexusos' -e REDIS_URL='redis://172.19.0.2:6379/0' -e USE_PG=1 -e NEXUSOS_SECRET=nexusos-v5-enterprise -e OLLAMA_URL=http://172.19.0.5:11434 nexusos-latest"
+          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "
+            cd /root/nexus-ai && git pull origin main || git clone https://github.com/mikeandhank/nexus-ai.git .
+            cd nexusos-v2
+            docker build -t nexusos-latest .
+            docker rm -f nexusos-api 2>/dev/null || true
+            docker run -d --name nexusos-api --network host \
+              -e DATABASE_URL='postgresql://nexusos:nexusos@172.19.0.4:5432/nexusos' \
+              -e REDIS_URL='redis://172.19.0.2:6379/0' \
+              -e USE_PG=1 \
+              -e NEXUSOS_SECRET=nexusos-v5-enterprise \
+              -e OLLAMA_URL=http://172.19.0.5:11434 \
+              nexusos-latest
+            sleep 3
+            docker logs nexusos-api --tail 5
+            docker ps | grep nexusos-api
+          "
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
