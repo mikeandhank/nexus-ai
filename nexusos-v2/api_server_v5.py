@@ -224,7 +224,7 @@ setup_user_routes(app)
 
 # ==================== WEBHOOKS ====================
 from webhooks import get_webhook_manager
-from database_compat import Database
+from database_compat import DatabaseCompat as Database
 
 # Initialize webhook manager with db
 _db_instance = Database() if not USE_PG else None

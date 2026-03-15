@@ -5,7 +5,7 @@ from flask import jsonify, request, g
 from auth import require_auth
 from agent_runtime import get_agent_runtime
 from webhooks import get_webhook_manager
-from database_compat import Database
+from database_compat import DatabaseCompat as Database
 
 # Initialize webhook manager
 _db = Database()

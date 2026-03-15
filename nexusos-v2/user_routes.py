@@ -4,7 +4,7 @@ Provides CRUD operations for user management (enterprise feature)
 """
 from flask import jsonify, request, g
 from auth import require_auth
-from database_compat import Database
+from database_compat import DatabaseCompat as Database
 
 _db = Database()
 
