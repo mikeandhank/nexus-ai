@@ -292,43 +292,61 @@ def login():
         return jsonify({'error': 'Email and password required'}), 400
     
     user = None
+    user_id = None
+    user_name = ''
+    user_role = 'user'
+    password_hash = ''
+    
     if USE_PG:
         try:
             import psycopg2.extras
             conn = get_pg_conn()
             cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            cur.execute("SELECT * FROM users WHERE email = %s", (email,))
-            user = cur.fetchone()
+            cur.execute("SELECT id, email, password_hash, name, role FROM users WHERE email = %s", (email,))
+            row = cur.fetchone()
             conn.close()
-        except:
+            if row:
+                user_id = row.get('id')
+                user_name = row.get('name', '')
+                user_role = row.get('role', 'user')
+                password_hash = row.get('password_hash', '')
+        except Exception as e:
+            # Log but don't expose details
+            print(f"Login DB error: {e}")
             pass
     else:
         conn = sqlite3.connect(db_path)
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        cur.execute("SELECT * FROM users WHERE email = ?", (email,))
-        user = cur.fetchone()
+        cur.execute("SELECT id, email, password_hash, name, role FROM users WHERE email = ?", (email,))
+        row = cur.fetchone()
         conn.close()
+        if row:
+            user_id = row.get('id')
+            user_name = row.get('name', '')
+            user_role = row.get('role', 'user')
+            password_hash = row.get('password_hash', '')
     
-    # Handle both RealDictCursor (dict) and sqlite3.Row (both support .get())
-    if not user:
+    if not user_id:
         return jsonify({'error': 'Invalid email or password'}), 401
-    
-    password_hash = user.get('password_hash', '')
     
     if not verify_password(password, password_hash):
         return jsonify({'error': 'Invalid email or password'}), 401
     
-    access = create_access_token(user['id'], user.get('role', 'user'))
-    refresh = create_refresh_token(user['id'])
-    
-    return jsonify({
-        'user_id': user['id'],
-        'access_token': access,
-        'refresh_token': refresh,
-        'name': user.get('name', ''),
-        'role': user.get('role', 'user')
-    })
+    try:
+        access = create_access_token(user_id, user_role)
+        refresh = create_refresh_token(user_id)
+        
+        return jsonify({
+            'user_id': user_id,
+            'access_token': access,
+            'refresh_token': refresh,
+            'name': user_name,
+            'role': user_role
+        })
+    except Exception as e:
+        print(f"Login token error: {e}")
+        return jsonify({'error': 'Login failed', 'code': 'LOGIN_FAILED'}), 500
 
 @app.route('/api/auth/refresh', methods=['POST'])
 def refresh():
@@ -826,13 +844,13 @@ app.register_blueprint(usage_bp)
 
 # Initialize Message Bus (Inter-Agent Communication)
 REDIS_URL = os.environ.get('REDIS_URL', '')
+message_bus = get_message_bus(REDIS_URL)
+coordinator = AgentCoordinator(message_bus)
+setup_message_bus_routes(app, message_bus, coordinator)
 if REDIS_URL:
-    message_bus = get_message_bus(REDIS_URL)
-    coordinator = AgentCoordinator(message_bus)
-    setup_message_bus_routes(app, message_bus, coordinator)
-    print("[NexusOS] Message Bus initialized")
+    print("[NexusOS] Message Bus initialized with Redis")
 else:
-    print("[NexusOS] Warning: REDIS_URL not set, using in-memory message bus")
+    print("[NexusOS] Message Bus initialized (in-memory fallback)")
 
 # Initialize Structured Logging & Kill Switches
 from structured_logging import (
