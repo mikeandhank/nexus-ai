@@ -61,10 +61,19 @@
   - PostgreSQL running with 8 tables (users, conversations, messages, agents, memory, audit_log, events, api_usage)
   - Redis running for shared state
   - API updated with DATABASE_URL support
+- ✅ **JWT Authentication** - Step 3 complete!
+  - Register/Login/Refresh/Logout working
+  - bcrypt password hashing
+  - Access tokens (1hr), Refresh tokens (7 days)
+  - @require_auth decorator for protected routes
+- ✅ **Agent Lifecycle** - Step 4 complete!
+  - Create, list, get, start, stop, pause, resume, delete agents
+  - Status tracking: created -> starting -> running -> paused -> stopped
+  - Agent runtime with background threads
 
 # Notes
 - Positioning revised: "Self-hosted AI agent platform" not "enterprise competitor"
-- Path: PostgreSQL ✅ → Redis ✅ → JWT → Agent Lifecycle → Communication → Observability
+- Path: PostgreSQL ✅ → Redis ✅ → JWT Auth ✅ → Agent Lifecycle ✅ → Communication → Observability
 - Cut: Subscription tiers, marketplace, SSO, SOC2 (deferred)
 
 ---

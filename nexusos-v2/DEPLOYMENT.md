@@ -54,6 +54,7 @@ curl -X POST http://187.124.150.225:8080/api/auth/register \
 
 - [x] PostgreSQL database layer (database_v2.py + database_compat.py)
 - [x] JWT Auth with refresh tokens (auth.py)
+- [x] Webhook System (webhooks.py + webhooks table added)
 - [ ] Redis for shared state (docker-compose has it, need to integrate)
 - [ ] Connection pooling and health checks
 

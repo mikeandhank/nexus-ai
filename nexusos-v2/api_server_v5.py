@@ -377,14 +377,18 @@ def get_ollama_response(prompt, model='phi3'):
         return f'Error: {e}'
 
 @app.route('/api/chat', methods=['POST'])
+@require_auth
 def chat():
+    """Chat endpoint - requires valid JWT auth"""
     data = request.json or {}
-    user_id = data.get('user_id') or request.headers.get('Authorization', '').replace('Bearer ', '')
     message = data.get('message', '')
     conversation_id = data.get('conversation_id')
     
-    if not user_id or not message:
-        return jsonify({'error': 'user_id and message required'}), 400
+    if not message:
+        return jsonify({'error': 'message required'}), 400
+    
+    # user_id is now validated from JWT via @require_auth decorator
+    user_id = g.user_id
     
     response = get_ollama_response(message)
     
@@ -392,19 +396,46 @@ def chat():
         'response': response,
         'conversation_id': conversation_id or str(uuid.uuid4()),
         'tokens': len(response.split()),
-        'cost': 0
+        'cost': 0,
+        'user_id': user_id  # Echo back for confirmation
     })
 
 # ==================== STATUS ====================
 @app.route('/api/status')
 def status():
+    # Check PostgreSQL connectivity
+    db_status = False
+    if USE_PG:
+        try:
+            conn = get_pg_conn()
+            conn.close()
+            db_status = True
+        except:
+            db_status = False
+    
+    # Check Redis connectivity
+    redis_status = False
+    try:
+        import redis
+        r = redis.from_url(os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
+        r.ping()
+        redis_status = True
+    except:
+        redis_status = False
+    
     return jsonify({
         'version': '5.0.0',
         'running': True,
         'enterprise': True,
         'components': {
-            'database': True,
+            'database': db_status,
+            'postgresql': USE_PG,
+            'redis': redis_status,
             'llm_manager': True
+        },
+        'infrastructure': {
+            'postgres': 'connected' if db_status else 'disconnected',
+            'redis': 'connected' if redis_status else 'disconnected'
         },
         'tiers': {
             'free': {'providers': ['ollama']},

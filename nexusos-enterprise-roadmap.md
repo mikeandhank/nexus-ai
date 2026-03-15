@@ -20,9 +20,9 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 ### Step 1: Foundation (Weeks 1-4) - DO THIS FIRST
 | Priority | Action | Status |
 |----------|--------|--------|
-| 1 | **PostgreSQL** - Replace SQLite for concurrent writes | ⬜ |
-| 2 | **Redis** - Shared state store, not for Celery yet | ⬜ |
-| 3 | **JWT Auth** - Real authentication with refresh tokens | ⬜ |
+| 1 | **PostgreSQL** - Replace SQLite for concurrent writes | ✅ Code Ready |
+| 2 | **Redis** - Shared state store, Celery broker | ✅ Code Ready |
+| 3 | **JWT Auth** - Real authentication with refresh tokens | ✅ Code Ready |
 
 ### Step 2: Agent Lifecycle (Weeks 5-10)
 | Priority | Action | Status |
@@ -37,6 +37,7 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 | 7 | **Message Bus** - Agents publish/subscribe events | ⬜ |
 | 8 | **Agent-to-Agent Protocol** - "Ask Agent B to do X" | ⬜ |
 | 9 | **Shared Scratchpad** - Working memory for collaboration | ⬜ |
+| 9b | **Multi-Tenant Isolation** - Customer/team data separation | ⬜ |
 
 ### Step 4: Observability (Weeks 10-14)
 | Priority | Action | Status |
@@ -59,6 +60,22 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 | 17 | **Backup/Restore** - Agent state + database | ⬜ |
 | 18 | **Rate Limiting** - Per user, per agent, per tool | ⬜ |
 | 19 | **Let's Encrypt** - Real TLS, not self-signed | ⬜ |
+
+### Step 7: Security Hardening (WEEKS 18-24) - 🚨 NEW PRIORITY
+| Priority | Action | Status |
+|----------|--------|--------|
+| 20 | **Fix user_id Injection** - Validate chat user_id against JWT | ⬜ |
+| 21 | **SSO/SAML Integration** - Enterprise identity providers | ⬜ |
+| 22 | **Audit Logging API** - `/api/logs` endpoint for compliance | ⬜ |
+| 23 | **E2E Encryption** - Encrypt agent state at rest | ⬜ |
+
+### Step 8: Observability & Controls (WEEKS 20-26) - 🚨 NEW PRIORITY
+| Priority | Action | Status |
+|----------|--------|--------|
+| 24 | **Metrics API** - Token usage, agent count, latency p95 | ⬜ |
+| 25 | **Kill Switches** - Enforce max tokens, tool calls via API | ⬜ |
+| 26 | **Agent Management API** - Create, list, pause, resume, stop | ⬜ |
+| 27 | **Connection Pool Health** - DB health check endpoint | ⬜ |
 
 ---
 
@@ -94,5 +111,6 @@ Pick PostgreSQL or Redis and get it running. Everything else is blocked on found
 
 ---
 
-_Last updated: 2026-03-14_
+_Last updated: 2026-03-15_
 _Revised based on third-party audit feedback_
+_Audit ID: 5ae21d8d-e4f0-4aa5-b9f3-73c570457579_

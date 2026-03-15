@@ -135,6 +135,20 @@ class PostgreSQL:
                 )
             ''')
             
+            # Webhooks table
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS webhooks (
+                    id TEXT PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    event_type TEXT NOT NULL,
+                    url TEXT NOT NULL,
+                    secret TEXT,
+                    enabled BOOLEAN DEFAULT TRUE,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (user_id) REFERENCES users(id)
+                )
+            ''')
+            
             # Create indexes
             cur.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_conversations_user ON conversations(user_id)')
@@ -143,6 +157,8 @@ class PostgreSQL:
             cur.execute('CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_usage_user ON api_usage(user_id)')
+            cur.execute('CREATE INDEX IF NOT EXISTS idx_webhooks_user ON webhooks(user_id)')
+            cur.execute('CREATE INDEX IF NOT EXISTS idx_webhooks_event ON webhooks(event_type)')
             
             conn.commit()
             cur.close()
