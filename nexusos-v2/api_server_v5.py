@@ -121,22 +121,36 @@ def register():
         try:
             conn = get_pg_conn()
             cur = conn.cursor()
-            cur.execute("INSERT INTO users (id, email, password_hash, name, role) VALUES (%s, %s, %s, %s, %s)",
-                       (user_id, email, password_hash, name, 'user'))
+            # Check if user exists first
+            cur.execute("SELECT id FROM users WHERE email = %s", (email,))
+            if cur.fetchone():
+                conn.close()
+                return jsonify({'error': 'Email already registered'}), 400
+            # Insert with all required fields
+            cur.execute("""INSERT INTO users (id, email, password_hash, name, role, subscription) 
+                           VALUES (%s, %s, %s, %s, %s, %s)
+                           ON CONFLICT (email) DO NOTHING""",
+                       (user_id, email, password_hash, name, 'user', 'free'))
             conn.commit()
             conn.close()
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            import traceback
+            return jsonify({'code': 'REGISTRATION_FAILED', 'error': 'Registration temporarily unavailable'}), 500
     else:
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
         try:
-            cur.execute("INSERT INTO users (id, email, password_hash, name) VALUES (?, ?, ?, ?)",
-                       (user_id, email, password_hash, name))
+            # Check if user exists first
+            cur.execute("SELECT id FROM users WHERE email = ?", (email,))
+            if cur.fetchone():
+                conn.close()
+                return jsonify({'error': 'Email already registered'}), 400
+            cur.execute("INSERT INTO users (id, email, password_hash, name, role) VALUES (?, ?, ?, ?, ?)",
+                       (user_id, email, password_hash, name, 'user'))
             conn.commit()
         except Exception as e:
             conn.close()
-            return jsonify({'error': str(e)}), 500
+            return jsonify({'code': 'REGISTRATION_FAILED', 'error': 'Registration temporarily unavailable'}), 500
         conn.close()
     
     access = create_access_token(user_id)
@@ -149,6 +163,9 @@ def login():
     data = request.json or {}
     email = data.get('email')
     password = data.get('password')
+    
+    if not email or not password:
+        return jsonify({'error': 'Email and password required'}), 400
     
     user = None
     if USE_PG:
@@ -170,7 +187,7 @@ def login():
         conn.close()
     
     if not user or not verify_password(password, user.get('password_hash', '')):
-        return jsonify({'error': 'Invalid credentials'}), 401
+        return jsonify({'error': 'Invalid email or password'}), 401
     
     access = create_access_token(user['id'], user.get('role', 'user'))
     refresh = create_refresh_token(user['id'])
@@ -412,6 +429,7 @@ def chat():
     data = request.json or {}
     message = data.get('message', '')
     conversation_id = data.get('conversation_id')
+    model = data.get('model', 'phi3')  # Allow model selection
     
     if not message:
         return jsonify({'error': 'message required'}), 400
@@ -419,13 +437,37 @@ def chat():
     # user_id is now validated from JWT via @require_auth decorator
     user_id = g.user_id
     
-    response = get_ollama_response(message)
+    response = get_ollama_response(message, model=model)
+    
+    # Track usage - estimate tokens from message/response length
+    # Rough approximation: 1 token ≈ 4 chars, so divide by 4
+    input_tokens = max(1, len(message) // 4)
+    output_tokens = max(1, len(response) // 4)
+    total_tokens = input_tokens + output_tokens
+    
+    # Record usage to database
+    if USE_PG:
+        try:
+            with get_pg_conn() as conn:
+                cur = conn.cursor()
+                cur.execute("""
+                    INSERT INTO usage_stats 
+                    (user_id, model, provider, input_tokens, output_tokens, total_tokens, requests, cost_usd)
+                    VALUES (%s, %s, 'ollama', %s, %s, %s, 1, %s)
+                """, (
+                    user_id, model, input_tokens, output_tokens, total_tokens,
+                    round(total_tokens / 1000 * 0.001, 6)
+                ))
+                conn.commit()
+        except:
+            pass  # Fail silently on usage tracking errors
     
     return jsonify({
         'response': response,
         'conversation_id': conversation_id or str(uuid.uuid4()),
-        'tokens': len(response.split()),
-        'cost': 0,
+        'tokens': total_tokens,
+        'cost': round(total_tokens / 1000 * 0.001, 6),
+        'model': model,
         'user_id': user_id  # Echo back for confirmation
     })
 
@@ -672,7 +714,14 @@ print("[NexusOS] Structured Logging & Kill Switches initialized")
 
 # Initialize Semantic Memory (Qdrant)
 from semantic_memory import get_semantic_memory, MemoryType
+from metrics_api import setup_metrics_routes
+
 semantic_memory = get_semantic_memory()
+setup_metrics_routes(app, _db_instance)
+
+# Setup metrics and multi-tenant routes
+db_module = None  # Will be set after Database is defined
+setup_metrics_routes(app, db_module)
 print("[NexusOS] Semantic Memory initialized")
 
 # ==================== SEMANTIC MEMORY ROUTES ====================

@@ -270,3 +270,18 @@ docker logs redis
 ---
 _Revised based on third-party audit feedback_
 _Audit ID: 5ae21d8d-e4f0-4aa5-b9f3-73c570457579_
+### Step 23: API Testing Audit Findings (2026-03-15) - NEW
+| Priority | Action | Status |
+|----------|--------|-------|
+| 94 | **Working JWT Login Flow** - Implement `/api/auth/login` that issues valid tokens | ⬜ |
+| 95 | **User Management API** - CRUD endpoints for users and role assignment | ⬜ |
+| 96 | **Multi-Tenant Isolation** - Tenant context in all API requests | ⬜ |
+| 97 | **Production TLS** - Let's Encrypt or proper certificate chain | ⬜ |
+| 98 | **API Documentation** - OpenAPI/Swagger for all endpoints | ⬜ |
+| 99 | **SLA Monitoring** - Uptime, latency SLOs with alerting | ⬜ |
+| 100 | **SSO/SAML Integration** - Enterprise identity provider support | ⬜ |
+| 101 | **Session Management** - Logout, token refresh, session invalidation | ⬜ |
+| 102 | **Horizontal Scaling** - Document Kubernetes/multi-node deployment | ⬜ |
+
+---
+_Added via API audit 5ae21d8d-e4f0-4aa5-b9f3-73c570457579_
