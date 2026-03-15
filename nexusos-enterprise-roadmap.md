@@ -31,7 +31,7 @@
 |---|--------|--------|
 | 10 | Activity Log | ✅ /api/logs working |
 | 11 | Kill Switches | ✅ /api/limits working |
-| 12 | Metrics API | ✅ /api/metrics working |
+| 12 | Metrics API | ✅ /api/metrics FIXED (2026-03-15) |
 | 13 | Real-time Dashboard | ⚠️ Disabled (boot issue) |
 
 ## Phase 5: Developer Experience (DONE ✅)
@@ -58,7 +58,7 @@
 | 24 | Let's Encrypt TLS | 🔄 Script Ready |
 | 25 | Health Check Endpoint | ✅ /api/status |
 | 26 | Audit Logging API | ✅ /api/logs |
-| 27 | API Documentation | ⬜ Not Started |
+| 27 | API Documentation | ✅ /api/docs working |
 
 ## Phase 8: Future (BACKLOG)
 | # | Action | Status |
@@ -71,6 +71,11 @@
 
 ## Enterprise Audit Findings (2026-03-15)
 
+### Fixed During Audit
+| # | Fix | Date |
+|---|-----|------|
+| F1 | /api/metrics - DatabaseCompat.get_conn() + tenant_id column | 2026-03-15 |
+
 ### Newly Discovered Gaps (Added from Audit)
 | # | Gap | Severity | Notes |
 |---|-----|----------|-------|
@@ -81,14 +86,16 @@
 | 35 | RBAC UI Management | MEDIUM | Roles endpoint exists but no admin GUI to manage them |
 | 36 | MCP Tool Expansion | MEDIUM | Only 8 basic tools (file, process, http) - needs enterprise integrations |
 | 37 | Compliance Certifications | LOW | No SOC2, HIPAA, GDPR framework documentation |
+| 38 | Web UI 404 Fix | CRITICAL | /ui returns NOT_FOUND - no web interface at all |
+| 39 | Auth Flow UX | CRITICAL | No login endpoint; registration returns "already exists" with no path to token |
 
 ---
 
 ## Summary
-- **Total Items:** 37
-- **Done:** 17 (46%)
-- **Code Ready:** 8 (22%)
-- **Not Started:** 12 (32%)
+- **Total Items:** 39
+- **Done:** 17 (44%)
+- **Code Ready:** 8 (21%)
+- **Not Started:** 14 (36%)
 
 ## Current Server Status
 - **URL:** http://187.124.150.225:8080
