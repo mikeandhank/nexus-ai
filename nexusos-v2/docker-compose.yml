@@ -1,37 +1,37 @@
 version: '3.8'
 
 services:
-  # Nginx reverse proxy with TLS
-  nginx:
-    image: nginx:latest
+  # Redis for async tasks and caching
+  redis:
+    image: redis:7-alpine
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    depends_on:
-      - nexusos-v2-flask
+      - "6379:6379"
     networks:
       - nexusos-network
     restart: unless-stopped
+    volumes:
+      - redis-data:/data
 
-  # NexusOS API (Flask)
-  nexusos-v2-flask:
+  # NexusOS API
+  nexusos-api:
     build: .
+    ports:
+      - "8080:8080"
     environment:
       - NEXUSOS_DB=/opt/nexusos-data/nexusos.db
       - NEXUSOS_SECRET=${NEXUSOS_SECRET:-nexusos-v5-enterprise}
       - OLLAMA_URL=http://nexusos-ollama:11434
-    volumes:
-      - nexusos-data:/opt/nexusos-data
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - redis
+      - nexusos-ollama
     networks:
       - nexusos-network
     restart: unless-stopped
-    depends_on:
-      - nexusos-ollama
+    volumes:
+      - nexusos-data:/opt/nexusos-data
 
-  # Ollama (local LLM)
+  # Ollama for local LLM
   nexusos-ollama:
     image: ollama/ollama
     ports:
@@ -49,3 +49,4 @@ networks:
 volumes:
   nexusos-data:
   ollama-data:
+  redis-data:

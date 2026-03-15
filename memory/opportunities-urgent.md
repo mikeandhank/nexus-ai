@@ -1,16 +1,20 @@
-# Urgent Opportunities - Updated 2026-03-14
+# Urgent Opportunities
 
-## This Scan (March 14, 2026)
+Last updated: 2026-03-14 22:51 ET
+
+## Quick Scan (2026-03-14)
 
 ### AI Agent Startup Funding
-- Major rounds: Anthropic $30B, OpenAI $110B, ElevenLabs $500M, SkildAI $1.4B
-- 17 startups crossed $100M+ in first 2 months of 2026
-- Market projection: $7.8B → $52B by 2030
-- **Assessment**: Not actionable - these are mega-rounds for established players
+- Major funding wave in early 2026: 17 US AI companies secured $100M+ rounds in first 2 months
+- Notable valuations: Cursor ($29B), Sierra ($10B), Glean ($7.2B), Harvey ($5B), Anthropic ($380B), OpenAI ($110B)
+- Emerging: robotics AI (SkildAI $1.4B), medical AI (OpenEvidence $250M), voice AI (ElevenLabs $500M @ $11B)
+- **Signal:** Heavy investor confidence; potential partnership/integration opportunities with funded AI agents
 
 ### SMB Software Pricing
-- Trends: subscription models, value-based metrics, AI-driven pricing tools
-- No specific major pricing changes announced
-- Small businesses: 31% raised prices, 36% plan to
+- No specific 2026 pricing changes found in search
+- General trend: shift toward outcome-based, AI-supported pricing models
+- SMBs benefiting from 70-95% lower costs via no-code/low-code platforms
 
-**Urgent opportunities found: NO**
+---
+
+*Note: These are market intelligence scans, not immediate actionable opportunities.*

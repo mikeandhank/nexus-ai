@@ -35,6 +35,7 @@ class Database:
             c.execute('''CREATE TABLE IF NOT EXISTS agents (id TEXT PRIMARY KEY, user_id TEXT NOT NULL, name TEXT NOT NULL, role TEXT, personality TEXT, tools TEXT, status TEXT DEFAULT 'idle', created_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP, last_active TEXT)''')
             c.execute('''CREATE TABLE IF NOT EXISTS audit_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT, action TEXT NOT NULL, resource_type TEXT, resource_id TEXT, details TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
             c.execute('''CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, event_type TEXT NOT NULL, priority INTEGER DEFAULT 3, source TEXT, data TEXT, handled INTEGER DEFAULT 0, created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
+            c.execute('''CREATE TABLE IF NOT EXISTS usage_stats (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id TEXT NOT NULL, model TEXT, provider TEXT, input_tokens INTEGER DEFAULT 0, output_tokens INTEGER DEFAULT 0, total_tokens INTEGER DEFAULT 0, requests INTEGER DEFAULT 0, cost_usd REAL DEFAULT 0, created_at TEXT DEFAULT CURRENT_TIMESTAMP)''')
             logger.info("Database initialized")
     
     def _hash_password(self, pwd):
@@ -198,6 +199,34 @@ class Database:
             else:
                 c.execute("SELECT * FROM events ORDER BY created_at DESC LIMIT ?", (limit,))
             return [dict(r) for r in c.fetchall()]
+    
+    def track_usage(self, user_id, model, provider, input_tokens, output_tokens, cost_usd=0):
+        """Track API usage for analytics and billing."""
+        with self._get_conn() as conn:
+            c = conn.cursor()
+            c.execute("""INSERT INTO usage_stats (user_id, model, provider, input_tokens, output_tokens, total_tokens, requests, cost_usd)
+                         VALUES (?, ?, ?, ?, ?, ?, 1, ?)""",
+                      (user_id, model, provider, input_tokens, output_tokens, input_tokens + output_tokens, cost_usd))
+    
+    def get_user_usage(self, user_id, days=30):
+        """Get usage stats for a user."""
+        with self._get_conn() as conn:
+            c = conn.cursor()
+            c.execute("""SELECT model, provider, SUM(input_tokens) as input_tokens, SUM(output_tokens) as output_tokens,
+                         SUM(total_tokens) as total_tokens, SUM(requests) as requests, SUM(cost_usd) as cost_usd
+                         FROM usage_stats WHERE user_id=? AND created_at >= datetime('now', '-{} days')
+                         GROUP BY model, provider ORDER BY total_tokens DESC""".format(days), (user_id,))
+            return [dict(r) for r in c.fetchall()]
+    
+    def get_usage_summary(self, user_id):
+        """Get total usage summary for a user."""
+        with self._get_conn() as conn:
+            c = conn.cursor()
+            c.execute("""SELECT SUM(input_tokens) as input_tokens, SUM(output_tokens) as output_tokens,
+                         SUM(total_tokens) as total_tokens, SUM(requests) as requests, SUM(cost_usd) as cost_usd
+                         FROM usage_stats WHERE user_id=?""", (user_id,))
+            r = c.fetchone()
+            return dict(r) if r else {'input_tokens': 0, 'output_tokens': 0, 'total_tokens': 0, 'requests': 0, 'cost_usd': 0}
 
 _db = None
 def get_db(path=None):

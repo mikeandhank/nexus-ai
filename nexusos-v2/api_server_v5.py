@@ -476,14 +476,118 @@ def mcp_chat():
     response = llm_manager.chat(g.user_id, llm_messages)
     
     if response.success:
+        # Track usage for analytics (input_tokens estimate based on message count)
+        input_tokens_est = sum(len(m.get('content', '')) // 4 for m in messages) + len(system_prompt) // 4
+        db.track_usage(g.user_id, response.model, response.provider, input_tokens_est, response.tokens_used or 0)
+        
         return jsonify({
             'content': response.content,
             'model': response.model,
             'provider': response.provider,
             'usage': {
-                'inputTokens': 0,
-                'outputTokens': response.tokens_used
+                'inputTokens': input_tokens_est,
+                'outputTokens': response.tokens_used or 0
             }
         })
     else:
         return jsonify({'error': response.error}), 400
+
+
+# Webhook System for Enterprise Integration
+import requests
+import threading
+
+webhooks = {}  # {user_id: [webhook_urls]}
+
+@app.route('/api/webhooks', methods=['POST'])
+def create_webhook():
+    """Register a webhook URL"""
+    data = request.json or {}
+    user_id = request.headers.get('Authorization', '').replace('Bearer ', '')
+    
+    if not user_id:
+        return jsonify({'error': 'Auth required'}), 401
+    
+    url = data.get('url')
+    if not url:
+        return jsonify({'error': 'URL required'}), 400
+    
+    # Validate URL
+    try:
+        response = requests.get(url, timeout=5)
+    except:
+        return jsonify({'error': 'Invalid URL'}), 400
+    
+    if user_id not in webhooks:
+        webhooks[user_id] = []
+    
+    webhook_id = len(webhooks[user_id]) + 1
+    webhooks[user_id].append({'id': webhook_id, 'url': url, 'active': True})
+    
+    return jsonify({'webhook_id': webhook_id, 'url': url})
+
+@app.route('/api/webhooks', methods=['GET'])
+def list_webhooks():
+    """List user's webhooks"""
+    user_id = request.headers.get('Authorization', '').replace('Bearer ', '')
+    
+    if not user_id:
+        return jsonify({'error': 'Auth required'}), 401
+    
+    return jsonify({'webhooks': webhooks.get(user_id, [])})
+
+@app.route('/api/webhooks/<int:webhook_id>', methods=['DELETE'])
+def delete_webhook(webhook_id):
+    """Delete a webhook"""
+    user_id = request.headers.get('Authorization', '').replace('Bearer ', '')
+    
+    if not user_id:
+        return jsonify({'error': 'Auth required'}), 401
+    
+    if user_id in webhooks:
+        webhooks[user_id] = [w for w in webhooks[user_id] if w['id'] != webhook_id]
+    
+    return jsonify({'status': 'deleted'})
+
+# ==================== USAGE ANALYTICS ====================
+
+@app.route('/api/analytics/usage', methods=['GET'])
+@require_auth
+def get_usage_analytics():
+    """Get usage analytics for the authenticated user."""
+    days = request.args.get('days', 30, type=int)
+    usage = db.get_user_usage(g.user_id, days)
+    summary = db.get_usage_summary(g.user_id)
+    return jsonify({
+        'period_days': days,
+        'summary': summary,
+        'by_model': usage
+    })
+
+@app.route('/api/analytics/usage/today', methods=['GET'])
+@require_auth
+def get_today_usage():
+    """Get today's usage summary."""
+    usage = db.get_user_usage(g.user_id, days=1)
+    return jsonify({
+        'date': datetime.now().strftime('%Y-%m-%d'),
+        'usage': usage
+    })
+
+def trigger_webhook(user_id, event_type, data):
+    """Trigger webhooks in background"""
+    if user_id not in webhooks:
+        return
+    
+    def _trigger():
+        for webhook in webhooks[user_id]:
+            if webhook['active']:
+                try:
+                    requests.post(webhook['url'], json={
+                        'event': event_type,
+                        'data': data
+                    }, timeout=5)
+                except:
+                    pass
+    
+    threading.Thread(target=_trigger).start()

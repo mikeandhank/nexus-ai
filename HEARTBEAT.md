@@ -46,6 +46,14 @@
 - ✅ **Web UI** - NOW WORKING at /ui
   - Modern dark theme chat interface
   - Login/register, chat, conversations, agents, settings
+- ✅ **RBAC** - 4 roles (admin/developer/user/viewer)
+- ✅ **Cron Jobs** - Enterprise ops:
+  - nexusos-enterprise-check (10 min)
+  - nexusos-api-health (5 min)
+  - nexusos-test (hourly)
+  - nexusos-deploy (30 min)
+  - nexusos-backup (daily 3AM)
+  - nexusos-logs-rotate (daily 4AM)
 
 ---
 
