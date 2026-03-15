@@ -20,8 +20,8 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 ### Step 1: Foundation (Weeks 1-4) - DO THIS FIRST
 | Priority | Action | Status |
 |----------|--------|--------|
-| 1 | **PostgreSQL** - Replace SQLite for concurrent writes | ✅ Code Ready |
-| 2 | **Redis** - Shared state store, Celery broker | ✅ Code Ready |
+| 1 | **PostgreSQL** - Replace SQLite for concurrent writes | ✅ Code Ready + Running |
+| 2 | **Redis** - Shared state store, Celery broker | ⚠️ CODE READY BUT DISCONNECTED ON PROD |
 | 3 | **JWT Auth** - Real authentication with refresh tokens | ✅ Code Ready |
 
 ### Step 2: Agent Lifecycle (Weeks 5-10)
@@ -139,6 +139,45 @@ Pick PostgreSQL or Redis and get it running. Everything else is blocked on found
 
 ---
 
-_Last updated: 2026-03-15_
+## Production Status (187.124.150.225:8080) - Updated 2026-03-15
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| API Server | ✅ Running | v5.0.0 |
+| PostgreSQL | ✅ Connected | - |
+| Redis | ❌ DISCONNECTED | **BLOCKS: Celery, Multi-Agent** |
+| LLM Manager | ✅ Running | Ollama + OpenRouter + Anthropic + OpenAI |
+
+### ✅ ALREADY RUNNING (v5.0.0)
+Confirmed working via API tests:
+- **Usage Analytics** - `/api/usage`, `/api/usage/summary`, `/api/usage/track` (uses DB)
+- **Webhook System** - `/api/webhooks` CRUD (uses Python threads, not Celery)
+- **Agent Stats** - `/api/agents/stats`
+- **JWT Auth** - Bearer token required (401 on missing)
+- **PostgreSQL** - Connected
+
+### ❌ STILL BLOCKED BY REDIS
+- Multi-Agent Orchestration (shared state)
+- Celery async task queue
+
+### 🚨 ACTION REQUIRED: Fix Redis
+```bash
+# SSH to 187.124.150.225 and run:
+docker compose -f nexusos-v2/docker-compose.yml restart redis
+
+# OR check logs:
+docker logs redis
+```
+
+### Step 12: Security Hardening - Error Handling (DISCOVERED VIA AUDIT - 2026-03-15)
+| Priority | Action | Status |
+|----------|--------|-------|
+| 44 | **Fix SQL Error Leakage** - Sanitize database errors, return generic messages | ⬜ |
+| 45 | **Standardize API Errors** - Consistent error format across all endpoints | ⬜ |
+| 46 | **Auth Flow Documentation** - Document how to obtain/use JWT tokens | ⬜ |
+| 47 | **Health Endpoint** - Create `/api/health` for monitoring systems | ⬜ |
+| 48 | **Rate Limiting Middleware** - Per-user, per-endpoint rate limits | ⬜ |
+
+---
 _Revised based on third-party audit feedback_
 _Audit ID: 5ae21d8d-e4f0-4aa5-b9f3-73c570457579_
