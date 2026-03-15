@@ -83,7 +83,7 @@ def refresh_access_token(refresh_token):
 
 def get_user_role(user_id):
     """Get user's role from database"""
-    from database_v2 import get_db
+    from database_compat import get_db as get_db_pg, init_db
     db = get_db()
     user = db.execute_one(
         "SELECT role FROM users WHERE id = %s",
@@ -137,7 +137,7 @@ def require_role(*allowed_roles):
 # API Key support
 def create_api_key(user_id, name, scopes=None):
     """Create an API key for a user"""
-    from database_v2 import get_db
+    from database_compat import get_db as get_db_pg, init_db
     import json
     
     key = f"nxos_{secrets.token_hex(16)}"
@@ -156,7 +156,7 @@ def create_api_key(user_id, name, scopes=None):
 
 def verify_api_key(key):
     """Verify an API key"""
-    from database_v2 import get_db
+    from database_compat import get_db as get_db_pg, init_db
     import json
     
     if not key.startswith('nxos_'):
