@@ -146,13 +146,29 @@ class UsageTracker:
         return True, f"{remaining} tokens remaining"
     
     def _get_daily_usage(self, user_id: str, date: str) -> int:
-        """Get daily token usage."""
-        # In a real implementation, query database
+        """Get daily token usage from database."""
+        try:
+            if self.db:
+                usage = self.db.get_user_usage(user_id, days=1)
+                if usage:
+                    return sum(r.get('total_tokens', 0) for r in usage)
+        except Exception as e:
+            logger.error(f"Failed to get daily usage: {e}")
         return 0
     
-    def record_usage(self, user_id: str, tokens: int, cost: float):
-        """Record usage for billing."""
-        logger.info(f"Usage: user={user_id}, tokens={tokens}, cost=${cost:.4f}")
+    def record_usage(self, user_id: str, tokens: int, cost: float, model: str = None, provider: str = None):
+        """Record usage for billing - persists to database."""
+        try:
+            if self.db and model and provider:
+                # Track with input/output split (approximate 30/70 split)
+                input_tokens = int(tokens * 0.3)
+                output_tokens = tokens - input_tokens
+                self.db.track_usage(user_id, model, provider, input_tokens, output_tokens, cost)
+                logger.info(f"Usage recorded: user={user_id}, tokens={tokens}, cost=${cost:.4f}, model={model}")
+            else:
+                logger.warning(f"Usage not persisted - missing db or metadata: user={user_id}")
+        except Exception as e:
+            logger.error(f"Failed to record usage: {e}")
 
 
 class LLMProvider:
@@ -435,7 +451,10 @@ class LLMManager:
         
         # Record usage
         if user_id and response.success:
-            self.usage_tracker.record_usage(user_id, response.tokens_used, response.cost)
+            self.usage_tracker.record_usage(
+                user_id, response.tokens_used, response.cost,
+                model=response.model, provider=response.provider
+            )
         
         return response
     
