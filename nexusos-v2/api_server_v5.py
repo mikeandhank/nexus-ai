@@ -170,9 +170,9 @@ def login():
     user = None
     if USE_PG:
         try:
+            import psycopg2.extras
             conn = get_pg_conn()
-            conn.row_factory = sqlite3.Row
-            cur = conn.cursor()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute("SELECT * FROM users WHERE email = %s", (email,))
             user = cur.fetchone()
             conn.close()
@@ -186,7 +186,13 @@ def login():
         user = cur.fetchone()
         conn.close()
     
-    if not user or not verify_password(password, user.get('password_hash', '')):
+    # Handle both RealDictCursor (dict) and sqlite3.Row (both support .get())
+    if not user:
+        return jsonify({'error': 'Invalid email or password'}), 401
+    
+    password_hash = user.get('password_hash', '')
+    
+    if not verify_password(password, password_hash):
         return jsonify({'error': 'Invalid email or password'}), 401
     
     access = create_access_token(user['id'], user.get('role', 'user'))
@@ -243,8 +249,11 @@ setup_user_routes(app)
 from webhooks import get_webhook_manager
 from database_compat import DatabaseCompat as Database
 
-# Initialize webhook manager with db
-_db_instance = Database() if not USE_PG else None
+# Initialize webhook manager with db (DatabaseCompat handles both SQLite and PostgreSQL)
+_db_instance = Database()
+# Ensure database tables exist (creates users, conversations, messages, etc.)
+if USE_PG:
+    _db_instance._init_db()
 _webhook_mgr = get_webhook_manager(_db_instance)
 
 @app.route('/api/webhooks', methods=['POST'])

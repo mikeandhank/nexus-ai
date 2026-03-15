@@ -14,6 +14,9 @@ from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, request, jsonify, g
 
+# Flag to track if routes are already registered
+_ROUTES_REGISTERED = False
+
 # ==================== MULTI-TENANT ISOLATION ====================
 
 def get_current_tenant_id():
@@ -33,6 +36,14 @@ def require_tenant(f):
 
 def setup_metrics_routes(app, db_module=None):
     """Add metrics and health routes"""
+    global _ROUTES_REGISTERED
+    
+    # Skip if already registered
+    if _ROUTES_REGISTERED:
+        return
+    
+    _ROUTES_REGISTERED = True
+    
     from flask import request, jsonify
     
     @app.route('/api/metrics', methods=['GET'])
