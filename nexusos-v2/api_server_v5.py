@@ -647,8 +647,10 @@ def health_check():
     except:
         system_info = None
     
-    # Overall health
-    all_healthy = db_status and redis_status and ollama_status
+    # Overall health - only fail if core infrastructure (DB/Redis) is down
+    # Ollama is optional since cloud LLM providers can substitute
+    core_healthy = db_status and redis_status
+    all_healthy = core_healthy and ollama_status
     
     return jsonify({
         'status': 'healthy' if all_healthy else 'degraded',
@@ -668,7 +670,7 @@ def health_check():
             }
         },
         'system': system_info
-    }), 200 if all_healthy else 503
+    }), 200 if core_healthy else 503
 
 # ==================== MCP ====================
 @app.route('/mcp/tools')

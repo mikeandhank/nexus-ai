@@ -143,22 +143,23 @@ Pick PostgreSQL or Redis and get it running. Everything else is blocked on found
 
 | Component | Status | Notes |
 |-----------|--------|-------|
-| API Server | ✅ Running | v5.0.0 |
+| API Server | ✅ Running | v6.0.0 |
 | PostgreSQL | ✅ Connected | - |
-| Redis | ❌ DISCONNECTED | **BLOCKS: Celery, Multi-Agent** |
-| LLM Manager | ✅ Running | Ollama + OpenRouter + Anthropic + OpenAI |
+| Redis | ✅ Connected | FIXED |
+| LLM Manager | ⚠️ Degraded | Ollama down, cloud LLM providers work |
 
-### ✅ ALREADY RUNNING (v5.0.0)
+### ✅ ALREADY RUNNING (v6.0.0)
 Confirmed working via API tests:
 - **Usage Analytics** - `/api/usage`, `/api/usage/summary`, `/api/usage/track` (uses DB)
 - **Webhook System** - `/api/webhooks` CRUD (uses Python threads, not Celery)
 - **Agent Stats** - `/api/agents/stats`
 - **JWT Auth** - Bearer token required (401 on missing)
 - **PostgreSQL** - Connected
+- **Health Endpoint** - `/api/health` (needs fix - returns 503 when Ollama down)
 
-### ❌ STILL BLOCKED BY REDIS
-- Multi-Agent Orchestration (shared state)
-- Celery async task queue
+### ✅ REDIS NOW CONNECTED - Multi-Agent Unblocked!
+- Redis is connected, enabling multi-agent orchestration
+- Celery can now be configured for async tasks
 
 ### 🚨 CRITICAL: Auth System Broken (2026-03-15)
 - **Login UI** - Password field not in form, button non-functional
@@ -180,7 +181,7 @@ docker logs redis
 | 44 | **Fix SQL Error Leakage** - Sanitize database errors, return generic messages | ⬜ |
 | 45 | **Standardize API Errors** - Consistent error format across all endpoints | ⬜ |
 | 46 | **Auth Flow Documentation** - Document how to obtain/use JWT tokens | ⬜ |
-| 47 | **Health Endpoint** - Create `/api/health` for monitoring systems | ✅ CODE READY (in api_server_v5.py, needs deploy) |
+| 47 | **Health Endpoint** - Create `/api/health` for monitoring systems | ✅ CODE READY v6.2 (needs deploy) |
 | 48 | **Rate Limiting Middleware** - Per-user, per-endpoint rate limits | ⬜ |
 
 ### Step 13: Authentication & Session Management (DISCOVERED VIA AUDIT - 2026-03-15)
