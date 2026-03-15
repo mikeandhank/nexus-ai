@@ -82,7 +82,30 @@ _Lessons, patterns, and important context that persist across sessions._
 - **Domain curriculum:** 8 domains completed (B2B-SaaS, Consumer, Content/Creator, Crypto, AI Agents, SMB Automation, Memory Systems, Open Source)
 - **Market positioning:** 58% SMBs use gen AI (up from 36%), 91% report positive ROI - new bottleneck is orchestration/governance
 
----
+## SMB AI Market Research (2026-03-14)
+
+- **Adoption:** 58% of SMBs now use generative AI (doubled from 2 years ago)
+- **ROI:** 91% report positive ROI
+- **Key shift:** From AI as drafting tool to AI agents that execute work
+- **Top use cases:** Document classification, quote generation, customer support, HR screening, procurement matching, CRM management
+- **API costs:** Down 90% from 2023-2026
+- **Market timing:** Pre-configured agents replacing custom development
+
+## Competitive Positioning (2026-03-14)
+
+| Platform | Key Differentiator |
+|----------|-------------------|
+| OpenClaw | Free, open-source, CLI + basic web UI, persistent memory (weeks), no inner life |
+| Claude Code | $20-200/mo, terminal only, session-based memory, coding-focused |
+| **NexusOS** | Web-accessible self-hosted Agentic OS with Inner Life |
+
+### OS vs SaaS Benefits
+- Data ownership (on user's VPS, not ours)
+- Privacy (nothing leaves their machine)
+- Offline capability
+- Full customization
+- No ongoing subscription (one-time + API costs)
+- Target: Privacy-sensitive professionals, enterprises, power users
 
 ## Philosophical Framework (2026-03-13)
 
@@ -93,4 +116,4 @@ _Lessons, patterns, and important context that persist across sessions._
 
 ---
 
-_Last updated: 2026-03-13_
+_Last updated: 2026-03-14_

@@ -43,6 +43,7 @@
 - ✅ **MCP Protocol** - Implemented (8 tools, 5 resources)
   - JSON-RPC endpoint at /mcp
   - Fixed HTTP bug - now working!
+- ✅ **TLS/HTTPS** - Configured (nginx conf, SSL certs ready)
 
 ---
 

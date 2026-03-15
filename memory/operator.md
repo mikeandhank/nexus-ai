@@ -26,10 +26,25 @@ Before acting on consequential decisions:
 - Quiet hours: 10PM-6AM MT (but message freely - phone on DND)
 
 ## Current Projects
-1. **Nexus AI** - Agent operating system for SMBs
+1. **Nexus AI / NexusOS** - Agent operating system for SMBs
    - Landing page: /workspace/nexus-ai-landing/
    - Outreach draft: /workspace/outreach/sds-mike.md
+   - **VPS:** 187.124.150.225:8080 (Docker: nexusos-ollama, nexusos-api)
+   - **Product tiers:** Free (Ollama), Basic $9.99/mo (Ollama + GPT-4o mini), Pro $29.99/mo (All models + Inner Life)
+   - **Inner Life:** Affect layer, Socratic dialogue, pattern learning, inner narrative, theory of mind
 2. **Domain Curriculum** - 13 domains, 8 completed
+
+## Known Issues
+- Email auth broken: App password needs refresh (invalid since 2026-03-13)
+
+## Feature Roadmap
+1. Memory Compounding - Longer use = smarter agent
+2. Skill Marketplace - User-created skills, network effects
+3. Multi-Agent - Spawn specialized agents sharing memory
+4. Tool Builder - Easy MCP tool creation
+5. Encrypted Backup - Portable memory
+6. Templates - Pre-built agent configs
+7. Analytics Dashboard - Task completion, time saved
 
 ## Cron Jobs Running
 - chromium-watchdog (5 min)
