@@ -149,6 +149,22 @@ class PostgreSQL:
                 )
             ''')
             
+            # Usage stats table (for usage analytics)
+            cur.execute('''
+                CREATE TABLE IF NOT EXISTS usage_stats (
+                    id SERIAL PRIMARY KEY,
+                    user_id TEXT NOT NULL,
+                    model TEXT,
+                    provider TEXT,
+                    input_tokens INTEGER DEFAULT 0,
+                    output_tokens INTEGER DEFAULT 0,
+                    total_tokens INTEGER DEFAULT 0,
+                    requests INTEGER DEFAULT 0,
+                    cost_usd REAL DEFAULT 0,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            
             # Create indexes
             cur.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_conversations_user ON conversations(user_id)')
@@ -157,6 +173,8 @@ class PostgreSQL:
             cur.execute('CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_events_type ON events(event_type)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_usage_user ON api_usage(user_id)')
+            cur.execute('CREATE INDEX IF NOT EXISTS idx_usage_stats_user ON usage_stats(user_id)')
+            cur.execute('CREATE INDEX IF NOT EXISTS idx_usage_stats_date ON usage_stats(created_at)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_webhooks_user ON webhooks(user_id)')
             cur.execute('CREATE INDEX IF NOT EXISTS idx_webhooks_event ON webhooks(event_type)')
             
