@@ -16,6 +16,36 @@ from message_bus import get_message_bus, AgentCoordinator, setup_message_bus_rou
 app = Flask(__name__)
 app.secret_key = os.environ.get('NEXUSOS_SECRET', 'nexusos-v5-enterprise')
 
+# CORS Configuration - Security hardening
+# Only allow requests from trusted origins
+ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '*').split(',')
+
+@app.after_request
+def add_cors_headers(response):
+    """Add CORS headers to all responses"""
+    origin = request.headers.get('Origin', '')
+    
+    # In production, be more restrictive
+    if os.environ.get('FLASK_ENV') == 'production':
+        # Only allow specific origins in production
+        if origin in ALLOWED_ORIGINS or origin == '':
+            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Tenant-ID'
+            response.headers['Access-Control-Max-Age'] = '3600'
+    else:
+        # Allow all in development
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Tenant-ID'
+    
+    return response
+
+@app.route('/api/options', methods=['OPTIONS'])
+def cors_preflight():
+    """Handle CORS preflight requests"""
+    return '', 204
+
 # Database path
 db_path = os.environ.get('NEXUSOS_DB', '/opt/nexusos-data/nexusos.db')
 
@@ -727,6 +757,13 @@ from metrics_api import setup_metrics_routes
 
 semantic_memory = get_semantic_memory()
 setup_metrics_routes(app, _db_instance)
+
+# Setup backup routes
+try:
+    from backup_api import setup_backup_routes
+    setup_backup_routes(app)
+except Exception as e:
+    print(f"[NexusOS] Backup routes not available: {e}")
 
 # Setup metrics and multi-tenant routes
 db_module = None  # Will be set after Database is defined
