@@ -34,7 +34,7 @@ jobs:
           
       - name: Deploy
         run: |
-          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "cd /root/nexus-ai && git pull origin main && cd nexusos-v2 && docker build -t nexusos-v6 . && docker rm -f nexusos-v6 || true && docker run -d --name nexusos-v6 --network nexusos-network -p 8080:8080 -e DATABASE_URL='postgresql://postgres:postgres@nexusos-postgres:5432/postgres' -e REDIS_URL='redis://nexusos-redis:6379' -v nexusos-data:/opt/nexusos-data nexusos-v6"
+          ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "cd /root/nexus-ai && git pull origin main && cd nexusos-v2 && docker build -t nexusos-v6 . && docker rm -f nexusos-v6 || true && docker run -d --name nexusos-v6 --network nexusos-network -p 8080:8080 -e DATABASE_URL='postgresql://nexusos:nexusos@nexusos-postgres:5432/nexusos' -e REDIS_URL='redis://nexusos-redis:6379' -v nexusos-data:/opt/nexusos-data nexusos-v6"
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
