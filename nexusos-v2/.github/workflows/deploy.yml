@@ -3,14 +3,12 @@ name: Deploy to Production
 on:
   push:
     branches: [main]
-  workflow_dispatch: {}
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up SSH
         run: |
@@ -22,18 +20,12 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
 
-      - name: Deploy to server
+      - name: Deploy
         run: |
           ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd /root/nexusos-v2
             git pull origin main
             docker build -t nexusos-v6 .
             docker rm -f nexusos-v6 2>/dev/null || true
-            docker run -d --name nexusos-v6 \
-              -p 8080:8080 \
-              -e DATABASE_URL="$DATABASE_URL" \
-              -e REDIS_URL="$REDIS_URL" \
-              -v nexusos-data:/opt/nexusos-data \
-              nexusos-v6
-            echo "Deployed successfully!"
+            docker run -d --name nexusos-v6 -p 8080:8080 -e DATABASE_URL="$DATABASE_URL" -v nexusos-data:/opt/nexusos-data nexusos-v6
           EOF
