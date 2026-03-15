@@ -35,6 +35,11 @@
   - 12 tool executions (file, process, HTTP, search)
   - 5 skills (welcome, help, remember, recall, analyze)
   - Multi-agent pool with 5 templates
+- ✅ **v5 DEPLOYED** - LLM Integration with BYOK:
+  - Multi-provider (Ollama, OpenRouter, Anthropic)
+  - API key encryption for BYOK model
+  - Subscription tiers (Free/Basic/Pro)
+  - Chat working with Ollama (phi3)
 
 ---
 

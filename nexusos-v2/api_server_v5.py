@@ -415,3 +415,75 @@ def index():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port, threaded=True)
+
+# ==================== MCP (Model Context Protocol) ====================
+
+@app.route('/mcp', methods=['POST'])
+def mcp_endpoint():
+    """MCP protocol endpoint."""
+    from mcp_server import MCPServer
+    mcp = MCPServer(g.user_id)
+    message = request.json or {}
+    response = mcp.handle_message(message)
+    return jsonify(response)
+
+
+@app.route('/mcp/tools', methods=['GET'])
+def mcp_list_tools():
+    """List MCP tools."""
+    from mcp_server import MCPTools, MCPServer
+    mcp = MCPServer(g.user_id)
+    return jsonify({"tools": mcp.tools.list()})
+
+
+@app.route('/mcp/resources', methods=['GET'])
+def mcp_list_resources():
+    """List MCP resources."""
+    from mcp_server import MCPServer
+    mcp = MCPServer(g.user_id)
+    return jsonify({"resources": mcp.resources.list()})
+
+
+@app.route('/mcp/initialize', methods=['POST'])
+def mcp_initialize():
+    """MCP initialize."""
+    from mcp_server import MCPServer
+    mcp = MCPServer(g.user_id)
+    return jsonify(mcp.server_info)
+
+
+@app.route('/mcp/chat', methods=['POST'])
+@require_auth
+def mcp_chat():
+    """Chat with LLM using MCP format."""
+    data = request.json or {}
+    
+    # MCP-style message
+    messages = data.get('messages', [])
+    max_tokens = data.get('maxTokens', 4000)
+    
+    if not messages:
+        return jsonify({'error': 'Messages required'}), 400
+    
+    # Build system prompt
+    system_prompt = data.get('systemPrompt', 'You are NexusOS, an AI assistant.')
+    
+    llm_messages = [{'role': 'system', 'content': system_prompt}]
+    for msg in messages:
+        llm_messages.append({'role': msg.get('role', 'user'), 'content': msg.get('content', '')})
+    
+    # Call LLM
+    response = llm_manager.chat(g.user_id, llm_messages)
+    
+    if response.success:
+        return jsonify({
+            'content': response.content,
+            'model': response.model,
+            'provider': response.provider,
+            'usage': {
+                'inputTokens': 0,
+                'outputTokens': response.tokens_used
+            }
+        })
+    else:
+        return jsonify({'error': response.error}), 400
