@@ -1,4 +1,4 @@
-"""NexusOS v2 - Database Layer"""
+"""NexusOS v2 - Database Layer (Fixed)"""
 import sqlite3, json, hashlib, secrets, os
 from datetime import datetime, timedelta
 from typing import Optional, Dict, List, Any
@@ -80,10 +80,11 @@ class Database:
     
     def create_conversation(self, uid, title='New Chat'):
         import uuid
+        conv_id = uuid.uuid4().hex
         with self._get_conn() as conn:
             c = conn.cursor()
-            c.execute("INSERT INTO conversations (id,user_id,title) VALUES (?,?,?)", (uuid.uuid4().hex, uid, title))
-        return self.get_conversation(uuid.uuid4().hex)
+            c.execute("INSERT INTO conversations (id,user_id,title) VALUES (?,?,?)", (conv_id, uid, title))
+        return self.get_conversation(conv_id)
     
     def get_conversation(self, cid):
         with self._get_conn() as conn:
