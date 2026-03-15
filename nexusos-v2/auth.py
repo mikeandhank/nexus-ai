@@ -30,22 +30,24 @@ def verify_password(password, hashed):
 
 def create_access_token(user_id, role='user'):
     """Create JWT access token"""
+    now = datetime.utcnow()
     payload = {
         'user_id': user_id,
         'role': role,
         'type': 'access',
-        'exp': datetime.utcnow() + timedelta(seconds=ACCESS_TOKEN_EXPIRE),
-        'iat': datetime.utcnow()
+        'exp': int((now + timedelta(seconds=ACCESS_TOKEN_EXPIRE)).timestamp()),
+        'iat': int(now.timestamp())
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 def create_refresh_token(user_id):
     """Create JWT refresh token"""
+    now = datetime.utcnow()
     payload = {
         'user_id': user_id,
         'type': 'refresh',
-        'exp': datetime.utcnow() + timedelta(seconds=REFRESH_TOKEN_EXPIRE),
-        'iat': datetime.utcnow(),
+        'exp': int((now + timedelta(seconds=REFRESH_TOKEN_EXPIRE)).timestamp()),
+        'iat': int(now.timestamp()),
         'nonce': secrets.token_hex(8)
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
