@@ -48,12 +48,20 @@
   - Login/register, chat, conversations, agents, settings
 - ✅ **RBAC** - 4 roles (admin/developer/user/viewer)
 - ✅ **Cron Jobs** - Enterprise ops:
-  - nexusos-enterprise-check (10 min)
+  - nexusos-enterprise-check (10 min) - Progress vs roadmap
+  - nexusos-enterprise-audit (hourly) - C-Suite evaluation
   - nexusos-api-health (5 min)
   - nexusos-test (hourly)
-  - nexusos-deploy (30 min)
+  - nexusos-deploy (4 hours)
   - nexusos-backup (daily 3AM)
   - nexusos-logs-rotate (daily 4AM)
+- ✅ **Third-party audit** - Received feedback, revised positioning
+- ✅ **Enterprise roadmap** - Honest 6-step path to Agentic AI OS
+
+# Notes
+- Positioning revised: "Self-hosted AI agent platform" not "enterprise competitor"
+- Path: PostgreSQL → Redis → JWT → Agent Lifecycle → Communication → Observability
+- Cut: Subscription tiers, marketplace, SSO, SOC2 (deferred)
 
 ---
 
