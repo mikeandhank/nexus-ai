@@ -480,7 +480,7 @@ def status():
         pass
     
     response = {
-        'version': '5.0.0',
+        'version': '6.0.0',
         'running': True,
         'enterprise': True,
         'components': {
