@@ -24,6 +24,29 @@ if USE_PG:
     import psycopg2
     def get_pg_conn():
         return psycopg2.connect(DATABASE_URL)
+    
+    # Ensure usage_stats table exists
+    try:
+        conn = get_pg_conn()
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS usage_stats (
+                id SERIAL PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                model TEXT,
+                provider TEXT,
+                input_tokens INTEGER DEFAULT 0,
+                output_tokens INTEGER DEFAULT 0,
+                total_tokens INTEGER DEFAULT 0,
+                requests INTEGER DEFAULT 0,
+                cost_usd REAL DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        conn.close()
+    except:
+        pass  # Table may already exist
 
 # ==================== JWT AUTH ====================
 import bcrypt
@@ -424,7 +447,34 @@ def status():
     except:
         redis_status = False
     
-    return jsonify({
+    # Get usage stats if available
+    usage_summary = None
+    try:
+        if USE_PG:
+            try:
+                conn = get_pg_conn()
+                cur = conn.cursor()
+                cur.execute("""
+                    SELECT COALESCE(SUM(total_tokens), 0) as total_tokens,
+                           COALESCE(SUM(cost_usd), 0) as total_cost,
+                           COALESCE(SUM(requests), 0) as total_requests,
+                           COUNT(*) as record_count
+                    FROM usage_stats
+                """)
+                row = cur.fetchone()
+                usage_summary = {
+                    'total_tokens': row[0] or 0,
+                    'total_cost_usd': round(float(row[1] or 0), 4),
+                    'total_requests': row[2] or 0,
+                    'records': row[3] or 0
+                }
+                conn.close()
+            except:
+                usage_summary = None
+    except:
+        pass
+    
+    response = {
         'version': '5.0.0',
         'running': True,
         'enterprise': True,
@@ -443,7 +493,96 @@ def status():
             'basic': {'providers': ['ollama', 'openrouter']},
             'pro': {'providers': ['ollama', 'openrouter', 'anthropic', 'openai']}
         }
-    })
+    }
+    
+    if usage_summary:
+        response['usage'] = usage_summary
+    
+    return jsonify(response)
+
+# ==================== HEALTH CHECK ====================
+@app.route('/api/health')
+def health_check():
+    """Comprehensive health check - no auth required"""
+    import time
+    import psutil
+    
+    # Check PostgreSQL connectivity
+    db_status = False
+    db_latency = None
+    if USE_PG:
+        try:
+            start = time.time()
+            conn = get_pg_conn()
+            conn.close()
+            db_latency = round((time.time() - start) * 1000, 2)
+            db_status = True
+        except Exception as e:
+            db_status = False
+    
+    # Check Redis connectivity
+    redis_status = False
+    redis_latency = None
+    try:
+        import redis
+        r = redis.from_url(os.environ.get('REDIS_URL', 'redis://redis:6379/0'))
+        start = time.time()
+        r.ping()
+        redis_latency = round((time.time() - start) * 1000, 2)
+        redis_status = True
+    except Exception as e:
+        redis_status = False
+    
+    # Check Ollama
+    ollama_status = False
+    ollama_latency = None
+    try:
+        ollama_url = os.environ.get('OLLAMA_URL', 'http://nexusos-ollama:11434')
+        import requests
+        start = time.time()
+        resp = requests.get(f"{ollama_url}/api/tags", timeout=2)
+        ollama_latency = round((time.time() - start) * 1000, 2)
+        ollama_status = resp.status_code == 200
+    except:
+        ollama_status = False
+    
+    # System metrics
+    try:
+        cpu_percent = psutil.cpu_percent(interval=0.1)
+        memory = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+        system_info = {
+            'cpu_percent': cpu_percent,
+            'memory_percent': memory.percent,
+            'memory_available_mb': round(memory.available / 1024 / 1024, 1),
+            'disk_percent': disk.percent,
+            'disk_free_gb': round(disk.free / 1024 / 1024 / 1024, 1)
+        }
+    except:
+        system_info = None
+    
+    # Overall health
+    all_healthy = db_status and redis_status and ollama_status
+    
+    return jsonify({
+        'status': 'healthy' if all_healthy else 'degraded',
+        'timestamp': datetime.utcnow().isoformat() + 'Z',
+        'dependencies': {
+            'postgresql': {
+                'status': 'up' if db_status else 'down',
+                'latency_ms': db_latency
+            },
+            'redis': {
+                'status': 'up' if redis_status else 'down',
+                'latency_ms': redis_latency
+            },
+            'ollama': {
+                'status': 'up' if ollama_status else 'down',
+                'latency_ms': ollama_latency
+            }
+        },
+        'system': system_info
+    }), 200 if all_healthy else 503
 
 # ==================== MCP ====================
 @app.route('/mcp/tools')

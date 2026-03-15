@@ -96,6 +96,15 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 | 37 | **Health Check Endpoint** - `/api/health` with dependency status | ⬜ |
 | 38 | **CORS Policy** - Configure proper cross-origin restrictions | ⬜ |
 
+### Step 11: Production Stability (DISCOVERED VIA AUDIT - 2026-03-15)
+| Priority | Action | Status |
+|----------|--------|--------|
+| 39 | **Redis Operational** - Ensure Redis is running in production | ⬜ |
+| 40 | **User Management API** - CRUD for users, role assignment via API | ⬜ |
+| 41 | **Agent Management API** - Create, list, pause, resume, stop agents | ⬜ |
+| 42 | **Multi-Tenant Isolation** - Tenant context in all API requests | ⬜ |
+| 43 | **TLS/SSL** - Proper certificate chain (Let's Encrypt) | ⬜ |
+
 ---
 
 ## What to Cut/Defer
