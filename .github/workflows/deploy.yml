@@ -6,7 +6,17 @@ on:
       - main
 
 jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug secrets
+        run: |
+          echo "SERVER_HOST: ${{ secrets.SERVER_HOST }}"
+          echo "SERVER_USER: ${{ secrets.SERVER_USER }}"
+          echo "SSH_KEY starts with: ${{ startsWith(secrets.SSH_PRIVATE_KEY, '-----') }}"
+          
   deploy:
+    needs: debug
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,15 +31,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           debug: true
+          command_timeout: 5m
           script: |
-            cd /root
-            rm -rf nexusos-v2 || true
-            cp -r ${{ github.workspace }}/nexusos/nexusos-v2 nexusos-v2
-            cd nexusos-v2
-            docker build -t nexusos-v6 . || echo "Docker build failed"
-            docker rm -f nexusos-v6 || true
-            docker run -d --name nexusos-v6 --network nexusos-network -p 8080:8080 \
-              -e DATABASE_URL="postgresql://postgres:postgres@nexusos-postgres:5432/postgres" \
-              -e REDIS_URL="redis://nexusos-redis:6379" \
-              -v nexusos-data:/opt/nexusos-data nexusos-v6
-            echo "Deploy complete"
+            whoami
+            pwd
+            ls -la /root/
