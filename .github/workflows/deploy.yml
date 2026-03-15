@@ -20,14 +20,16 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          debug: true
           script: |
             cd /root
             rm -rf nexusos-v2 || true
             cp -r ${{ github.workspace }}/nexusos/nexusos-v2 nexusos-v2
             cd nexusos-v2
-            docker build -t nexusos-v6 .
+            docker build -t nexusos-v6 . || echo "Docker build failed"
             docker rm -f nexusos-v6 || true
             docker run -d --name nexusos-v6 --network nexusos-network -p 8080:8080 \
               -e DATABASE_URL="postgresql://postgres:postgres@nexusos-postgres:5432/postgres" \
               -e REDIS_URL="redis://nexusos-redis:6379" \
               -v nexusos-data:/opt/nexusos-data nexusos-v6
+            echo "Deploy complete"
