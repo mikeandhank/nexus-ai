@@ -94,7 +94,7 @@ def setup_sso_routes(app):
                 'client_secret': config['client_secret'],
                 'code': code,
                 'grant_type': 'authorization_code',
-                'redirect_uri': f"{request.host_url}api/auth/sso/callback'
+                'redirect_uri': f"{request.host_url}api/auth/sso/callback"
             })
             token_data = token_response.json()
             
