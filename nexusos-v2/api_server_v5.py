@@ -872,13 +872,12 @@ except Exception as e:
 try:
     import psutil
     import time
+    from flask import jsonify as dash_jsonify
+    import sqlite3
     
     @app.route('/api/dashboard', methods=['GET'])
-    def dashboard():
+    def dashboard_endpoint():
         """Real-time system dashboard"""
-        from flask import jsonify as json_dash
-        from api_server_v5 import get_pg_conn
-        
         stats = {
             'timestamp': time.time(),
             'system': {
@@ -888,28 +887,31 @@ try:
             }
         }
         
-        try:
-            conn = get_pg_conn()
-            cur = conn.cursor()
-            cur.execute("SELECT COUNT(*) FROM users")
-            stats['users'] = cur.fetchone()[0]
-            cur.execute("SELECT COUNT(*) FROM agents")
-            stats['agents'] = cur.fetchone()[0]
-            cur.execute("SELECT COUNT(*) FROM conversations")
-            stats['conversations'] = cur.fetchone()[0]
-            cur.execute("SELECT COUNT(*) FROM messages")
-            stats['messages'] = cur.fetchone()[0]
-            conn.close()
-        except Exception as e:
-            stats['db_error'] = str(e)
+        # Try PostgreSQL
+        if USE_PG:
+            try:
+                conn = get_pg_conn()
+                cur = conn.cursor()
+                cur.execute("SELECT COUNT(*) FROM users")
+                stats['users'] = cur.fetchone()[0]
+                cur.execute("SELECT COUNT(*) FROM agents")
+                stats['agents'] = cur.fetchone()[0]
+                cur.execute("SELECT COUNT(*) FROM conversations")
+                stats['conversations'] = cur.fetchone()[0]
+                cur.execute("SELECT COUNT(*) FROM messages")
+                stats['messages'] = cur.fetchone()[0]
+                conn.close()
+            except Exception as e:
+                stats['db_error'] = str(e)
         
-        return json_dash(stats)
+        return dash_jsonify(stats)
     
     @app.route('/api/dashboard/agents', methods=['GET'])
     def dashboard_agents():
         from flask import jsonify
+        if not USE_PG:
+            return jsonify({'agents': []})
         try:
-            from api_server_v5 import get_pg_conn
             conn = get_pg_conn()
             cur = conn.cursor()
             cur.execute("SELECT id, name, status, model, created_at FROM agents LIMIT 50")
