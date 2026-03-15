@@ -1071,13 +1071,25 @@ def log_request():
 def simple_dashboard():
     """Simple system dashboard"""
     import time
+    import os
+    
+    # Check Redis
+    redis_ok = False
+    try:
+        import redis
+        r = redis.from_url(os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
+        r.ping()
+        redis_ok = True
+    except:
+        pass
+    
     dashboard = {
         'status': 'running',
         'timestamp': int(time.time()),
         'version': '18',
         'infrastructure': {
             'postgresql': 'connected' if USE_PG else 'disconnected',
-            'redis': 'connected' if redis_client else 'disconnected'
+            'redis': 'connected' if redis_ok else 'disconnected'
         }
     }
     return jsonify(dashboard)

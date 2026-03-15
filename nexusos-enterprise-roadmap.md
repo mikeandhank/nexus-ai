@@ -69,15 +69,30 @@
 
 ---
 
+## Enterprise Audit Findings (2026-03-15)
+
+### Newly Discovered Gaps (Added from Audit)
+| # | Gap | Severity | Notes |
+|---|-----|----------|-------|
+| 31 | Login/Token Management UI | HIGH | No web-based login flow; users must use API directly |
+| 32 | Session Persistence Layer | HIGH | /api/chat returns "Auth required" but no clear token refresh flow |
+| 33 | Enterprise SAML/SCIM | MEDIUM | SSO "Code Ready" but no actual IdP integration |
+| 34 | TLS/SSL | HIGH | Running on plain HTTP - unacceptable for enterprise |
+| 35 | RBAC UI Management | MEDIUM | Roles endpoint exists but no admin GUI to manage them |
+| 36 | MCP Tool Expansion | MEDIUM | Only 8 basic tools (file, process, http) - needs enterprise integrations |
+| 37 | Compliance Certifications | LOW | No SOC2, HIPAA, GDPR framework documentation |
+
+---
+
 ## Summary
-- **Total Items:** 30
-- **Done:** 17 (57%)
-- **Code Ready:** 8 (27%)
-- **Not Started:** 5 (17%)
+- **Total Items:** 37
+- **Done:** 17 (46%)
+- **Code Ready:** 8 (22%)
+- **Not Started:** 12 (32%)
 
 ## Current Server Status
 - **URL:** http://187.124.150.225:8080
-- **Version:** 18 (auth fixed)
+- **Version:** 6.0.0
 - **PostgreSQL:** ✅ Connected
 - **Redis:** ✅ Connected
 - **Ollama:** ✅ Running (phi3)
