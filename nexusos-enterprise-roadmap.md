@@ -10,6 +10,25 @@ An OS does three things:
 
 ---
 
+## 🚨 ACTION REQUIRED: Deploy Fix (2026-03-15)
+
+**Root cause identified:** PostgreSQL tables (users, conversations, messages, webhooks) not initialized at startup.
+
+**Fix applied (committed as 02b34ea):**
+- Added users, conversations, messages, webhooks table creation in USE_PG block
+- Added default admin user: `admin@nexusos.local` / `nexusos2026`
+
+**To deploy:**
+```bash
+# Option 1: SSH to server and run deploy script
+ssh root@187.124.150.225
+cd /opt/nexusos && git pull origin main && bash nexusos-v2/deploy-combined.sh
+
+# Option 2: Fix GitHub Actions secrets and trigger workflow
+```
+
+---
+
 ## What We Actually Are Today
 A self-hosted AI chat server for developers and small teams with MCP tool support.
 
