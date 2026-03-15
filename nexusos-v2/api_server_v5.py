@@ -187,6 +187,181 @@ def refresh():
 def logout():
     return jsonify({'status': 'logged_out'})
 
+# ==================== AGENT ROUTES ====================
+from agent_routes import setup_agent_routes
+setup_agent_routes(app)
+
+# ==================== WEBHOOKS ====================
+from webhooks import get_webhook_manager
+from database import Database
+
+# Initialize webhook manager with db
+_db_instance = Database() if not USE_PG else None
+_webhook_mgr = get_webhook_manager(_db_instance)
+
+@app.route('/api/webhooks', methods=['POST'])
+@require_auth
+def create_webhook():
+    """Register a new webhook"""
+    data = request.json or {}
+    event_type = data.get('event_type')
+    url = data.get('url')
+    
+    if not event_type or not url:
+        return jsonify({'error': 'event_type and url required'}), 400
+    
+    # Validate URL
+    if not url.startswith('http://') and not url.startswith('https://'):
+        return jsonify({'error': 'url must start with http:// or https://'}), 400
+    
+    webhook = _webhook_mgr.register_webhook(event_type, url, user_id=g.user_id)
+    
+    # Dispatch event for webhook creation
+    _webhook_mgr.dispatch('webhook.created', {'webhook_id': webhook['id'], 'event_type': event_type})
+    
+    return jsonify({
+        'id': webhook['id'],
+        'event_type': event_type,
+        'url': url,
+        'enabled': True
+    })
+
+@app.route('/api/webhooks', methods=['GET'])
+@require_auth
+def list_webhooks():
+    """List user's webhooks"""
+    webhooks = _webhook_mgr.list_webhooks(user_id=g.user_id)
+    return jsonify({'webhooks': webhooks})
+
+@app.route('/api/webhooks/<webhook_id>', methods=['DELETE'])
+@require_auth
+def delete_webhook(webhook_id):
+    """Delete a webhook"""
+    success = _webhook_mgr.unregister_webhook(webhook_id, user_id=g.user_id)
+    if success:
+        return jsonify({'status': 'deleted'})
+    return jsonify({'error': 'Not found'}), 404
+
+# Available webhook events
+WEBHOOK_EVENTS = [
+    'agent.created', 'agent.started', 'agent.stopped', 'agent.paused', 'agent.resumed',
+    'chat.message', 'chat.complete',
+    'user.registered', 'user.login',
+    'webhook.created', 'webhook.deleted',
+    'usage.exceeded'
+]
+
+@app.route('/api/webhooks/events', methods=['GET'])
+def list_webhook_events():
+    """List available webhook events"""
+    return jsonify({'events': WEBHOOK_EVENTS})
+
+# ==================== USAGE ANALYTICS ====================
+
+@app.route('/api/usage', methods=['GET'])
+def get_usage():
+    """Get current user's usage stats"""
+    if not hasattr(g, 'user_id') or not g.user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+    days = request.args.get('days', 30, type=int)
+    
+    try:
+        if USE_PG:
+            with get_pg_conn() as conn:
+                with conn.cursor() as cur:
+                    # Get summary
+                    cur.execute("""
+                        SELECT COALESCE(SUM(total_tokens), 0) as total_tokens,
+                               COALESCE(SUM(requests), 0) as total_requests,
+                               COALESCE(SUM(cost_usd), 0) as total_cost
+                        FROM usage_stats 
+                        WHERE user_id = %s AND created_at >= datetime('now', '-%s days')
+                    """, (g.user_id, days))
+                    row = cur.fetchone()
+                    
+                    # Get breakdown by model
+                    cur.execute("""
+                        SELECT model, provider,
+                               SUM(total_tokens) as tokens,
+                               SUM(requests) as requests,
+                               SUM(cost_usd) as cost
+                        FROM usage_stats 
+                        WHERE user_id = %s AND created_at >= datetime('now', '-%s days')
+                        GROUP BY model, provider
+                        ORDER BY tokens DESC
+                    """, (g.user_id, days))
+                    breakdown = []
+                    for r in cur.fetchall():
+                        breakdown.append({
+                            'model': r[0],
+                            'provider': r[1],
+                            'tokens': r[2],
+                            'requests': r[3],
+                            'cost': float(r[4])
+                        })
+                    
+                    return jsonify({
+                        'period_days': days,
+                        'summary': {
+                            'total_tokens': row[0] or 0,
+                            'total_requests': row[1] or 0,
+                            'total_cost': float(row[2]) if row[2] else 0
+                        },
+                        'by_model': breakdown
+                    })
+        else:
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            c = conn.cursor()
+            
+            # Get summary
+            c.execute("""
+                SELECT COALESCE(SUM(total_tokens), 0) as total_tokens,
+                       COALESCE(SUM(requests), 0) as total_requests,
+                       COALESCE(SUM(cost_usd), 0) as total_cost
+                FROM usage_stats 
+                WHERE user_id = ? AND created_at >= datetime('now', '-' || ? || ' days')
+            """, (g.user_id, days))
+            row = c.fetchone()
+            
+            # Get breakdown by model
+            c.execute("""
+                SELECT model, provider,
+                       SUM(total_tokens) as tokens,
+                       SUM(requests) as requests,
+                       SUM(cost_usd) as cost
+                FROM usage_stats 
+                WHERE user_id = ? AND created_at >= datetime('now', '-' || ? || ' days')
+                GROUP BY model, provider
+                ORDER BY tokens DESC
+            """, (g.user_id, days))
+            
+            breakdown = []
+            for r in c.fetchall():
+                breakdown.append({
+                    'model': r['model'],
+                    'provider': r['provider'],
+                    'tokens': r['tokens'],
+                    'requests': r['requests'],
+                    'cost': r['cost']
+                })
+            
+            conn.close()
+            
+            return jsonify({
+                'period_days': days,
+                'summary': {
+                    'total_tokens': row['total_tokens'],
+                    'total_requests': row['total_requests'],
+                    'total_cost': row['total_cost']
+                },
+                'by_model': breakdown
+            })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
 # ==================== LLM ====================
 OLLAMA_URL = os.environ.get('OLLAMA_URL', 'http://nexusos-ollama:11434')
 
