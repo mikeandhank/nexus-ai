@@ -10,13 +10,13 @@ An OS does three things:
 
 ---
 
-## 🚨 ACTION REQUIRED: Deploy Fix (2026-03-15)
+## 🚨 ACTION REQUIRED: Deploy Fix (2026-03-15 1:44 PM)
 
-**Root cause identified:** PostgreSQL tables (users, conversations, messages, webhooks) not initialized at startup.
+**Root cause identified:** PyJWT 2.x requires integer Unix timestamps for `exp` and `iat` claims. The code was passing datetime objects which causes jwt.encode() to fail silently, returning "Login failed".
 
-**Fix applied (committed as 02b34ea):**
-- Added users, conversations, messages, webhooks table creation in USE_PG block
-- Added default admin user: `admin@nexusos.local` / `nexusos2026`
+**Fix applied (committed as 45abe35):**
+- Modified `auth.py` to convert exp/iat to Unix timestamps using `.timestamp()`
+- Fixed both `create_access_token()` and `create_refresh_token()`
 
 **To deploy:**
 ```bash
@@ -26,6 +26,11 @@ cd /opt/nexusos && git pull origin main && bash nexusos-v2/deploy-combined.sh
 
 # Option 2: Fix GitHub Actions secrets and trigger workflow
 ```
+
+**GitHub Actions secrets needed:**
+- `SSH_PRIVATE_KEY` - Private key for SSH access
+- `SERVER_HOST` - 187.124.150.225
+- `SERVER_USER` - root
 
 ---
 
