@@ -5,7 +5,8 @@ import uuid
 import hashlib
 import sqlite3
 import requests
-from flask import Flask, request, jsonify, g, session
+from flask import Flask, request, jsonify, g, session, send_from_directory
+from usage_analytics import usage_bp
 from functools import wraps
 from datetime import datetime
 
@@ -498,6 +499,9 @@ def index():
 @app.route('/ui')
 def web_ui():
     return send_from_directory('/app/templates', 'index.html')
+
+# Register blueprints
+app.register_blueprint(usage_bp)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, threaded=True)
