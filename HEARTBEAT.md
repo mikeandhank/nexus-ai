@@ -42,7 +42,7 @@
   - Chat working with Ollama (phi3)
 - ✅ **MCP Protocol** - Implemented (8 tools, 5 resources)
   - JSON-RPC endpoint at /mcp
-  - Note: HTTP 404 bug in production (test client works)
+  - Fixed HTTP bug - now working!
 
 ---
 
