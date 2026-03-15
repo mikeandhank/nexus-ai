@@ -27,16 +27,16 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 ### Step 2: Agent Lifecycle (Weeks 5-10)
 | Priority | Action | Status |
 |----------|--------|--------|
-| 4 | **Agent Definition Format** - Like Dockerfile for agents (model, tools, prompts, permissions) | ⬜ |
-| 5 | **Runtime** - Spawn, run, pause, resume, stop agents | ⬜ |
-| 6 | **Persistent Identity** - Agent ID, history, recoverable state | ⬜ |
+| 4 | **Agent Definition Format** - Like Dockerfile for agents (model, tools, prompts, permissions) | ✅ CODE READY |
+| 5 | **Runtime** - Spawn, run, pause, resume, stop agents | ✅ CODE READY |
+| 6 | **Persistent Identity** - Agent ID, history, recoverable state | ✅ CODE READY |
 
 ### Step 3: Inter-Agent Communication (Weeks 8-12)
 | Priority | Action | Status |
 |----------|--------|--------|
-| 7 | **Message Bus** - Agents publish/subscribe events | ⬜ |
-| 8 | **Agent-to-Agent Protocol** - "Ask Agent B to do X" | ⬜ |
-| 9 | **Shared Scratchpad** - Working memory for collaboration | ⬜ |
+| 7 | **Message Bus** - Agents publish/subscribe events | 🔄 CODE READY |
+| 8 | **Agent-to-Agent Protocol** - "Ask Agent B to do X" | 🔄 CODE READY |
+| 9 | **Shared Scratchpad** - Working memory for collaboration | 🔄 CODE READY |
 | 9b | **Multi-Tenant Isolation** - Customer/team data separation | ⬜ |
 
 ### Step 4: Observability (Weeks 10-14)
@@ -200,6 +200,21 @@ docker logs redis
 | 71 | **Memory Indexing** - Auto-index agent memories with embeddings | ⬜ |
 | 72 | **Semantic Recall** - Query past conversations by meaning not keywords | ⬜ |
 | 73 | **Knowledge Graph** - Structured entity relationships for reasoning | ⬜ |
+
+### Step 22: Enterprise Audit Findings (2026-03-15)
+| Priority | Action | Status |
+|----------|--------|-------|
+| 82 | **Fix Login Endpoint** - Implement `/api/auth/login` to issue JWT tokens | ⬜ |
+| 83 | **SQL Error Sanitization** - Prevent SQL error leakage in API responses | ⬜ |
+| 84 | **Redis Production Fix** - Ensure Redis is running and stays running | ⬜ |
+| 85 | **Chat API Auth Validation** - Test chat endpoint with valid JWT token | ⬜ |
+| 86 | **Extended MCP Tools** - Add 20+ enterprise tools (DB, cron, env, secrets) | ⬜ |
+| 87 | **Connection Pooling** - Implement DB connection pooling for production | ⬜ |
+| 88 | **CORS Configuration** - Proper cross-origin restrictions for enterprise | ⬜ |
+| 89 | **Production Readiness Certification** - SOC2 Type II readiness checklist | ⬜ |
+| 90 | **Uptime SLA** - Implement 99.9% uptime with monitoring | ⬜ |
+| 91 | **Disaster Recovery** - Automated backup + restore procedures | ⬜ |
+| 92 | **Secret Management** - Enterprise secrets handling (Vault integration) | ⬜ |
 
 ### Step 16: Self-Reflection & Verification
 | Priority | Action | Status |
