@@ -24,7 +24,7 @@ Platform for AI agents with inner life. Built on OpenClaw (MIT licensed).
 | **User Auth** | ✅ Live | Simple token-based, works |
 | **Per-User Memory** | ✅ Live | Conversations stored per user |
 | **Multi-LLM Support** | ✅ Live | Ollama (free) + BYOK (paid) |
-| **Web UI** | ✅ Live | http://187.124.150.225:8080 |
+| **Web UI** | ✅ Live | `https://your-nexusos-server.example.com` |
 
 ### LLM Options
 | Backend | Type | Cost | Models |
@@ -39,7 +39,7 @@ Platform for AI agents with inner life. Built on OpenClaw (MIT licensed).
 
 ### Web Interface
 ```
-http://187.124.150.225:8080/
+https://your-nexusos-server.example.com
 ```
 - Enter name/email to create account
 - Chat with Ollama (free) or add OpenAI/Anthropic API key
@@ -48,10 +48,10 @@ http://187.124.150.225:8080/
 ### API
 ```bash
 # List available models
-curl http://187.124.150.225:8080/api/models
+curl https://your-nexusos-server.example.com/api/models
 
 # Chat (requires user_id from login)
-curl -X POST http://187.124.150.225:8080/api/chat \
+curl -X POST https://your-nexusos-server.example.com/api/chat \
   -H "Content-Type: application/json" \
   -d '{"user_id": "YOUR_USER_ID", "message": "Hello"}'
 ```

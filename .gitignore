@@ -11,6 +11,8 @@ token*
 node_modules/
 *.node
 *.bin
+*.tar.gz
+*.zip
 
 # OS
 .DS_Store

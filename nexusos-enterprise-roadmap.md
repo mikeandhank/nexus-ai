@@ -1,229 +1,178 @@
-# NexusOS Enterprise Roadmap (CONSOLIDATED)
-
-## Vision
-**An Operating System for Agentic AI** - A self-hosted platform where AI agents can be created, managed, collaborated, and scaled.
+# NexusOS Enterprise Roadmap (CONSOLIDATED & PRIORITIZED)
+**Last Updated:** March 15, 2026  
+**Status:** EXECUTING AUDIT FIXES
 
 ---
 
-## Phase 1: Foundation (VERIFIED ✅ 2026-03-15 22:58)
-| # | Action | Status |
-|---|--------|--------|
+## 🎯 EXECUTION PRIORITY: SECURITY FIRST
+
+### 🚨 IMMEDIATE (This Week - STOP all feature work)
+
+| Priority | Item | Source | Status |
+|----------|------|--------|--------|
+| P0 | TLS/SSL with Let's Encrypt | Audit S1 | 🔴 NOT STARTED |
+| P0 | Remove all tar.gz files from repo | Audit A1 | 🔴 NOT STARTED |
+| P0 | Rotate ALL credentials (assume compromised) | Audit S1 | 🔴 NOT STARTED |
+| P0 | Remove exposed IP from all docs | Audit S2 | 🔴 NOT STARTED |
+| P0 | Consolidate codebase to single source | Audit A2 | 🔴 NOT STARTED |
+| P0 | Input sanitization + prompt injection defense | Audit S4 | 🔴 NOT STARTED |
+| P0 | Agent container isolation | Audit A5 | 🔴 NOT STARTED |
+
+---
+
+### 📋 PHASE 1: FOUNDATION (COMPLETE ✅)
+
+| # | Item | Status |
+|---|------|--------|
 | 1 | PostgreSQL Database | ✅ Running |
 | 2 | Redis Cache | ✅ Running |
-| 3 | JWT Authentication | ✅ Verified working (register/login return JWT) |
-| 4 | **Redis + Celery (async)** | ✅ **VERIFIED RUNNING 2026-03-15 22:58** |
-
-## Phase 2: Core Platform (VERIFIED ✅ 2026-03-15 18:24)
-| # | Action | Status |
-|---|--------|--------|
-| 4 | Agent Definition Format | ✅ /api/agents works |
-| 5 | Agent Runtime (spawn/stop/pause) | ✅ POST/DELETE /api/agents verified |
-| 6 | Persistent Identity (history) | ✅ Code Ready |
-
-## Phase 3: Communication (CODE READY 🔄)
-| # | Action | Status |
-|---|--------|--------|
-| 7 | Message Bus (pub/sub) | 🔄 Code Ready |
-| 8 | Agent-to-Agent Protocol | 🔄 Code Ready |
-| 9 | Multi-Tenant Isolation | 🔄 Schema Ready |
-
-## Phase 4: Observability (MIXED)
-| # | Action | Status |
-|---|--------|--------|
-| 10 | Activity Log | ✅ /api/logs working |
-| 11 | Kill Switches | ✅ /api/limits working |
-| 12 | Metrics API | ✅ /api/metrics FIXED (2026-03-15) |
-| 13 | Real-time Dashboard | ⚠️ Disabled (boot issue) |
-
-## Phase 5: Developer Experience (DONE ✅)
-| # | Action | Status |
-|---|--------|--------|
-| 14 | CLI Tool | ✅ `nexus` command |
-| 15 | Python SDK | ✅ nexusos_sdk.py |
-| 16 | Plugin System | ✅ /api/plugins |
-| 17 | Web UI | ✅ /ui |
-| 18 | MCP Protocol | ✅ /mcp/* |
-
-## Phase 6: Enterprise Features (IN PROGRESS)
-| # | Action | Status |
-|---|--------|--------|
-| 19 | Rate Limiting | ✅ Working |
-| 20 | Backup/Restore API | ✅ Working |
-| 21 | SSO/OAuth2 | 🔄 Code Ready (needs creds) |
-| 22 | E2E Encryption | 🔄 Code Ready (needs v19 rebuild) |
-| 23 | Connection Pooling | 🔄 Code Ready |
-
-## Phase 7: Production Hardening
-| # | Action | Status |
-|---|--------|--------|
-| 24 | Let's Encrypt TLS | 🔄 Script Ready |
-| 25 | Health Check Endpoint | ✅ /api/status |
-| 26 | Audit Logging API | ✅ /api/logs |
-| 27 | API Documentation | ✅ **FIXED 2026-03-15 18:52** | Swagger UI now available at /api/docs/ |
-
-## Phase 8: Future (BACKLOG)
-| # | Action | Status |
-|---|--------|--------|
-| 28 | Agent Marketplace | ⬜ Backlog |
-| 29 | Usage Analytics UI | ⬜ Backlog |
-| 30 | SLA Monitoring | ⬜ Backlog |
+| 3 | JWT Authentication | ✅ Verified |
+| 4 | Redis + Celery (async) | ✅ Running |
 
 ---
 
-## Enterprise Audit Findings (2026-03-15)
+### 📋 PHASE 2: CORE PLATFORM (COMPLETE ✅)
 
-### Fixed During Audit
-| # | Fix | Date |
-|---|-----|------|
-| F1 | /api/metrics - DatabaseCompat.get_conn() + tenant_id column | 2026-03-15 |
-| F2 | **Redis + Celery async integration** | **2026-03-15** |
-
-### Newly Discovered Gaps (Added from Audit)
-| # | Gap | Severity | Notes |
-|---|-----|----------|-------|
-| 31 | Login/Token Management UI | HIGH | No web-based login flow; users must use API directly |
-| 32 | Session Persistence Layer | HIGH | /api/chat returns "Auth required" but no clear token refresh flow |
-| 33 | Enterprise SAML/SCIM | MEDIUM | SSO "Code Ready" but no actual IdP integration |
-| 34 | TLS/SSL | HIGH | Running on plain HTTP - unacceptable for enterprise |
-| 35 | RBAC UI Management | MEDIUM | Roles endpoint exists but no admin GUI to manage them |
-| 36 | MCP Tool Expansion | MEDIUM | Only 8 basic tools (file, process, http) - needs enterprise integrations |
-| 37 | Compliance Certifications | LOW | No SOC2, HIPAA, GDPR framework documentation |
-| 38 | Web UI | ✅ /ui NOW WORKING (2026-03-15) |
-| 39 | Auth Flow UX | ✅ FIXED (2026-03-15) | /api/auth/login and /api/auth/register both working, return JWT tokens |
-| 40 | Webhook System | ✅ VERIFIED (2026-03-15) | /api/webhooks - CRUD operations working (created & deleted test webhook) |
-| 41 | Multi-Agent Orchestration | ✅ VERIFIED (2026-03-15) | /api/agents - create/list/delete working |
-| 42 | API Documentation | ⚠️ /api/docs + /openapi.json return 404 | Still needs Swagger integration |
+| # | Item | Status |
+|---|------|--------|
+| 5 | Agent Definition Format | ✅ /api/agents |
+| 6 | Agent Runtime (spawn/stop/pause) | ✅ Verified |
+| 7 | Persistent Identity | ✅ Code Ready |
 
 ---
 
-## ENTERPRISE AUDIT EXECUTION REPORT
-**Audit Date:** March 15, 2026 7:01 PM ET
-**Auditor:** Fortune 500 C-Suite Evaluation
-**Contract Value:** $1,000,000
+### 📋 PHASE 3: TESTING & CI/CD (NEW - HIGH PRIORITY)
+
+| # | Item | Priority | Status |
+|---|------|----------|--------|
+| 8 | Automated testing (auth/security paths) | P0 | 🔴 NOT STARTED |
+| 9 | CI/CD Pipeline (GitHub Actions) | P0 | 🔴 NOT STARTED |
+| 10 | Threat Model Document | P1 | 🔴 NOT STARTED |
+| 11 | Database Migrations (Alembic) | P1 | 🔴 NOT STARTED |
 
 ---
 
-### PART 1: API TEST RESULTS
+### 📋 PHASE 4: NETWORK SECURITY (NEW - FROM AUDIT)
 
-| Test | Endpoint | Result | Details |
-|------|----------|--------|---------|
-| 1 | /api/status | ✅ PASS | Infrastructure healthy: PostgreSQL, Redis, Celery all connected |
-| 2 | /api/auth/register | ✅ PASS | Returns JWT token (email already registered shows prior working) |
-| 3 | /api/chat | ❌ FAIL | "Auth required" - authentication not flowing properly |
-| 4 | /mcp/tools | ✅ PASS | 8 tools available (file_read, file_write, file_list, process_run, http_get, http_post, system_info, search_files) |
-| 5 | /api/roles | ✅ PASS | 4 roles defined: admin, developer, user, viewer |
-| 6 | /ui | ❌ FAIL | 404 NOT_FOUND |
+| # | Item | Priority | Status |
+|---|------|----------|--------|
+| 12 | Network-level Rate Limiting | P1 | 🔴 NOT STARTED |
+| 13 | Backup Endpoint Security | P1 | 🔴 NOT STARTED |
+| 14 | Webhook SSRF Protection | P1 | 🔴 NOT STARTED |
+| 15 | Agent Resource Limits (CPU/memory/network) | P1 | 🔴 NOT STARTED |
 
 ---
 
-### PART 2: ENTERPRISE EVALUATION
+### 📋 PHASE 5: AUTH & IDENTITY
 
-#### 1. What is Missing from an Enterprise Perspective?
-
-**Critical Gaps:**
-- **No TLS/SSL** - Running on plain HTTP (port 8080). Unacceptable for any enterprise handling sensitive data. Data in transit is unencrypted.
-- **Web UI Completely Broken** - /ui returns 404. The primary interface for non-technical users is non-functional.
-- **Chat API Auth Broken** - /api/chat returns "Auth required" even when attempting to use the auth flow. This suggests the JWT token handling is broken at the application layer.
-- **No RBAC UI** - While /api/roles works, there's no admin GUI to manage roles. Enterprise IT teams need visual interfaces.
-- **Limited MCP Tools** - Only 8 basic tools. Enterprise requires integration with Salesforce, ServiceNow, Jira, Slack, etc.
-- **No SSO/SAML** - "Code Ready" but no actual identity provider integration. Enterprises run on Okta, Azure AD, Ping Identity.
-
-**Missing Governance:**
-- No compliance certifications (SOC2, HIPAA, GDPR)
-- No audit trail visualization
-- No data residency controls
-
-#### 2. What Would Take This OS to the Next Level?
-
-- **Production-grade Web UI** - Dashboard for monitoring agents, viewing logs, managing users
-- **Enterprise App Ecosystem** - Pre-built integrations with Salesforce, ServiceNow, Jira, Workday
-- **Multi-region Deployment** - Geo-distributed architecture for global enterprises
-- **Advanced RBAC** - Role hierarchy, temporary roles, role approval workflows
-- **SLA Dashboard** - Real-time uptime, latency metrics, agent performance metrics
-- **Compliance Suite** - SOC2 Type II ready, HIPAA BAA capability, GDPR data export tools
-
-#### 3. What Bottlenecks Are Being Hardcoded?
-
-- **Single-server architecture** - No horizontal scaling mentioned
-- **Ollama-only for free tier** - No cloud LLM abstraction for basic tier
-- **No connection pooling optimization visible** - Could be a bottleneck under load
-- **In-memory session handling likely** - No distributed session store evident
-- **No CDN integration** - Static assets served directly
-
-#### 4. How Will This Fall Short of Changing Enterprise Agentic AI?
-
-**The Honest Assessment:**
-
-The platform has solid foundational architecture (PostgreSQL, Redis, Celery, JWT auth, RBAC). However, it is currently a **developer-focused API platform** - not an enterprise operating system.
-
-**Why it falls short:**
-
-1. **No non-technical user path** - Web UI is broken. Business users cannot interact with agents without writing code.
-
-2. **Trust gap** - No compliance certifications means no regulated industry adoption (healthcare, finance, government).
-
-3. **Integration poverty** - 8 MCP tools vs. competitors with 500+. Enterprise work flows require connecting to existing systems.
-
-4. **Security immaturity** - Plain HTTP, no E2E encryption deployed, no actual SSO integration.
-
-5. **Operational blind spots** - No real-time dashboard, no SLA monitoring, no alerting.
+| # | Item | Priority | Status |
+|---|------|----------|--------|
+| 16 | SSO/OAuth2 (Okta, Azure AD) | P1 | 🔴 NOT STARTED |
+| 17 | SAML/SCIM Integration | P1 | 🔴 NOT STARTED |
+| 18 | RBAC Admin GUI | P2 | 🔴 NOT STARTED |
+| 19 | JWT Key Rotation | P1 | 🔴 NOT STARTED |
 
 ---
 
-### PART 3: $1M CONTRACT RECOMMENDATION
+### 📋 PHASE 6: ENCRYPTION & COMPLIANCE
 
-## ❌ NO - Would NOT Sign
-
-### Rationale:
-
-**What they have:** A solid technical foundation with working async processing, agent management, RBAC, and webhook system.
-
-**What they lack:** Enterprise readiness.
-
-At $1M contract value, I expect:
-- ✅ A working product, not "code ready" features
-- ✅ Security fundamentals (TLS, SSO)
-- ✅ Operational visibility (working dashboard)
-- ✅ Compliance story (or clear roadmap to it)
-- ✅ Non-technical user path
-
-**Current State:** This is a developer preview / technical proof-of-concept, not an enterprise product.
-
-### Recommendation:
-
-**Do not sign.** Re-engage in 6 months when:
-1. Web UI is functional
-2. TLS is enabled
-3. At least one SSO integration works
-4. 50+ enterprise integrations available
-5. Compliance roadmap is defined
-
-**Alternative:** Sign a $50K pilot to fund development of above items, with option to expand to $1M upon milestone completion.
+| # | Item | Priority | Status |
+|---|------|----------|--------|
+| 20 | E2E Encryption | P2 | 🔴 NOT STARTED |
+| 21 | Encrypted BYOK Key Storage | P2 | 🔴 NOT STARTED |
+| 22 | Compliance Roadmap (SOC2/HIPAA/GDPR) | P2 | 🔴 NOT STARTED |
+| 23 | Disaster Recovery Plan | P2 | 🔴 NOT STARTED |
 
 ---
 
-### PART 4: NEW GAPS ADDED TO ROADMAP
+### 📋 PHASE 7: OBSERVABILITY (MOSTLY DONE ✅)
 
-| # | Gap | Severity | Source |
-|---|-----|----------|--------|
-| 43 | Web UI Functional | CRITICAL | 2026-03-15 Audit - /ui returns 404 |
-| 44 | Chat API Auth Flow | CRITICAL | 2026-03-15 Audit - /api/chat "Auth required" despite valid JWT |
-| 45 | Production TLS | CRITICAL | 2026-03-15 Audit - Plain HTTP unacceptable for enterprise |
-| 46 | SSO IdP Integration | HIGH | 2026-03-15 Audit - Okta/Azure AD integration needed |
-| 47 | Enterprise MCP Integrations | HIGH | 2026-03-15 Audit - Need 50+ (Salesforce, ServiceNow, etc.) |
-| 48 | RBAC Admin GUI | MEDIUM | 2026-03-15 Audit - Visual role management |
-| 49 | Compliance Roadmap | MEDIUM | 2026-03-15 Audit - SOC2/HIPAA/GDPR path |
-| 50 | SLA Monitoring | MEDIUM | 2026-03-15 Audit - Real-time uptime/performance |
+| # | Item | Status |
+|---|------|--------|
+| 24 | Activity Log (/api/logs) | ✅ Working |
+| 25 | Kill Switches (/api/limits) | ✅ Working |
+| 26 | Metrics API (/api/metrics) | ✅ Fixed |
+| 27 | Real-time Dashboard | 🔴 NOT STARTED |
+| 28 | Health Check Endpoint | ✅ Working |
+| 29 | Audit Logging | ✅ Working |
 
 ---
 
-## Summary
-- **Total Items:** 50
-- **Done:** 20 (40%)
-- **Code Ready:** 6 (12%)
-- **Not Started:** 18 (36%)
-- **NEW Critical Issues:** 6
+### 📋 PHASE 8: COMMUNICATION
+
+| # | Item | Status |
+|---|------|--------|
+| 30 | Message Bus (pub/sub) | ✅ Code Ready |
+| 31 | Agent-to-Agent Protocol | ✅ Code Ready |
+| 32 | Multi-Tenant Isolation (row-level security) | 🔴 NOT STARTED |
 
 ---
 
-*Last Updated: 2026-03-15 19:01 ET (Enterprise Audit Complete)*
+### 📋 PHASE 9: DEVELOPER EXPERIENCE (MOSTLY DONE ✅)
+
+| # | Item | Status |
+|---|------|--------|
+| 33 | CLI Tool | ✅ Working |
+| 34 | Python SDK | ✅ Working |
+| 35 | Plugin System | ✅ Working |
+| 36 | Web UI (/ui) | ✅ FIXED 2026-03-15 |
+| 37 | MCP Protocol | ✅ Working |
+| 38 | MCP Tool Expansion (50+ tools) | 🔴 NOT STARTED |
+| 39 | API Documentation (Swagger) | 🔴 NOT STARTED |
+
+---
+
+### 📋 PHASE 10: ENTERPRISE FEATURES
+
+| # | Item | Priority | Status |
+|---|------|----------|--------|
+| 40 | Backup/Restore API | ✅ Working |
+| 41 | Connection Pooling | ✅ Code Ready |
+| 42 | Terms of Service | P1 | 🔴 NOT STARTED |
+| 43 | Privacy Policy | P1 | 🔴 NOT STARTED |
+| 44 | Data Processing Agreement | P1 | 🔴 NOT STARTED |
+
+---
+
+### 📋 PHASE 11: BUSINESS & FUTURE (BACKLOG)
+
+| # | Item | Priority | Status |
+|---|------|----------|--------|
+| 45 | Revenue Model | P2 | 🔴 NOT STARTED |
+| 46 | Usage Analytics UI | P3 | 🔴 NOT STARTED |
+| 47 | SLA Monitoring | P3 | 🔴 NOT STARTED |
+| 48 | Agent Marketplace | P3 | 🔴 NOT STARTED |
+
+---
+
+## 📊 SUMMARY
+
+| Category | Total | Done | Not Started |
+|----------|-------|------|-------------|
+| Immediate (P0) | 7 | 0 | 7 |
+| Phase 3-4 (Testing/Security) | 7 | 0 | 7 |
+| Phase 5-6 (Auth/Compliance) | 8 | 0 | 8 |
+| Phase 7-9 (Ops/DevEx) | 9 | 6 | 3 |
+| Phase 10-11 (Business) | 6 | 1 | 5 |
+| **TOTAL** | **48** | **11** | **37** |
+
+---
+
+## 🔄 AUDIT FINDINGS MAPPING
+
+| Audit Finding | Roadmap Item |
+|---------------|--------------|
+| S1: TLS/SSL | #12 |
+| S2: Exposed IP | REMOVED FROM DOCS |
+| S3: JWT Secret Mgmt | #19 |
+| S4: Input Sanitization | #6 |
+| A1: tar.gz files | REMOVED FROM REPO |
+| A2: Multiple versions | #5 (consolidated) |
+| A3: No testing | #8 |
+| A4: No CI/CD | #9 |
+| A5: Agent isolation | #7, #15 |
+| A6: DB migrations | #11 |
+
+---
+
+*Next Review: March 22, 2026*
