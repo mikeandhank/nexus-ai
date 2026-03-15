@@ -77,7 +77,7 @@ def setup_metrics_routes(app, db_module=None):
         # Get from database if available
         if db_module:
             try:
-                with db_module._get_conn() as conn:
+                with db_module.get_conn() as conn:
                     cur = conn.cursor()
                     
                     # Agent counts
@@ -186,7 +186,7 @@ def setup_metrics_routes(app, db_module=None):
         
         if db_module:
             try:
-                with db_module._get_conn() as conn:
+                with db_module.get_conn() as conn:
                     cur = conn.cursor()
                     cur.execute("SELECT DISTINCT tenant_id FROM users WHERE tenant_id IS NOT NULL")
                     for (tid,) in cur.fetchall():
