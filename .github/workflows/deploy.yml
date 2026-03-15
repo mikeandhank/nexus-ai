@@ -1,0 +1,85 @@
+name: NexusOS Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nexusos-v2/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  deploy-usage-analytics:
+    runs-on: ubuntu-latest
+    if: contains(join(github.changed_files), 'usage_analytics') || contains(join(github.changed_files), 'api_server'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.NEXUSOS_HOST }}
+          username: ${{ secrets.NEXUSOS_USER }}
+          key: ${{ secrets.NEXUSOS_SSH_KEY }}
+          script: |
+            cd /opt/nexusos
+            git pull origin main
+            bash nexusos-v2/deploy-usage-analytics.sh
+
+  deploy-webhooks:
+    runs-on: ubuntu-latest
+    if: contains(join(github.changed_files), 'webhooks') || contains(join(github.changed_files), 'api_server'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.NEXUSOS_HOST }}
+          username: ${{ secrets.NEXUSOS_USER }}
+          key: ${{ secrets.NEXUSOS_SSH_KEY }}
+          script: |
+            cd /opt/nexusos
+            git pull origin main
+            bash nexusos-v2/deploy-webhooks.sh || echo "No deploy-webhooks.sh found"
+
+  full-deploy:
+    runs-on: ubuntu-latest
+    # Manual trigger for full deployment
+    workflow_dispatch:
+      inputs:
+        service:
+          description: 'Service to deploy'
+          required: true
+          default: 'all'
+          type: choice
+          options:
+            - all
+            - api
+            - postgres
+            - redis
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.NEXUSOS_HOST }}
+          username: ${{ secrets.NEXUSOS_USER }}
+          key: ${{ secrets.NEXUSOS_SSH_KEY }}
+          script: |
+            cd /opt/nexusos
+            git pull origin main
+            
+            if [ "${{ github.event.inputs.service }}" == "all" ] || [ "${{ github.event.inputs.service }}" == "api" ]; then
+              bash nexusos-v2/deploy-usage-analytics.sh 2>/dev/null || true
+              bash nexusos-v2/deploy-webhooks.sh 2>/dev/null || true
+              docker restart nexusos-v2-flask 2>/dev/null || pkill -f "python.*api_server" && sleep 2 && cd /opt/nexusos/nexusos-v2 && python api_server_v5.py &
+            fi
+            
+            if [ "${{ github.event.inputs.service }}" == "postgres" ]; then
+              docker compose -f nexusos-v2/docker-compose.yml up -d postgres
+            fi
+            
+            if [ "${{ github.event.inputs.service }}" == "redis" ]; then
+              docker compose -f nexusos-v2/docker-compose.yml up -d redis
+            fi
