@@ -64,6 +64,12 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 - API Key: (in memory - not in repo)
 - Use for: Transactional email (waitlist signups)
 
+### NexusOS Server
+- Production: 187.124.150.225 (port 22 SSH)
+- Currently running: Only /api/status works (v5.0.0)
+- Missing: Usage Analytics, Webhooks endpoints
+- Issue: GitHub Actions deploy fails (secrets not configured)
+
 ## What's Been Tried
 
 - Web search on AI agent platforms (Claude Code, LangGraph, AutoGen, CrewAI)
