@@ -871,7 +871,7 @@ except Exception as e:
 # Multi-Tenant Isolation
 @app.route('/api/tenants', methods=['GET'])
 @require_auth
-def list_tenants():
+def get_tenants():
     """List tenants (admin only)"""
     if g.user_role != 'admin':
         return jsonify({'error': 'Admin only'}), 403
