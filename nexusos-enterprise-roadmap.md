@@ -49,7 +49,7 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 ### Step 5: Developer Experience (Weeks 12-18)
 | Priority | Action | Status |
 |----------|--------|--------|
-| 13 | **CLI Tool** - `nexus agent create`, `nexus agent deploy` | ⬜ |
+| 13 | **CLI Tool** - `nexus agent create`, `nexus agent deploy` | ✅ DONE (v6.1) |
 | 14 | **Python SDK** - Define agents in code | ⬜ |
 | 15 | **Plugin System** - Community tool extensions | ⬜ |
 
@@ -58,7 +58,7 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 |----------|--------|--------|
 | 16 | **Connection Pooling** - PostgreSQL health checks | ⬜ |
 | 17 | **Backup/Restore** - Agent state + database | ⬜ |
-| 18 | **Rate Limiting** - Per user, per agent, per tool | ⬜ |
+| 18 | **Rate Limiting** - Per user, per agent, per tool | ✅ DONE (v6.0) |
 | 19 | **Let's Encrypt** - Real TLS, not self-signed | ⬜ |
 
 ### Step 7: Security Hardening (WEEKS 18-24) - 🚨 NEW PRIORITY
@@ -72,7 +72,7 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 ### Step 8: Observability & Controls (WEEKS 20-26) - 🚨 NEW PRIORITY
 | Priority | Action | Status |
 |----------|--------|--------|
-| 24 | **Metrics API** - Token usage, agent count, latency p95 | ⬜ |
+| 24 | **Metrics API** - Token usage, agent count, latency p95 | ✅ DONE (v6.0) |
 | 25 | **Kill Switches** - Enforce max tokens, tool calls via API | ⬜ |
 | 26 | **Agent Management API** - Create, list, pause, resume, stop | ⬜ |
 | 27 | **Connection Pool Health** - DB health check endpoint | ⬜ |
