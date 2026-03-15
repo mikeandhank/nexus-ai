@@ -51,7 +51,7 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 |----------|--------|--------|
 | 13 | **CLI Tool** - `nexus agent create`, `nexus agent deploy` | ✅ DONE (v6.1) |
 | 14 | **Python SDK** - Define agents in code | ✅ DONE (v6.1) |
-| 15 | **Plugin System** - Community tool extensions | ⬜ |
+| 15 | **Plugin System** - Community tool extensions | ✅ DONE (v6.2) | |
 
 ### Step 6: Production Hardening (Weeks 16-22)
 | Priority | Action | Status |
