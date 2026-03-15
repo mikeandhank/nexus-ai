@@ -1094,5 +1094,82 @@ def simple_dashboard():
     }
     return jsonify(dashboard)
 
+# ==================== PUBLIC ANALYTICS ====================
+@app.route('/api/analytics', methods=['GET'])
+def public_analytics():
+    """Public aggregated analytics - no auth required"""
+    import time
+    from collections import defaultdict
+    
+    try:
+        conn = get_db()
+        c = conn.cursor()
+        
+        # Get totals
+        c.execute("""
+            SELECT 
+                COALESCE(SUM(total_tokens), 0) as total_tokens,
+                COALESCE(SUM(input_tokens), 0) as input_tokens,
+                COALESCE(SUM(output_tokens), 0) as output_tokens,
+                COALESCE(SUM(requests), 0) as total_requests,
+                COALESCE(SUM(cost_usd), 0) as total_cost
+            FROM usage_stats
+        """)
+        row = c.fetchone()
+        
+        # Get daily stats for last 30 days
+        c.execute("""
+            SELECT 
+                DATE(created_at) as date,
+                SUM(requests) as requests,
+                SUM(total_tokens) as tokens,
+                SUM(cost_usd) as cost
+            FROM usage_stats
+            WHERE created_at >= DATE('now', '-30 days')
+            GROUP BY DATE(created_at)
+            ORDER BY date DESC
+        """)
+        daily = []
+        for r in c.fetchall():
+            daily.append({
+                'date': r[0],
+                'requests': r[1] or 0,
+                'tokens': r[2] or 0,
+                'cost': round(r[3] or 0, 4)
+            })
+        
+        # Get top models
+        c.execute("""
+            SELECT model, SUM(requests) as requests, SUM(total_tokens) as tokens
+            FROM usage_stats
+            GROUP BY model
+            ORDER BY requests DESC
+            LIMIT 5
+        """)
+        models = []
+        for r in c.fetchall():
+            models.append({
+                'model': r[0] or 'unknown',
+                'requests': r[1] or 0,
+                'tokens': r[2] or 0
+            })
+        
+        conn.close()
+        
+        return jsonify({
+            'summary': {
+                'total_requests': row[3] or 0,
+                'total_tokens': row[0] or 0,
+                'input_tokens': row[1] or 0,
+                'output_tokens': row[2] or 0,
+                'total_cost_usd': round(row[4] or 0, 4)
+            },
+            'daily': daily,
+            'top_models': models,
+            'period_days': 30
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, threaded=True)
