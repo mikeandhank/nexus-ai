@@ -196,9 +196,9 @@ docker logs redis
 ### Step 15: Semantic Memory (CRITICAL - 2026-03-15)
 | Priority | Action | Status |
 |----------|--------|-------|
-| 70 | **Vector Database (Qdrant)** - Add Qdrant for semantic memory search | ⬜ |
-| 71 | **Memory Indexing** - Auto-index agent memories with embeddings | ⬜ |
-| 72 | **Semantic Recall** - Query past conversations by meaning not keywords | ⬜ |
+| 70 | **Vector Database (Qdrant)** - Add Qdrant for semantic memory search | 🔄 CODE READY |
+| 71 | **Memory Indexing** - Auto-index agent memories with embeddings | 🔄 CODE READY |
+| 72 | **Semantic Recall** - Query past conversations by meaning not keywords | 🔄 CODE READY |
 | 73 | **Knowledge Graph** - Structured entity relationships for reasoning | ⬜ |
 
 ### Step 22: Enterprise Audit Findings (2026-03-15)

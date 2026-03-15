@@ -670,6 +670,82 @@ rate_limiter = get_rate_limiter()
 setup_logging_routes(app, nexus_logger, kill_switches, rate_limiter)
 print("[NexusOS] Structured Logging & Kill Switches initialized")
 
+# Initialize Semantic Memory (Qdrant)
+from semantic_memory import get_semantic_memory, MemoryType
+semantic_memory = get_semantic_memory()
+print("[NexusOS] Semantic Memory initialized")
+
+# ==================== SEMANTIC MEMORY ROUTES ====================
+@app.route('/api/memory', methods=['POST'])
+@require_auth
+def add_memory():
+    """Add a memory to semantic store"""
+    data = request.json or {}
+    content = data.get('content')
+    memory_type = data.get('type', 'conversation')
+    
+    if not content:
+        return jsonify({'error': 'content required'}), 400
+    
+    try:
+        mem_type = MemoryType(memory_type)
+    except:
+        mem_type = MemoryType.CONVERSATION
+    
+    memory_id = semantic_memory.add(
+        content=content,
+        memory_type=mem_type,
+        user_id=g.user_id,
+        agent_id=data.get('agent_id'),
+        metadata=data.get('metadata')
+    )
+    
+    return jsonify({'id': memory_id, 'status': 'added'})
+
+@app.route('/api/memory/search', methods=['GET'])
+@require_auth
+def search_memory():
+    """Semantic search across memories"""
+    query = request.args.get('q', '')
+    limit = request.args.get('limit', 5, type=int)
+    
+    if not query:
+        return jsonify({'error': 'query required'}), 400
+    
+    results = semantic_memory.search(query, user_id=g.user_id, limit=limit)
+    
+    return jsonify({
+        'results': [
+            {
+                'id': r.get('id'),
+                'content': r.get('content'),
+                'type': r.get('memory_type'),
+                'score': r.get('score', 0),
+                'created_at': r.get('created_at')
+            }
+            for r in results
+        ]
+    })
+
+@app.route('/api/memory', methods=['GET'])
+@require_auth
+def list_memory():
+    """List user's memories"""
+    limit = request.args.get('limit', 50, type=int)
+    memories = semantic_memory.get_by_user(g.user_id, limit=limit)
+    
+    return jsonify({
+        'memories': [
+            {
+                'id': m.get('id'),
+                'content': m.get('content')[:200],
+                'type': m.get('memory_type'),
+                'created_at': m.get('created_at')
+            }
+            for m in memories
+        ]
+    })
+
 # ==================== ERROR HANDLING ====================
 @app.errorhandler(400)
 def bad_request(e):
