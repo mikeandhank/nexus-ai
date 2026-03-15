@@ -175,8 +175,77 @@ docker logs redis
 | 44 | **Fix SQL Error Leakage** - Sanitize database errors, return generic messages | ⬜ |
 | 45 | **Standardize API Errors** - Consistent error format across all endpoints | ⬜ |
 | 46 | **Auth Flow Documentation** - Document how to obtain/use JWT tokens | ⬜ |
-| 47 | **Health Endpoint** - Create `/api/health` for monitoring systems | ⬜ |
+| 47 | **Health Endpoint** - Create `/api/health` for monitoring systems | ✅ CODE READY (in api_server_v5.py, needs deploy) |
 | 48 | **Rate Limiting Middleware** - Per-user, per-endpoint rate limits | ⬜ |
+
+### Step 13: Authentication & Session Management (DISCOVERED VIA AUDIT - 2026-03-15)
+| Priority | Action | Status |
+|----------|--------|-------|
+| 49 | **Login Endpoint** - Implement and document `/api/auth/login` for JWT token issuance | ⬜ |
+| 50 | **Token Refresh** - Implement refresh token endpoint | ⬜ |
+| 51 | **Session Invalidation** - Allow logout/session termination | ⬜ |
+| 52 | **Auth Flow Validation** - Ensure chat API accepts valid JWT tokens | ⬜ |
+
+### Step 14: Infrastructure & Reliability (DISCOVERED VIA AUDIT - 2026-03-15)
+| Priority | Action | Status |
+|----------|--------|-------|
+| 53 | **Redis Production Deployment** - Ensure Redis running in production (currently DISCONNECTED) | ⬜ |
+| 54 | **Service Health Checks** - All dependencies report real status | ⬜ |
+| 55 | **API Documentation** - OpenAPI/Swagger for all endpoints | ⬜ |
+
+### Step 15: Semantic Memory (CRITICAL - 2026-03-15)
+| Priority | Action | Status |
+|----------|--------|-------|
+| 70 | **Vector Database (Qdrant)** - Add Qdrant for semantic memory search | ⬜ |
+| 71 | **Memory Indexing** - Auto-index agent memories with embeddings | ⬜ |
+| 72 | **Semantic Recall** - Query past conversations by meaning not keywords | ⬜ |
+| 73 | **Knowledge Graph** - Structured entity relationships for reasoning | ⬜ |
+
+### Step 16: Self-Reflection & Verification
+| Priority | Action | Status |
+|----------|--------|-------|
+| 74 | **Self-Critique Loop** - Agent verifies own output before responding | ⬜ |
+| 75 | **Confidence Scoring** - Agents flag uncertain responses | ⬜ |
+| 76 | **Fact-Check Tool** - Verify claims against known data | ⬜ |
+
+### Step 17: Hardware Optimization (2026-03-15)
+| Priority | Action | Status |
+|----------|--------|-------|
+| 77 | **vLLM Integration** - Replace Flask with vLLM for 10x inference throughput | ⬜ |
+| 78 | **Quantization Support** - INT8/4-bit model support for consumer GPUs | ⬜ |
+| 79 | **GPU Time-Slicing** - Share GPUs across multiple agents | ⬜ |
+| 80 | **CPU-GPU Orchestration** - Optimize data pipeline for agent workloads | ⬜ |
+
+### Step 18: Inter-Agent Communication (PRIORITY - 2026-03-15)
+| Priority | Action | Status |
+|----------|--------|-------|
+| 56 | **Message Bus** - Pub/sub event system for agent-to-agent events | ⬜ |
+| 57 | **Agent Coordination** - Ability for agents to request/action handoffs | ⬜ |
+| 58 | **Shared Context** - Cross-agent memory/state sharing | ⬜ |
+| 81 | **A2A Protocol** - Implement Agent-to-Agent protocol for cross-platform | ⬜ |
+
+### Step 19: Observability & Monitoring
+| Priority | Action | Status |
+|----------|--------|-------|
+| 59 | **Structured Logging** - Who did what, when, with timestamps | ⬜ |
+| 60 | **Execution Tracing** - Tool calls, LLM requests, latencies | ⬜ |
+| 61 | **Metrics Dashboard** - Agent uptime, API usage, errors | ⬜ |
+
+### Step 20: Extended Tool Ecosystem
+| Priority | Action | Status |
+|----------|--------|-------|
+| 62 | **File Operations** - Read/write with path restrictions | ⬜ |
+| 63 | **Database Tools** - SQL execution via API | ⬜ |
+| 64 | **Job Scheduling** - Cron management via API | ⬜ |
+| 65 | **Environment Management** - Env var CRUD | ⬜ |
+
+### Step 21: Developer Experience
+| Priority | Action | Status |
+|----------|--------|-------|
+| 66 | **Agent Editor/Debugger** - Web-based debugging UI | ⬜ |
+| 67 | **Log Streaming** - Real-time log viewing | ⬜ |
+| 68 | **Agent Cloning** - One-click duplicate agents | ⬜ |
+| 69 | **Config Import/Export** - JSON config backup/restore | ⬜ |
 
 ---
 _Revised based on third-party audit feedback_

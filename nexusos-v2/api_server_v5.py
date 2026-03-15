@@ -10,6 +10,9 @@ from usage_analytics import usage_bp
 from functools import wraps
 from datetime import datetime
 
+# Import Message Bus for Inter-Agent Communication
+from message_bus import get_message_bus, AgentCoordinator, setup_message_bus_routes
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('NEXUSOS_SECRET', 'nexusos-v5-enterprise')
 
@@ -215,9 +218,13 @@ def logout():
 from agent_routes import setup_agent_routes
 setup_agent_routes(app)
 
+# ==================== USER MANAGEMENT ROUTES ====================
+from user_routes import setup_user_routes
+setup_user_routes(app)
+
 # ==================== WEBHOOKS ====================
 from webhooks import get_webhook_manager
-from database import Database
+from database_compat import Database
 
 # Initialize webhook manager with db
 _db_instance = Database() if not USE_PG else None
@@ -283,11 +290,9 @@ def list_webhook_events():
 # ==================== USAGE ANALYTICS ====================
 
 @app.route('/api/usage', methods=['GET'])
+@require_auth
 def get_usage():
     """Get current user's usage stats"""
-    if not hasattr(g, 'user_id') or not g.user_id:
-        return jsonify({'error': 'Unauthorized'}), 401
-    
     days = request.args.get('days', 30, type=int)
     
     try:
@@ -641,6 +646,16 @@ def web_ui():
 
 # Register blueprints
 app.register_blueprint(usage_bp)
+
+# Initialize Message Bus (Inter-Agent Communication)
+REDIS_URL = os.environ.get('REDIS_URL', '')
+if REDIS_URL:
+    message_bus = get_message_bus(REDIS_URL)
+    coordinator = AgentCoordinator(message_bus)
+    setup_message_bus_routes(app, message_bus, coordinator)
+    print("[NexusOS] Message Bus initialized")
+else:
+    print("[NexusOS] Warning: REDIS_URL not set, using in-memory message bus")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, threaded=True)
