@@ -4,7 +4,7 @@ NexusOS Real-time Dashboard API
 
 from flask import jsonify
 import time
-import psutil
+import os
 
 def setup_dashboard_routes(app):
     """Add real-time dashboard routes"""
@@ -12,8 +12,8 @@ def setup_dashboard_routes(app):
     @app.route('/api/dashboard', methods=['GET'])
     def dashboard():
         """Real-time system dashboard"""
-        import os
-        from api_server_v5 import USE_PG, get_pg_conn, redis_client
+        import psutil
+        from flask import current_app
         
         # Base stats
         stats = {
@@ -26,9 +26,12 @@ def setup_dashboard_routes(app):
             }
         }
         
-        # Database stats
-        if USE_PG:
-            try:
+        # Get database connection from app
+        try:
+            use_pg = current_app.config.get('USE_PG', False)
+            if use_pg:
+                # Import here to avoid circular imports
+                from api_server_v5 import get_pg_conn
                 conn = get_pg_conn()
                 cur = conn.cursor()
                 
@@ -70,11 +73,12 @@ def setup_dashboard_routes(app):
                 stats['active_sessions_30m'] = cur.fetchone()[0]
                 
                 conn.close()
-            except Exception as e:
-                stats['db_error'] = str(e)
+        except Exception as e:
+            stats['db_error'] = str(e)
         
         # Redis stats
         try:
+            from api_server_v5 import redis_client
             if redis_client:
                 info = redis_client.info()
                 stats['redis'] = {
@@ -91,13 +95,11 @@ def setup_dashboard_routes(app):
     @app.route('/api/dashboard/agents', methods=['GET'])
     def dashboard_agents():
         """Real-time agent status"""
-        import os
-        from api_server_v5 import USE_PG, get_pg_conn
-        
-        if not USE_PG:
-            return jsonify({'agents': []})
-        
         try:
+            from api_server_v5 import get_pg_conn, current_app
+            if not current_app.config.get('USE_PG', False):
+                return jsonify({'agents': []})
+            
             conn = get_pg_conn()
             cur = conn.cursor()
             cur.execute("""
@@ -124,13 +126,11 @@ def setup_dashboard_routes(app):
     @app.route('/api/dashboard/usage', methods=['GET'])
     def dashboard_usage():
         """Usage over time"""
-        import os
-        from api_server_v5 import USE_PG, get_pg_conn
-        
-        if not USE_PG:
-            return jsonify({'error': 'PostgreSQL not available'})
-        
         try:
+            from api_server_v5 import get_pg_conn, current_app
+            if not current_app.config.get('USE_PG', False):
+                return jsonify({'error': 'PostgreSQL not available'})
+            
             conn = get_pg_conn()
             cur = conn.cursor()
             
