@@ -77,6 +77,25 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 | 26 | **Agent Management API** - Create, list, pause, resume, stop | ⬜ |
 | 27 | **Connection Pool Health** - DB health check endpoint | ⬜ |
 
+### Step 9: Enterprise Compliance (DISCOVERED VIA AUDIT)
+| Priority | Action | Status |
+|----------|--------|--------|
+| 28 | **Rate Limiting** - Per user, per agent, per tool enforcement | ⬜ |
+| 29 | **User Management API** - CRUD for users, role assignment | ⬜ |
+| 30 | **Real TLS** - Let's Encrypt or proper cert chain | ⬜ |
+| 31 | **Backup/Restore** - Automated agent state + database backup | ⬜ |
+| 32 | **Multi-Tenant Isolation** - Proper tenant context in all APIs | ⬜ |
+| 33 | **SLA Monitoring** - Uptime, latency SLOs | ⬜ |
+
+### Step 10: Security Enforcement (CRITICAL - DISCOVERED VIA AUDIT)
+| Priority | Action | Status |
+|----------|--------|--------|
+| 34 | **Authentication Enforcement** - All API endpoints must require valid JWT | ⬜ |
+| 35 | **Session Management** - Implement refresh tokens, session invalidation | ⬜ |
+| 36 | **API Response Consistency** - Standardize error messages across endpoints | ⬜ |
+| 37 | **Health Check Endpoint** - `/api/health` with dependency status | ⬜ |
+| 38 | **CORS Policy** - Configure proper cross-origin restrictions | ⬜ |
+
 ---
 
 ## What to Cut/Defer
