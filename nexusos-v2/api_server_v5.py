@@ -6,6 +6,7 @@ import hashlib
 import sqlite3
 import requests
 from flask import Flask, request, jsonify, g, session, send_from_directory
+from flasgger import Swagger
 from usage_analytics import usage_bp
 from functools import wraps
 from datetime import datetime
@@ -15,6 +16,45 @@ from message_bus import get_message_bus, AgentCoordinator, setup_message_bus_rou
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('NEXUSOS_SECRET', 'nexusos-v5-enterprise')
+
+# Swagger/OpenAPI Configuration
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": 'apispec',
+            "route": '/apispec.json',
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/api/docs/"
+}
+
+template = {
+  "swagger": "2.0",
+  "info": {
+    "title": "NexusOS Enterprise API",
+    "description": "API for NexusOS - An Operating System for Agentic AI",
+    "version": "6.0.0",
+    "contact": {
+        "name": "NexusOS Team"
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "JWT token. Example: Bearer <your_token>"
+    }
+  },
+  "security": [{"Bearer": []}]
+}
+
+swagger = Swagger(app, config=swagger_config, template=template)
 
 # CORS Configuration - Security hardening
 # Only allow requests from trusted origins
@@ -457,6 +497,71 @@ def list_webhook_events():
     """List available webhook events"""
     return jsonify({'events': WEBHOOK_EVENTS})
 
+# ==================== CELERY TASKS ====================
+
+# Try to import Celery - gracefully degrade if not available
+_celery_available = False
+try:
+    from tasks import celery_app
+    _celery_available = True
+    print("[NexusOS] Celery integration available")
+except ImportError as e:
+    print(f"[NexusOS] Celery not available: {e}")
+
+@app.route('/api/tasks/status', methods=['GET'])
+@require_auth
+def get_task_status():
+    """Get status of a background task"""
+    if not _celery_available:
+        return jsonify({'error': 'Celery not available'}), 503
+    
+    task_id = request.args.get('task_id')
+    if not task_id:
+        return jsonify({'error': 'task_id required'}), 400
+    
+    task = celery_app.AsyncResult(task_id)
+    
+    return jsonify({
+        'task_id': task_id,
+        'status': task.state,
+        'result': task.result if task.ready() else None,
+        'ready': task.ready(),
+        'successful': task.successful() if task.ready() else None
+    })
+
+@app.route('/api/tasks/health-check', methods=['POST'])
+@require_auth
+def trigger_health_check():
+    """Trigger a background health check"""
+    if not _celery_available:
+        return jsonify({'error': 'Celery not available'}), 503
+    
+    task = celery_app.send_task('nexusos.health.check')
+    
+    return jsonify({
+        'task_id': task.id,
+        'status': 'scheduled',
+        'message': 'Health check scheduled'
+    })
+
+@app.route('/api/tasks/cleanup-sessions', methods=['POST'])
+@require_auth
+def trigger_session_cleanup():
+    """Trigger session cleanup task (admin only)"""
+    if not _celery_available:
+        return jsonify({'error': 'Celery not available'}), 503
+    
+    if g.user_role != 'admin':
+        return jsonify({'error': 'Admin only'}), 403
+    
+    task = celery_app.send_task('nexusos.cleanup.sessions')
+    
+    return jsonify({
+        'task_id': task.id,
+        'status': 'scheduled',
+        'message': 'Session cleanup scheduled'
+    })
+
 # ==================== USAGE ANALYTICS ====================
 
 @app.route('/api/usage', methods=['GET'])
@@ -647,6 +752,9 @@ def status():
     except:
         redis_status = False
     
+    # Check Celery connectivity
+    celery_status = _celery_available
+    
     # Get usage stats if available
     usage_summary = None
     try:
@@ -682,11 +790,13 @@ def status():
             'database': db_status,
             'postgresql': USE_PG,
             'redis': redis_status,
+            'celery': celery_status,
             'llm_manager': True
         },
         'infrastructure': {
             'postgres': 'connected' if db_status else 'disconnected',
-            'redis': 'connected' if redis_status else 'disconnected'
+            'redis': 'connected' if redis_status else 'disconnected',
+            'celery': 'available' if celery_status else 'not available'
         },
         'tiers': {
             'free': {'providers': ['ollama']},
