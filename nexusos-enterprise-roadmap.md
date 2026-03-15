@@ -42,9 +42,9 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 ### Step 4: Observability (Weeks 10-14)
 | Priority | Action | Status |
 |----------|--------|--------|
-| 10 | **Activity Log** - Every tool call, LLM request, decision | ⬜ |
+| 10 | **Activity Log** - Every tool call, LLM request, decision | 🔄 CODE READY |
 | 11 | **Real-time Dashboard** - What's running, doing, consuming | ⬜ |
-| 12 | **Kill Switches** - Max tokens, tool calls, concurrent agents | ⬜ |
+| 12 | **Kill Switches** - Max tokens, tool calls, concurrent agents | 🔄 CODE READY |
 
 ### Step 5: Developer Experience (Weeks 12-18)
 | Priority | Action | Status |
@@ -90,9 +90,9 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 ### Step 10: Security Enforcement (CRITICAL - DISCOVERED VIA AUDIT)
 | Priority | Action | Status |
 |----------|--------|--------|
-| 34 | **Authentication Enforcement** - All API endpoints must require valid JWT | ⬜ |
-| 35 | **Session Management** - Implement refresh tokens, session invalidation | ⬜ |
-| 36 | **API Response Consistency** - Standardize error messages across endpoints | ⬜ |
+| 34 | **Authentication Enforcement** - All API endpoints must require valid JWT | 🔄 MOSTLY DONE |
+| 35 | **Session Management** - Implement refresh tokens, session invalidation | 🔄 CODE READY |
+| 36 | **API Response Consistency** - Standardize error messages across endpoints | 🔄 CODE READY |
 | 37 | **Health Check Endpoint** - `/api/health` with dependency status | ⬜ |
 | 38 | **CORS Policy** - Configure proper cross-origin restrictions | ⬜ |
 

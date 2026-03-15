@@ -657,5 +657,63 @@ if REDIS_URL:
 else:
     print("[NexusOS] Warning: REDIS_URL not set, using in-memory message bus")
 
+# Initialize Structured Logging & Kill Switches
+from structured_logging import (
+    get_logger, get_kill_switches, get_rate_limiter,
+    setup_logging_routes, EventType
+)
+nexus_logger = get_logger()
+kill_switches = get_kill_switches()
+rate_limiter = get_rate_limiter()
+
+# Add logging routes
+setup_logging_routes(app, nexus_logger, kill_switches, rate_limiter)
+print("[NexusOS] Structured Logging & Kill Switches initialized")
+
+# ==================== ERROR HANDLING ====================
+@app.errorhandler(400)
+def bad_request(e):
+    return jsonify({'error': 'Bad request', 'code': 'BAD_REQUEST'}), 400
+
+@app.errorhandler(401)
+def unauthorized(e):
+    return jsonify({'error': 'Authentication required', 'code': 'UNAUTHORIZED'}), 401
+
+@app.errorhandler(403)
+def forbidden(e):
+    return jsonify({'error': 'Access forbidden', 'code': 'FORBIDDEN'}), 403
+
+@app.errorhandler(404)
+def not_found(e):
+    return jsonify({'error': 'Resource not found', 'code': 'NOT_FOUND'}), 404
+
+@app.errorhandler(429)
+def rate_limited(e):
+    return jsonify({'error': 'Rate limit exceeded', 'code': 'RATE_LIMITED'}), 429
+
+@app.errorhandler(500)
+def internal_error(e):
+    # Don't leak internal errors
+    return jsonify({'error': 'Internal server error', 'code': 'INTERNAL_ERROR'}), 500
+
+# ==================== REQUEST LOGGING ====================
+@app.before_request
+def log_request():
+    """Log all API requests"""
+    if request.path.startswith('/api/'):
+        # Rate limit check
+        key = f"{g.get('user_id', 'anonymous')}:{request.endpoint}"
+        if not rate_limiter.check(key):
+            return jsonify({'error': 'Rate limit exceeded', 'code': 'RATE_LIMITED'}), 429
+        
+        # Log the request
+        nexus_logger.info(
+            event_type=EventType.API_REQUEST.value,
+            message=f"{request.method} {request.path}",
+            user_id=g.get('user_id'),
+            ip_address=request.remote_addr,
+            user_agent=request.headers.get('User-Agent')
+        )
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, threaded=True)
