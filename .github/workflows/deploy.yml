@@ -11,11 +11,9 @@ jobs:
     steps:
       - name: Download and deploy
         run: |
-          # Download the repo as zip
           curl -L -o /tmp/nexusos.zip https://github.com/mikeandhank/nexus-ai/archive/refs/heads/main.zip
           unzip -o /tmp/nexusos.zip -d /tmp/
           
-          # SSH and deploy
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd /root
             rm -rf nexusos-v2 || true
@@ -25,4 +23,3 @@ jobs:
             docker rm -f nexusos-v6 || true
             docker run -d --name nexusos-v6 -p 8080:8080 -e DATABASE_URL="$DATABASE_URL" -v nexusos-data:/opt/nexusos-data nexusos-v6
           EOF
-Sun Mar 15 10:19:43 EDT 2026
