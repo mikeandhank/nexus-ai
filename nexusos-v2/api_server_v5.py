@@ -58,6 +58,73 @@ if USE_PG:
     def get_pg_conn():
         return psycopg2.connect(DATABASE_URL)
     
+    # Ensure users table exists (critical for auth)
+    try:
+        conn = get_pg_conn()
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                name TEXT,
+                role TEXT DEFAULT 'user',
+                subscription TEXT DEFAULT 'free',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_login TIMESTAMP,
+                api_keys TEXT,
+                preferences TEXT,
+                active_model TEXT DEFAULT 'ollama'
+            )
+        """)
+        
+        # Ensure conversations table exists
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS conversations (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                title TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                message_count INTEGER DEFAULT 0,
+                metadata TEXT
+            )
+        """)
+        
+        # Ensure messages table exists
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS messages (
+                id TEXT PRIMARY KEY,
+                conversation_id TEXT NOT NULL,
+                role TEXT NOT NULL,
+                content TEXT NOT NULL,
+                model_used TEXT,
+                directive TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                metadata TEXT
+            )
+        """)
+        
+        # Ensure webhooks table exists
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS webhooks (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                url TEXT NOT NULL,
+                secret TEXT,
+                enabled BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Warning: Database table initialization error: {e}")
+        pass  # Tables may already exist
+    
     # Ensure usage_stats table exists
     try:
         conn = get_pg_conn()
@@ -76,6 +143,20 @@ if USE_PG:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        conn.commit()
+        
+        # Create default admin user if not exists
+        import uuid
+        default_email = 'admin@nexusos.local'
+        cur.execute("SELECT id FROM users WHERE email = %s", (default_email,))
+        if not cur.fetchone():
+            import bcrypt
+            default_password_hash = bcrypt.hashpw('nexusos2026'.encode(), bcrypt.gensalt()).decode()
+            cur.execute("""INSERT INTO users (id, email, password_hash, name, role, subscription)
+                           VALUES (%s, %s, %s, %s, %s, %s)""",
+                       (str(uuid.uuid4()), default_email, default_password_hash, 'Admin', 'admin', 'pro'))
+            print(f"Created default admin user: {default_email} / nexusos2026")
+        
         conn.commit()
         conn.close()
     except:
@@ -770,12 +851,7 @@ try:
         from plugin_system import setup_plugin_routes
         setup_plugin_routes(app)
     
-    # Setup dashboard
-    try:
-        from dashboard_api import setup_dashboard_routes
-        setup_dashboard_routes(app)
-    except Exception as e:
-        print(f"[NexusOS] Dashboard not available: {e}")
+    # Dashboard is disabled (requires circular import fix)
     except Exception as e:
         print(f"[NexusOS] Plugin system not available: {e}")
 except Exception as e:
