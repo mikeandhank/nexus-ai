@@ -3,7 +3,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install dependencies
-RUN pip install flask requests
+RUN pip install flask requests gunicorn
 
 # Create data directories
 RUN mkdir -p /opt/nexusos-data /opt/nexusos-workspace
@@ -13,4 +13,5 @@ COPY *.py .
 
 EXPOSE 8080
 
-CMD ["python", "api_server_v5.py"]
+# Use gunicorn instead of Flask dev server
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "4", "--timeout", "120", "api_server_v5:app"]
