@@ -764,6 +764,13 @@ setup_metrics_routes(app, _db_instance)
 try:
     from backup_api import setup_backup_routes
     setup_backup_routes(app)
+    
+    # Setup plugin system
+    try:
+        from plugin_system import setup_plugin_routes
+        setup_plugin_routes(app)
+    except Exception as e:
+        print(f"[NexusOS] Plugin system not available: {e}")
 except Exception as e:
     print(f"[NexusOS] Backup routes not available: {e}")
 

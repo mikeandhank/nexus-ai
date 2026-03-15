@@ -50,7 +50,7 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 | Priority | Action | Status |
 |----------|--------|--------|
 | 13 | **CLI Tool** - `nexus agent create`, `nexus agent deploy` | ✅ DONE (v6.1) |
-| 14 | **Python SDK** - Define agents in code | ⬜ |
+| 14 | **Python SDK** - Define agents in code | ✅ DONE (v6.1) |
 | 15 | **Plugin System** - Community tool extensions | ⬜ |
 
 ### Step 6: Production Hardening (Weeks 16-22)
@@ -59,12 +59,12 @@ A self-hosted AI chat server for developers and small teams with MCP tool suppor
 | 16 | **Connection Pooling** - PostgreSQL health checks | ⬜ |
 | 17 | **Backup/Restore** - Agent state + database | ⬜ |
 | 18 | **Rate Limiting** - Per user, per agent, per tool | ✅ DONE (v6.0) |
-| 19 | **Let's Encrypt** - Real TLS, not self-signed | ⬜ |
+| 19 | **Let's Encrypt** - Real TLS, not self-signed | 🔄 SCRIPT READY | |
 
 ### Step 7: Security Hardening (WEEKS 18-24) - 🚨 NEW PRIORITY
 | Priority | Action | Status |
 |----------|--------|--------|
-| 20 | **Fix user_id Injection** - Validate chat user_id against JWT | ⬜ |
+| 20 | **Fix user_id Injection** - Validate chat user_id against JWT | ✅ DONE (v6.0) | |
 | 21 | **SSO/SAML Integration** - Enterprise identity providers | ⬜ |
 | 22 | **Audit Logging API** - `/api/logs` endpoint for compliance | ⬜ |
 | 23 | **E2E Encryption** - Encrypt agent state at rest | ⬜ |
