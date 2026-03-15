@@ -14,8 +14,19 @@ from flask import Blueprint, request, jsonify, g
 usage_bp = Blueprint('usage', __name__)
 
 DB_PATH = os.environ.get("NEXUSOS_DB", "/opt/nexusos-data/nexusos.db")
+USE_PG = os.environ.get('USE_PG', '').lower() in ('1', 'true', 'yes')
+
+# Import PostgreSQL if available
+if USE_PG:
+    try:
+        from database_v2 import get_db as get_pg_db
+        _pg_db = get_pg_db
+    except ImportError:
+        USE_PG = False
 
 def get_db():
+    if USE_PG:
+        return _pg_db()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
@@ -38,7 +49,7 @@ def get_usage():
     try:
         c = conn.cursor()
         
-        # Base query
+        # Base query - use PostgreSQL syntax
         if user_id:
             c.execute("""
                 SELECT 
@@ -51,10 +62,10 @@ def get_usage():
                     model,
                     provider
                 FROM usage_stats 
-                WHERE user_id = ? AND created_at >= datetime('now', '-{} days')
+                WHERE user_id = %s AND created_at >= NOW() - INTERVAL '%s days'
                 GROUP BY DATE(created_at), model, provider
                 ORDER BY date DESC
-            """.format(days), (user_id,))
+            """, (user_id, days))
         else:
             c.execute("""
                 SELECT 
@@ -67,10 +78,10 @@ def get_usage():
                     model,
                     provider
                 FROM usage_stats 
-                WHERE created_at >= datetime('now', '-{} days')
+                WHERE created_at >= NOW() - INTERVAL '%s days'
                 GROUP BY DATE(created_at), model, provider
                 ORDER BY date DESC
-            """.format(days))
+            """, (days,))
         
         rows = c.fetchall()
         
@@ -145,10 +156,10 @@ def get_user_usage(target_user_id):
                 model,
                 provider
             FROM usage_stats 
-            WHERE user_id = ? AND created_at >= datetime('now', '-{} days')
+            WHERE user_id = %s AND created_at >= NOW() - INTERVAL '%s days'
             GROUP BY DATE(created_at), model
             ORDER BY date DESC
-        """.format(days), (target_user_id,))
+        """, (target_user_id, days))
         
         rows = c.fetchall()
         

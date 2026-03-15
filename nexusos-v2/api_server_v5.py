@@ -475,7 +475,7 @@ def get_usage():
                                COALESCE(SUM(requests), 0) as total_requests,
                                COALESCE(SUM(cost_usd), 0) as total_cost
                         FROM usage_stats 
-                        WHERE user_id = %s AND created_at >= datetime('now', '-%s days')
+                        WHERE user_id = %s AND created_at >= NOW() - INTERVAL '1 day' * %s
                     """, (g.user_id, days))
                     row = cur.fetchone()
                     
@@ -486,7 +486,7 @@ def get_usage():
                                SUM(requests) as requests,
                                SUM(cost_usd) as cost
                         FROM usage_stats 
-                        WHERE user_id = %s AND created_at >= datetime('now', '-%s days')
+                        WHERE user_id = %s AND created_at >= NOW() - INTERVAL '1 day' * %s
                         GROUP BY model, provider
                         ORDER BY tokens DESC
                     """, (g.user_id, days))
@@ -1065,6 +1065,22 @@ def log_request():
             ip_address=request.remote_addr,
             user_agent=request.headers.get('User-Agent')
         )
+
+# Simple Dashboard Endpoint
+@app.route('/api/dashboard', methods=['GET'])
+def simple_dashboard():
+    """Simple system dashboard"""
+    import time
+    dashboard = {
+        'status': 'running',
+        'timestamp': int(time.time()),
+        'version': '18',
+        'infrastructure': {
+            'postgresql': 'connected' if USE_PG else 'disconnected',
+            'redis': 'connected' if redis_client else 'disconnected'
+        }
+    }
+    return jsonify(dashboard)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, threaded=True)
