@@ -160,6 +160,11 @@ Confirmed working via API tests:
 - Multi-Agent Orchestration (shared state)
 - Celery async task queue
 
+### 🚨 CRITICAL: Auth System Broken (2026-03-15)
+- **Login UI** - Password field not in form, button non-functional
+- **Register API** - Returns 500 error, cannot create accounts
+- **Impact** - Cannot obtain JWT token, blocks all authenticated API testing
+
 ### 🚨 ACTION REQUIRED: Fix Redis
 ```bash
 # SSH to 187.124.150.225 and run:

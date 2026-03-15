@@ -46,3 +46,4 @@ Push any change to `main` and watch the deploy happen automatically!
 ## Manual Deploy
 You can also trigger manually from GitHub:
 Actions → Deploy to Production → Run workflow
+# trigger deploy
