@@ -886,6 +886,27 @@ try:
 except Exception as e:
     print(f"[NexusOS] Plugin system not available: {e}")
 
+# Setup encryption routes
+try:
+    from e2e_encryption import setup_encryption_routes
+    setup_encryption_routes(app)
+except Exception as e:
+    print(f"[NexusOS] Encryption not available: {e}")
+
+# Setup SSO routes
+try:
+    from sso_oauth import setup_sso_routes
+    setup_sso_routes(app)
+except Exception as e:
+    print(f"[NexusOS] SSO not available: {e}")
+
+# Setup connection pool routes
+try:
+    from connection_pool import setup_pool_routes
+    setup_pool_routes(app)
+except Exception as e:
+    print(f"[NexusOS] Connection pool not available: {e}")
+
 # Multi-Tenant Isolation
 @app.route('/api/tenants', methods=['GET'])
 @require_auth
