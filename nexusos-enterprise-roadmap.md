@@ -1,91 +1,98 @@
-# NexusOS Enterprise Roadmap
+# NexusOS Enterprise Roadmap (REVISED)
 
 ## Vision
-Redefine enterprise AI by delivering a self-hosted, privacy-first agentic OS that competitors can't match.
+**An Operating System for Agentic AI** - A self-hosted platform where AI agents can be created, managed, collaborated, and scaled.
 
-## Competitive Analysis (2026)
-
-### Key Competitors
-| Platform | Strength | Weakness |
-|----------|----------|----------|
-| LuMay AI | End-to-end orchestration | Cloud-only, expensive |
-| Kore.ai | 300+ pre-built agents | High complexity |
-| Microsoft Copilot | Ecosystem integration | Azure lock-in |
-| AWS Bedrock | Model agnostic | Developer-focused |
-| Salesforce Agentforce | CRM automation | Salesforce-only |
-
-### Our Differentiation
-- **Self-hosted** (privacy, data sovereignty)
-- **Open** (no vendor lock-in)
-- **Affordable** (10x cheaper than enterprise)
+An OS does three things:
+- **Manages resources** (CPU, memory, context windows)
+- **Provides abstractions** (tools = system calls)
+- **Handles security** (permissions, guardrails, audit)
 
 ---
 
-## Enterprise MVP Requirements
-
-### Phase 1: Core Infrastructure (Month 1-2)
-
-| Priority | Feature | Status | Effort |
-|----------|---------|--------|--------|
-| 1 | Multi-Agent Orchestration | ⬜ | 6 mo |
-| 2 | Redis + Celery (async) | ⬜ | 2 mo |
-| 3 | Usage Analytics | ⬜ | 1 mo |
-| 4 | Webhook System | ⬜ | 1 mo |
-
-### Phase 2: Enterprise Features (Month 3-6)
-
-| Priority | Feature | Status | Effort |
-|----------|---------|--------|--------|
-| 5 | Governance Dashboard | ⬜ | 4 mo |
-| 6 | SSO/SAML | ⬜ | 2 mo |
-| 7 | 50 Enterprise Integrations | ⬜ | 6 mo |
-| 8 | Rate Limiting/Quotas | ⬜ | 1 mo |
-
-### Phase 3: Enterprise Ready (Month 7-12)
-
-| Priority | Feature | Status | Effort |
-|----------|---------|--------|--------|
-| 9 | Agent Marketplace | ⬜ | 3 mo |
-| 10 | Hybrid Deployment | ⬜ | 4 mo |
-| 11 | SOC2 Type II | ⬜ | 12 mo |
-| 12 | 24/7 Support Structure | ⬜ | 6 mo |
+## What We Actually Are Today
+A self-hosted AI chat server for developers and small teams with MCP tool support.
 
 ---
 
-## Bottlenecks to Remove
+## The Real Path Forward
 
-| Bottleneck | Current | Target |
-|------------|---------|--------|
-| Inference | Single model | Smart routing |
-| Queue | None | Redis + Celery |
-| Cache | None | Redis layer |
-| DB | SQLite | PostgreSQL (scale) |
-| I/O | Blocking | Async everywhere |
-| CDN | None | CloudFlare |
+### Step 1: Foundation (Weeks 1-4) - DO THIS FIRST
+| Priority | Action | Status |
+|----------|--------|--------|
+| 1 | **PostgreSQL** - Replace SQLite for concurrent writes | ⬜ |
+| 2 | **Redis** - Shared state store, not for Celery yet | ⬜ |
+| 3 | **JWT Auth** - Real authentication with refresh tokens | ⬜ |
+
+### Step 2: Agent Lifecycle (Weeks 5-10)
+| Priority | Action | Status |
+|----------|--------|--------|
+| 4 | **Agent Definition Format** - Like Dockerfile for agents (model, tools, prompts, permissions) | ⬜ |
+| 5 | **Runtime** - Spawn, run, pause, resume, stop agents | ⬜ |
+| 6 | **Persistent Identity** - Agent ID, history, recoverable state | ⬜ |
+
+### Step 3: Inter-Agent Communication (Weeks 8-12)
+| Priority | Action | Status |
+|----------|--------|--------|
+| 7 | **Message Bus** - Agents publish/subscribe events | ⬜ |
+| 8 | **Agent-to-Agent Protocol** - "Ask Agent B to do X" | ⬜ |
+| 9 | **Shared Scratchpad** - Working memory for collaboration | ⬜ |
+
+### Step 4: Observability (Weeks 10-14)
+| Priority | Action | Status |
+|----------|--------|--------|
+| 10 | **Activity Log** - Every tool call, LLM request, decision | ⬜ |
+| 11 | **Real-time Dashboard** - What's running, doing, consuming | ⬜ |
+| 12 | **Kill Switches** - Max tokens, tool calls, concurrent agents | ⬜ |
+
+### Step 5: Developer Experience (Weeks 12-18)
+| Priority | Action | Status |
+|----------|--------|--------|
+| 13 | **CLI Tool** - `nexus agent create`, `nexus agent deploy` | ⬜ |
+| 14 | **Python SDK** - Define agents in code | ⬜ |
+| 15 | **Plugin System** - Community tool extensions | ⬜ |
+
+### Step 6: Production Hardening (Weeks 16-22)
+| Priority | Action | Status |
+|----------|--------|--------|
+| 16 | **Connection Pooling** - PostgreSQL health checks | ⬜ |
+| 17 | **Backup/Restore** - Agent state + database | ⬜ |
+| 18 | **Rate Limiting** - Per user, per agent, per tool | ⬜ |
+| 19 | **Let's Encrypt** - Real TLS, not self-signed | ⬜ |
 
 ---
 
-## Success Metrics
-
-- **Users**: 1000+ self-hosted deployments
-- **Revenue**: $100K ARR
-- **Integrations**: 50+ connectors
-- **Uptime**: 99.9% SLA
+## What to Cut/Defer
+| Item | Why |
+|------|-----|
+| Subscription tiers | Don't need until users |
+| Agent marketplace | Year 2+ feature |
+| SSO/SAML | Not until core works |
+| SOC2 | $50K+, defer until revenue |
+| 50 integrations | Build 5 great ones instead |
 
 ---
 
-## Strategic Position
+## What Success Looks Like
 
-**Target Market:** 
-- Companies that can't use cloud AI (privacy, compliance)
-- Developers who want full control
-- Enterprises migrating from expensive platforms
+**After Step 2:**
+- Demo: Agent autonomously monitors logs, sends hourly summary
 
-**Moat:**
-- Self-hosting (what competitors can't easily match)
-- Open architecture (no lock-in)
-- Price/performance (10x better value)
+**After Step 3:**
+- Demo: Two agents collaborate - one researches, one writes
+
+**After Step 4:**
+- Demo: Dashboard showing agent activity with audit trails
+
+**After Step 5:**
+- Demo: Developer goes from zero to deployed agent in <10 min
+
+---
+
+## One Thing to Do Monday Morning
+Pick PostgreSQL or Redis and get it running. Everything else is blocked on foundation.
 
 ---
 
 _Last updated: 2026-03-14_
+_Revised based on third-party audit feedback_
