@@ -868,65 +868,6 @@ try:
 except Exception as e:
     print(f"[NexusOS] Plugin system not available: {e}")
 
-# Setup dashboard with lazy imports to avoid circular dependency
-try:
-    import psutil
-    import time
-    from flask import jsonify as dash_jsonify
-    import sqlite3
-    
-    @app.route('/api/dashboard', methods=['GET'])
-    def dashboard_endpoint():
-        """Real-time system dashboard"""
-        stats = {
-            'timestamp': time.time(),
-            'system': {
-                'cpu_percent': psutil.cpu_percent(interval=0.1),
-                'memory_percent': psutil.virtual_memory().percent,
-                'disk_percent': psutil.disk_usage('/').percent
-            }
-        }
-        
-        # Try PostgreSQL
-        if USE_PG:
-            try:
-                conn = get_pg_conn()
-                cur = conn.cursor()
-                cur.execute("SELECT COUNT(*) FROM users")
-                stats['users'] = cur.fetchone()[0]
-                cur.execute("SELECT COUNT(*) FROM agents")
-                stats['agents'] = cur.fetchone()[0]
-                cur.execute("SELECT COUNT(*) FROM conversations")
-                stats['conversations'] = cur.fetchone()[0]
-                cur.execute("SELECT COUNT(*) FROM messages")
-                stats['messages'] = cur.fetchone()[0]
-                conn.close()
-            except Exception as e:
-                stats['db_error'] = str(e)
-        
-        return dash_jsonify(stats)
-    
-    @app.route('/api/dashboard/agents', methods=['GET'])
-    def dashboard_agents():
-        from flask import jsonify
-        if not USE_PG:
-            return jsonify({'agents': []})
-        try:
-            conn = get_pg_conn()
-            cur = conn.cursor()
-            cur.execute("SELECT id, name, status, model, created_at FROM agents LIMIT 50")
-            agents = []
-            for row in cur.fetchall():
-                agents.append({'id': row[0], 'name': row[1], 'status': row[2], 'model': row[3], 'created_at': str(row[4])})
-            conn.close()
-            return jsonify({'agents': agents})
-        except Exception as e:
-            return jsonify({'error': str(e)}), 500
-    
-    print("[NexusOS] Dashboard routes enabled")
-except Exception as e:
-    print(f"[NexusOS] Dashboard not available: {e}")
-
 # Multi-Tenant Isolation
 @app.route('/api/tenants', methods=['GET'])
 @require_auth
