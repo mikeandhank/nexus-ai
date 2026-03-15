@@ -9,10 +9,18 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug secrets
+        run: |
+          echo "Host: ${{ secrets.SERVER_HOST }}"
+          echo "User: ${{ secrets.SERVER_USER }}"
+          echo "Key starts with: ${{ secrets.SSH_PRIVATE_KEY | take(50) }}"
+      
       - name: Download and deploy
         run: |
           curl -L -o /tmp/nexusos.zip https://github.com/mikeandhank/nexus-ai/archive/refs/heads/main.zip
           unzip -o /tmp/nexusos.zip -d /tmp/
+          
+          ssh -v -o StrictHostKeyChecking=no -o ConnectTimeout=10 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo connected" || echo "SSH failed"
           
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd /root
