@@ -65,6 +65,7 @@ if USE_PG:
         cur.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 id TEXT PRIMARY KEY,
+                tenant_id TEXT DEFAULT 'default',
                 email TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 name TEXT,
@@ -79,10 +80,17 @@ if USE_PG:
             )
         """)
         
+        # Add tenant_id column if not exists (for existing DBs)
+        try:
+            cur.execute("ALTER TABLE users ADD COLUMN tenant_id TEXT DEFAULT 'default'")
+        except:
+            pass
+        
         # Ensure conversations table exists
         cur.execute("""
             CREATE TABLE IF NOT EXISTS conversations (
                 id TEXT PRIMARY KEY,
+                tenant_id TEXT DEFAULT 'default',
                 user_id TEXT NOT NULL,
                 title TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -91,6 +99,11 @@ if USE_PG:
                 metadata TEXT
             )
         """)
+        
+        try:
+            cur.execute("ALTER TABLE conversations ADD COLUMN tenant_id TEXT DEFAULT 'default'")
+        except:
+            pass
         
         # Ensure messages table exists
         cur.execute("""
@@ -845,17 +858,108 @@ setup_metrics_routes(app, _db_instance)
 try:
     from backup_api import setup_backup_routes
     setup_backup_routes(app)
-    
-    # Setup plugin system
-    try:
-        from plugin_system import setup_plugin_routes
-        setup_plugin_routes(app)
-    
-    # Dashboard is disabled (requires circular import fix)
-    except Exception as e:
-        print(f"[NexusOS] Plugin system not available: {e}")
 except Exception as e:
     print(f"[NexusOS] Backup routes not available: {e}")
+
+# Setup plugin system
+try:
+    from plugin_system import setup_plugin_routes
+    setup_plugin_routes(app)
+except Exception as e:
+    print(f"[NexusOS] Plugin system not available: {e}")
+
+# Setup dashboard with lazy imports to avoid circular dependency
+try:
+    import psutil
+    import time
+    
+    @app.route('/api/dashboard', methods=['GET'])
+    def dashboard():
+        """Real-time system dashboard"""
+        from flask import jsonify as json_dash
+        from api_server_v5 import get_pg_conn
+        
+        stats = {
+            'timestamp': time.time(),
+            'system': {
+                'cpu_percent': psutil.cpu_percent(interval=0.1),
+                'memory_percent': psutil.virtual_memory().percent,
+                'disk_percent': psutil.disk_usage('/').percent
+            }
+        }
+        
+        try:
+            conn = get_pg_conn()
+            cur = conn.cursor()
+            cur.execute("SELECT COUNT(*) FROM users")
+            stats['users'] = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM agents")
+            stats['agents'] = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM conversations")
+            stats['conversations'] = cur.fetchone()[0]
+            cur.execute("SELECT COUNT(*) FROM messages")
+            stats['messages'] = cur.fetchone()[0]
+            conn.close()
+        except Exception as e:
+            stats['db_error'] = str(e)
+        
+        return json_dash(stats)
+    
+    @app.route('/api/dashboard/agents', methods=['GET'])
+    def dashboard_agents():
+        from flask import jsonify
+        try:
+            from api_server_v5 import get_pg_conn
+            conn = get_pg_conn()
+            cur = conn.cursor()
+            cur.execute("SELECT id, name, status, model, created_at FROM agents LIMIT 50")
+            agents = []
+            for row in cur.fetchall():
+                agents.append({'id': row[0], 'name': row[1], 'status': row[2], 'model': row[3], 'created_at': str(row[4])})
+            conn.close()
+            return jsonify({'agents': agents})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    
+    print("[NexusOS] Dashboard routes enabled")
+except Exception as e:
+    print(f"[NexusOS] Dashboard not available: {e}")
+
+# Multi-Tenant Isolation
+@app.route('/api/tenants', methods=['GET'])
+@require_auth
+def list_tenants():
+    """List tenants (admin only)"""
+    if g.user_role != 'admin':
+        return jsonify({'error': 'Admin only'}), 403
+    
+    try:
+        conn = get_pg_conn()
+        cur = conn.cursor()
+        cur.execute("SELECT DISTINCT tenant_id FROM users WHERE tenant_id IS NOT NULL")
+        tenants = [row[0] for row in cur.fetchall()]
+        conn.close()
+        return jsonify({'tenants': tenants})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/tenants/<tenant_id>/users', methods=['GET'])
+@require_auth
+def list_tenant_users(tenant_id):
+    """List users in a tenant"""
+    try:
+        conn = get_pg_conn()
+        cur = conn.cursor()
+        cur.execute("SELECT id, email, name, role FROM users WHERE tenant_id = %s", (tenant_id,))
+        users = []
+        for row in cur.fetchall():
+            users.append({'id': row[0], 'email': row[1], 'name': row[2], 'role': row[3]})
+        conn.close()
+        return jsonify({'users': users})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+print("[NexusOS] Multi-tenant routes enabled")
 
 # Setup metrics and multi-tenant routes
 db_module = None  # Will be set after Database is defined
