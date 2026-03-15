@@ -11,15 +11,87 @@ import uuid
 import hashlib
 import secrets
 from datetime import datetime, timedelta
+from contextlib import contextmanager
 
 # Import the PostgreSQL backend
 from database_v2 import PostgreSQL, get_db as get_pg_db
+
+
+class CursorCompat:
+    """Compatibility wrapper for PostgreSQL cursor to return tuple-style rows"""
+    
+    def __init__(self, cursor):
+        self._cursor = cursor
+    
+    def execute(self, query, params=None):
+        if params:
+            self._cursor.execute(query, params)
+        else:
+            self._cursor.execute(query)
+    
+    def fetchall(self):
+        rows = self._cursor.fetchall()
+        # Convert dict rows to tuples if needed
+        if rows and isinstance(rows[0], dict):
+            # Get column names from cursor
+            return [tuple(row[col] for col in self._cursor.keys()) for row in rows]
+        return rows
+    
+    def fetchone(self):
+        row = self._cursor.fetchone()
+        if row and isinstance(row, dict):
+            return tuple(row[col] for col in self._cursor.keys())
+        return row
+    
+    @property
+    def keys(self):
+        return self._cursor.keys()
+
+
+class ConnCompat:
+    """Compatibility wrapper for PostgreSQL connection"""
+    
+    def __init__(self, conn):
+        self._conn = conn
+    
+    def cursor(self):
+        return CursorCompat(self._conn.cursor())
+    
+    def commit(self):
+        self._conn.commit()
+    
+    def rollback(self):
+        self._conn.rollback()
+    
+    def close(self):
+        self._conn.close()
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, *args):
+        self.close()
+
 
 class DatabaseCompat:
     """Compatibility layer wrapping PostgreSQL with old SQLite API"""
     
     def __init__(self, db_url=None):
         self._pg = PostgreSQL(db_url)
+    
+    @contextmanager
+    def _get_conn(self):
+        """Get database connection - compatible with old SQLite API"""
+        # Get actual connection from the PostgreSQL context manager
+        pg_conn = self._pg.get_conn().__enter__()
+        try:
+            yield ConnCompat(pg_conn)
+            pg_conn.commit()
+        except Exception:
+            pg_conn.rollback()
+            raise
+        finally:
+            pg_conn.close()
     
     def _init_db(self):
         """Initialize the PostgreSQL database"""
