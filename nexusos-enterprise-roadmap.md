@@ -52,6 +52,8 @@
 | 11a | **Infrastructure Health Failures (NEW)** | P0 | ✅ DONE |
 | 11b | **User Registration Service (NEW)** | P0 | ✅ DONE |
 | 11c | **MCP Tool Expansion - CRITICAL GAP (NEW)** | P0 | 🔴 NOT STARTED |
+| 11d | **Web UI Endpoint 404 (NEW - AUDIT)** | P0 | 🔴 NOT STARTED |
+| 11e | **Chat API Auth Flow Broken (NEW - AUDIT)** | P0 | 🔴 NOT STARTED |
 
 ---
 
@@ -178,6 +180,8 @@
 | NEW: Infrastructure Down (#11a) | PostgreSQL/Redis disconnected in production |
 | NEW: Registration Failure (#11b) | /api/auth/register returns "temporarily unavailable" |
 | NEW: MCP Tool Gap (#11c) | Only 8 tools exist (not 50+ as planned) |
+| NEW: Web UI 404 (#11d) | /ui endpoint returns NOT_FOUND |
+| NEW: Chat Auth Broken (#11e) | /api/chat returns "Auth required" despite valid JWT |
 
 ---
 
