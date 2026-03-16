@@ -15,8 +15,6 @@ services:
     networks:
       - nexusos-network
     restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
 
   # Redis for shared state and Celery broker
   redis:
@@ -28,8 +26,6 @@ services:
     restart: unless-stopped
     volumes:
       - redis-data:/data
-    labels:
-      - "traefik.enable=true"
 
   # NexusOS API behind Traefik
   nexusos-api:
@@ -50,10 +46,10 @@ services:
       - "traefik.http.routers.nexusos.tls=true"
       - "traefik.http.routers.nexusos.entrypoints=https"
       - "traefik.http.services.nexusos.loadbalancer.server.port=8080"
-      - "traefik.http.middlewares.nexusos-https.redirectscheme.scheme=https"
       - "traefik.http.routers.nexusos-http.rule=Host(nexusos.cloud)"
       - "traefik.http.routers.nexusos-http.entrypoints=http"
-      - "traefik.http.routers.nexusos-http.middlewares.nexusos-https.redirectscheme"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.nexusos-http.middlewares=https-redirect"
 
   # Celery Worker for async tasks
   celery-worker:
@@ -78,16 +74,13 @@ services:
     restart: unless-stopped
     volumes:
       - ollama-data:/root/.ollama
-    labels:
-      - "traefik.enable=false"
 
   # Traefik for TLS/HTTPS (Let's Encrypt)
   traefik:
-    image: traefik:v3.0
+    image: traefik:v2.9
     ports:
       - "80:80"
       - "443:443"
-      - "443:443/udp"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-acme:/acme
@@ -99,18 +92,6 @@ services:
     networks:
       - nexusos-network
     restart: unless-stopped
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedByDefault=false"
-      - "--entrypoints.http=true"
-      - "--entrypoints.http.address=80"
-      - "--entrypoints.https=true"
-      - "--entrypoints.https.address=443"
-      - "--certificatesResolvers.letsencrypt.acme.email=admin@nexusos.cloud"
-      - "--certificatesResolvers.letsencrypt.acme.storage=/acme/acme.json"
-      - "--certificatesResolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesResolvers.letsencrypt.acme.httpchallenge.entrypoint=http"
 
 networks:
   nexusos-network:
