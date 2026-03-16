@@ -74,7 +74,7 @@ jobs:
             
             # Run new container with correct network and container names (not IPs)
             docker rm -f nexusos-api 2>/dev/null || true
-            docker run -d --name nexusos-api --network nexusos-v2_nexusos-network \
+            docker run -d --name nexusos-api --network nexusos-network \
               -e DATABASE_URL='postgresql://nexusos:nexusos@nexusos-postgres:5432/nexusos' \
               -e REDIS_URL='redis://nexusos-redis:6379/0' \
               -e USE_PG=1 \
