@@ -147,13 +147,27 @@
 
 ---
 
+## 🚨 NEWLY DISCOVERED GAPS (Post-Audit)
+
+| # | Item | Status | Notes |
+|---|------|--------|-------|
+| 58 | Chat API requires Bearer token documentation | 🔴 NOT STARTED | Docs don't mention auth header; returns "Auth required" without it |
+| 59 | Empty LLM response handling | 🔴 NOT STARTED | Chat API returns empty "response" field - no error, no fallback |
+| 60 | OAuth2 flow implementation | ⚠️ PARTIAL | Only token-based; no actual OAuth2 redirect flow for SSO |
+| 61 | Dynamic RBAC (custom roles) | 🔴 NOT STARTED | Static 4 roles; enterprises need custom role definitions |
+| 62 | Rate limiting per-user/per-agent | 🔴 NOT STARTED | Network-level exists, but no granular API limits |
+| 63 | Audit log export (SIEM integration) | 🔴 NOT STARTED | Logs exist but no Splunk/ELK export |
+
+---
+
 ## 📊 SUMMARY
 
 | Category | Total | Done | Remaining |
 |----------|-------|------|-----------|
 | Critical (Must Have) | 4 | 0 | 4 |
+| Newly Discovered | 6 | 0 | 6 |
 | Complete | 53 | 53 | 0 |
-| **TOTAL** | **57** | **53** | **4** |
+| **TOTAL** | **63** | **53** | **10** |
 
 ---
 
@@ -165,6 +179,8 @@
 | SAML/SCIM | 🔴 Not started |
 | DB Migrations | 🔴 Not started |
 | Backup Security | 🔴 Not started |
+| Empty LLM Response Handling | 🔴 Not started |
+| OAuth2 Redirect Flow | 🔴 Not started |
 
 **Note:** Celery is optional - API works in sync mode without it.
 
