@@ -56,21 +56,43 @@ jobs:
           
       - name: Deploy
         run: |
+          # Get current version number or start at 34
+          CURRENT_V=$(ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "docker images --format '{{.Tag}}' | grep -E '^v[0-9]+$' | sed 's/v//' | sort -n | tail -1" 2>/dev/null || echo "33")
+          NEXT_V=$((CURRENT_V + 1))
+          echo "Deploying version v$NEXT_V"
+          
           ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_HOST "
             cd /root/nexus-ai && git pull origin main || git clone https://github.com/mikeandhank/nexus-ai.git .
             cd nexusos-v2
-            docker build -t nexusos-latest .
+            
+            # Build new version
+            docker build -t nexusos-v\$NEXT_V .
+            docker tag nexusos-v\$NEXT_V nexusos-latest
+            
+            # Stop old container
             docker rm -f nexusos-api 2>/dev/null || true
+            
+            # Run new container
             docker run -d --name nexusos-api --network host \
               -e DATABASE_URL='postgresql://nexusos:nexusos@172.19.0.4:5432/nexusos' \
               -e REDIS_URL='redis://172.19.0.2:6379/0' \
               -e USE_PG=1 \
               -e NEXUSOS_SECRET=nexusos-v5-enterprise \
               -e OLLAMA_URL=http://172.19.0.5:11434 \
-              nexusos-latest
+              nexusos-v\$NEXT_V
+              
             sleep 3
+            
+            # Verify it's running
             docker logs nexusos-api --tail 5
             docker ps | grep nexusos-api
+            
+            # Keep only last 2 versions, delete rest
+            echo 'Cleaning up old images...'
+            docker images | grep 'nexusos-v' | awk '{print \$1\":\"\$2}' | grep -v 'v\$NEXT_V\|v\$CURRENT_V' | xargs -r docker rmi 2>/dev/null || true
+            
+            echo 'Remaining images:'
+            docker images | grep nexusos
           "
         env:
           SERVER_HOST: ${{ secrets.SERVER_HOST }}
