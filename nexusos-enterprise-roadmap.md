@@ -8,14 +8,16 @@
 
 | Metric | Result |
 |--------|--------|
-| API Status | ✅ PASS |
-| Authentication | ✅ PASS (endpoint works) |
-| RBAC | ✅ PASS (4 roles) |
-| MCP Tools | ✅ PASS (43 verified) |
-| Web UI | ✅ PASS |
-| **Celery Status** | 🔴 **CRITICAL: NOT AVAILABLE** |
+| API Status | ✅ Running v6.0.0 |
+| Authentication | ✅ Endpoint works |
+| RBAC | ✅ 4 roles |
+| MCP Tools | ✅ 43 verified |
+| Web UI | ✅ Working |
+| **PostgreSQL** | 🔴 **CRITICAL: DISCONNECTED** |
+| **Redis** | 🔴 **CRITICAL: DISCONNECTED** |
+| **Celery** | 🔴 **CRITICAL: NOT AVAILABLE** |
 
-**Recommendation:** Would NOT sign $1M contract until Celery fixed, TLS added, SAML roadmap committed.
+**Recommendation:** Would NOT sign $1M contract until core infrastructure (PostgreSQL, Redis, Celery) is verified working, TLS added, SAML roadmap committed.
 
 ---
 
@@ -35,12 +37,12 @@
 
 ---
 
-### 📋 PHASE 1: FOUNDATION (1 CRITICAL GAP)
+### 📋 PHASE 1: FOUNDATION (3 CRITICAL GAPS)
 
 | # | Item | Status |
 |---|------|--------|
-| 1 | PostgreSQL Database | ✅ Running |
-| 2 | Redis Cache | ✅ Running |
+| 1 | PostgreSQL Database | 🔴 **BROKEN - shows disconnected** |
+| 2 | Redis Cache | 🔴 **BROKEN - shows disconnected** |
 | 3 | JWT Authentication | ✅ Verified |
 | 4 | Redis + Celery (async) | 🔴 **BROKEN - shows "not available"** |
 
@@ -82,6 +84,18 @@
 | MCP tools = 8 | 43 tools at /mcp/tools | ✅ MORE THAN CLAIMED |
 | Chat API = "broken" | "Auth required" = correct | ✅ WORKING |
 | Auth register = "unavailable" | "Email already registered" | ✅ WORKING |
+
+---
+
+### 📋 PHASE 3C: INFRASTRUCTURE AUDIT GAPS (March 16, 2026 - NEW)
+
+| # | Item | Priority | Status | Notes |
+|---|------|----------|--------|-------|
+| 53 | PostgreSQL Connection Status | P0 | 🔴 BROKEN | Status shows "disconnected" despite roadmap claiming ✅ Running |
+| 54 | Redis Connection Status | P0 | 🔴 BROKEN | Status shows "disconnected" despite roadmap claiming ✅ Running |
+| 55 | Celery Worker Health | P0 | 🔴 BROKEN | Shows "not available" - CRITICAL for async workloads |
+| 56 | Status Endpoint Accuracy | P1 | 🔴 INCONSISTENT | Claims infrastructure running but shows disconnected |
+| 57 | Auth Registration UX | P1 | ⚠️ NEEDS WORK | "Temporarily unavailable" message unclear - should indicate if rate-limited vs disabled |
 
 ---
 
@@ -187,12 +201,13 @@
 | Category | Total | Done | Not Started | Critical |
 |----------|-------|------|-------------|----------|
 | Immediate (P0) | 7 | 6 | 1 | TLS |
-| Phase 1 (Foundation) | 4 | 3 | 1 | **CELERY** |
+| Phase 1 (Foundation) | 4 | 2 | 2 | **CELERY + DB/REDIS** |
+| Phase 3B (Audit Corrections) | 6 | 4 | 2 | Status Accuracy |
 | Phase 3-4 (Testing/Security) | 10 | 8 | 2 | - |
 | Phase 5-6 (Auth/Compliance) | 8 | 6 | 2 | SAML |
 | Phase 7-9 (Ops/DevEx) | 9 | 8 | 1 | - |
 | Phase 10-11 (Business) | 6 | 5 | 1 | - |
-| **TOTAL** | **48** | **40** | **8** | **3 Critical** |
+| **TOTAL** | **54** | **43** | **11** | **6 Critical** |
 
 ---
 
@@ -202,14 +217,17 @@
 
 **Blocking Issues:**
 1. 🔴 No TLS/SSL - data in plain text
-2. 🔴 Celery broken - no async workloads
-3. 🔴 No SAML/SCIM - blocks enterprise identity
+2. 🔴 Celery broken - no async workloads (NEW: verified via /api/status)
+3. 🔴 PostgreSQL disconnected - database layer broken (NEW: found in audit)
+4. 🔴 Redis disconnected - cache layer broken (NEW: found in audit)
+5. 🔴 No SAML/SCIM - blocks enterprise identity
 
 **Conditional Yes If:**
 - TLS + certificate management committed
-- Celery fixed within 30 days
+- Celery + Redis + PostgreSQL fixed and verified within 30 days
 - SAML 2.0 roadmap in Q2
 - SOC2 Type II pathway defined
+- Status endpoint accuracy improved (trust issue)
 
 ---
 
@@ -227,7 +245,10 @@
 | A4: No CI/CD | ✅ #9 | Done |
 | A5: Agent isolation | ✅ #7, #15 | Done |
 | A6: DB migrations | 🔴 #11 | NOT STARTED |
-| Celery broken | 🔴 NEW | Priority fix |
+| Celery broken | 🔴 #55 | Priority fix - NEW |
+| PostgreSQL disconnected | 🔴 #53 | NEW - Priority fix |
+| Redis disconnected | 🔴 #54 | NEW - Priority fix |
+| Status inaccurate | 🔴 #56 | NEW - Priority fix |
 
 ---
 
