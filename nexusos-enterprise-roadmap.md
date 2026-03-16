@@ -72,10 +72,10 @@
 
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 16 | SSO/OAuth2 (Okta, Azure AD) | P1 | 🔴 NOT STARTED |
+| 16 | SSO/OAuth2 (Okta, Azure AD) | P1 | ✅ DONE |
 | 17 | SAML/SCIM Integration | P1 | 🔴 NOT STARTED |
 | 18 | RBAC Admin GUI | P2 | ✅ DONE |
-| 19 | JWT Key Rotation | P1 | 🔴 NOT STARTED |
+| 19 | JWT Key Rotation | P2 | ✅ DONE |
 
 ---
 
@@ -144,9 +144,9 @@
 | # | Item | Priority | Status |
 |---|------|----------|--------|
 | 45 | Revenue Model | P2 | 🔴 NOT STARTED |
-| 46 | Usage Analytics UI | P3 | 🔴 NOT STARTED |
-| 47 | SLA Monitoring | P3 | 🔴 NOT STARTED |
-| 48 | Agent Marketplace | P3 | 🔴 NOT STARTED |
+| 46 | Usage Analytics UI | P2 | ✅ DONE |
+| 47 | SLA Monitoring | P2 | ✅ DONE |
+| 48 | Agent Marketplace | P2 | ✅ DONE |
 
 ---
 
