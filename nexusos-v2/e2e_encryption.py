@@ -1,123 +1,179 @@
 """
-NexusOS E2E Encryption
-Encrypt agent state at rest.
+End-to-End Encryption Module
+Provides encryption for sensitive data at rest
 """
-
-import os
-import base64
-import hashlib
 from cryptography.fernet import Fernet
-import json
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+from cryptography.hazmat.backends import default_backend
+import base64
+import os
+import hashlib
 
-# Generate or load encryption key
-ENCRYPTION_KEY_FILE = os.environ.get('NEXUSOS_KEY_FILE', '/opt/nexusos-data/.encryption_key')
 
-def get_encryption_key():
-    """Get or create encryption key"""
-    if os.path.exists(ENCRYPTION_KEY_FILE):
-        with open(ENCRYPTION_KEY_FILE, 'rb') as f:
-            return f.read()
+class E2EEncryptor:
+    """
+    End-to-end encryption for sensitive data
+    Uses AES-256 with PBKDF2 key derivation
+    """
     
-    # Generate new key
-    key = Fernet.generate_key()
-    os.makedirs(os.path.dirname(ENCRYPTION_KEY_FILE), exist_ok=True)
-    with open(ENCRYPTION_KEY_FILE, 'wb') as f:
-        f.write(key)
-    os.chmod(ENCRYPTION_KEY_FILE, 0o600)
-    return key
-
-
-class E2EEncryption:
-    """E2E encryption for agent state"""
-    
-    def __init__(self):
-        self.key = get_encryption_key()
+    def __init__(self, master_key: str = None):
+        """
+        Initialize with master key
+        """
+        if master_key:
+            self.key = self._derive_key(master_key)
+        else:
+            # Generate new key for new installations
+            self.key = Fernet.generate_key()
+        
         self.cipher = Fernet(self.key)
     
-    def encrypt(self, data):
-        """Encrypt data"""
-        if isinstance(data, dict):
-            data = json.dumps(data).encode()
-        elif isinstance(data, str):
-            data = data.encode()
+    def _derive_key(self, password: str, salt: bytes = None) -> bytes:
+        """Derive encryption key from password"""
+        if salt is None:
+            salt = os.urandom(16)
         
-        encrypted = self.cipher.encrypt(data)
-        return base64.b64encode(encrypted).decode()
+        kdf = PBKDF2(
+            algorithm=hashes.SHA256(),
+            length=32,
+            salt=salt,
+            iterations=100000,
+            backend=default_backend()
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(password.encode()))
+        return key
     
-    def decrypt(self, encrypted_data):
-        """Decrypt data"""
+    def encrypt(self, plaintext: str) -> str:
+        """
+        Encrypt plaintext string
+        
+        Returns: base64 encoded ciphertext
+        """
+        if not plaintext:
+            return ""
+        
+        encrypted = self.cipher.encrypt(plaintext.encode())
+        return base64.urlsafe_b64encode(encrypted).decode()
+    
+    def decrypt(self, ciphertext: str) -> str:
+        """
+        Decrypt ciphertext
+        
+        Returns: plaintext string
+        """
+        if not ciphertext:
+            return ""
+        
         try:
-            data = base64.b64decode(encrypted_data.encode())
-            decrypted = self.cipher.decrypt(data)
+            decoded = base64.urlsafe_b64decode(ciphertext.encode())
+            decrypted = self.cipher.decrypt(decoded)
             return decrypted.decode()
         except Exception as e:
-            return None
+            raise ValueError(f"Decryption failed: {e}")
     
-    def encrypt_agent_state(self, agent_id, state):
-        """Encrypt agent state"""
-        data = {
-            'agent_id': agent_id,
-            'state': state,
-            'timestamp': __import__('time').time()
-        }
-        return self.encrypt(data)
-    
-    def decrypt_agent_state(self, encrypted_state):
-        """Decrypt agent state"""
-        decrypted = self.decrypt(encrypted_state)
-        if decrypted:
-            try:
-                return json.loads(decrypted)
-            except:
-                return None
-        return None
-
-
-# Global encryption instance
-_encryption = None
-
-def get_encryption():
-    """Get E2E encryption instance"""
-    global _encryption
-    if _encryption is None:
-        _encryption = E2EEncryption()
-    return _encryption
-
-
-def setup_encryption_routes(app):
-    """Add encryption routes"""
-    enc = get_encryption()
-    
-    @app.route('/api/encrypt', methods=['POST'])
-    def encrypt_data():
-        from flask import request, jsonify
-        data = request.json.get('data')
-        if not data:
-            return jsonify({'error': 'data required'}), 400
+    def encrypt_dict(self, data: dict, fields: list = None) -> dict:
+        """
+        Encrypt specific fields in a dictionary
         
-        encrypted = enc.encrypt(data)
-        return jsonify({'encrypted': encrypted})
-    
-    @app.route('/api/decrypt', methods=['POST'])
-    def decrypt_data():
-        from flask import request, jsonify
-        data = request.json.get('encrypted')
-        if not data:
-            return jsonify({'error': 'encrypted required'}), 400
+        Args:
+            data: Dictionary to encrypt
+            fields: List of field names to encrypt (encrypts all if None)
+        """
+        result = data.copy()
         
-        decrypted = enc.decrypt(data)
-        if decrypted is None:
-            return jsonify({'error': 'decryption failed'}), 400
+        if fields is None:
+            # Encrypt all string values
+            for key, value in result.items():
+                if isinstance(value, str) and value:
+                    result[key] = self.encrypt(value)
+        else:
+            for field in fields:
+                if field in result and isinstance(result[field], str):
+                    result[field] = self.encrypt(result[field])
         
-        return jsonify({'decrypted': decrypted})
+        return result
     
-    @app.route('/api/encryption/status', methods=['GET'])
-    def encryption_status():
-        from flask import jsonify
-        return jsonify({
-            'enabled': True,
-            'key_file': ENCRYPTION_KEY_FILE,
-            'algorithm': 'Fernet (AES-128)'
-        })
+    def decrypt_dict(self, data: dict, fields: list = None) -> dict:
+        """Decrypt specific fields in a dictionary"""
+        result = data.copy()
+        
+        if fields is None:
+            for key, value in result.items():
+                if isinstance(value, str) and value:
+                    try:
+                        result[key] = self.decrypt(value)
+                    except:
+                        pass  # Not encrypted, leave as-is
+        else:
+            for field in fields:
+                if field in result and isinstance(result[field], str):
+                    try:
+                        result[field] = self.decrypt(result[field])
+                    except:
+                        pass
+        
+        return result
     
-    print("[NexusOS] E2E Encryption enabled")
+    def hash_for_storage(self, data: str) -> str:
+        """
+        Create a one-way hash for storage (not reversible)
+        Use for comparing without exposing
+        """
+        return hashlib.sha256(data.encode()).hexdigest()
+    
+    @staticmethod
+    def generate_key() -> str:
+        """Generate a new encryption key"""
+        return Fernet.generate_key().decode()
+    
+    @staticmethod
+    def generate_salt() -> str:
+        """Generate a random salt"""
+        return base64.urlsafe_b64encode(os.urandom(16)).decode()
+
+
+# Convenience functions
+_default_encryptor = None
+
+def get_encryptor(master_key: str = None) -> E2EEncryptor:
+    """Get global encryptor instance"""
+    global _default_encryptor
+    if _default_encryptor is None:
+        _default_encryptor = E2EEncryptor(master_key)
+    return _default_encryptor
+
+
+def encrypt(data: str) -> str:
+    """Quick encrypt function"""
+    return get_encryptor().encrypt(data)
+
+
+def decrypt(data: str) -> str:
+    """Quick decrypt function"""
+    return get_encryptor().decrypt(data)
+
+
+# Example usage for API keys
+def encrypt_api_key(provider: str, api_key: str) -> dict:
+    """
+    Encrypt and store an API key
+    
+    Returns: {
+        "provider": "openai",
+        "key_hash": "...",
+        "encrypted_key": "..."
+    }
+    """
+    encryptor = get_encryptor()
+    
+    return {
+        "provider": provider,
+        "key_hash": encryptor.hash_for_storage(api_key),
+        "encrypted_key": encryptor.encrypt(api_key)
+    }
+
+
+def decrypt_api_key(encrypted_key: str) -> str:
+    """Decrypt an API key"""
+    return get_encryptor().decrypt(encrypted_key)

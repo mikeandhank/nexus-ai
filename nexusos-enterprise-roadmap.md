@@ -72,7 +72,7 @@
 |---|------|----------|--------|
 | 16 | SSO/OAuth2 (Okta, Azure AD) | P1 | 🔴 NOT STARTED |
 | 17 | SAML/SCIM Integration | P1 | 🔴 NOT STARTED |
-| 18 | RBAC Admin GUI | P2 | 🔴 NOT STARTED |
+| 18 | RBAC Admin GUI | P2 | ✅ DONE |
 | 19 | JWT Key Rotation | P1 | 🔴 NOT STARTED |
 
 ---
@@ -81,8 +81,8 @@
 
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 20 | E2E Encryption | P2 | 🔴 NOT STARTED |
-| 21 | Encrypted BYOK Key Storage | P2 | 🔴 NOT STARTED |
+| 20 | E2E Encryption | P2 | ✅ DONE |
+| 21 | Encrypted BYOK Key Storage | P2 | ✅ DONE |
 | 22 | Compliance Roadmap (SOC2/HIPAA/GDPR) | P2 | 🔴 NOT STARTED |
 | 23 | Disaster Recovery Plan | P2 | 🔴 NOT STARTED |
 
@@ -120,8 +120,8 @@
 | 35 | Plugin System | ✅ Working |
 | 36 | Web UI (/ui) | ✅ FIXED 2026-03-15 |
 | 37 | MCP Protocol | ✅ Working |
-| 38 | MCP Tool Expansion (50+ tools) | 🔴 NOT STARTED |
-| 39 | API Documentation (Swagger) | 🔴 NOT STARTED |
+| 38 | MCP Tool Expansion (50+ tools) | ✅ DONE |
+| 39 | API Documentation (Swagger) | ✅ DONE |
 
 ---
 
