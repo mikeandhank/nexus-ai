@@ -16,7 +16,7 @@ services:
       - nexusos-network
     restart: unless-stopped
 
-  # Redis for shared state
+  # Redis for shared state and Celery broker
   redis:
     image: redis:7-alpine
     ports:
@@ -37,6 +37,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - NEXUSOS_SECRET=${NEXUSOS_SECRET:-nexusos-v5-enterprise}
       - OLLAMA_URL=http://nexusos-ollama:11434
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - postgres
       - redis
@@ -46,6 +48,43 @@ services:
     restart: unless-stopped
     volumes:
       - nexusos-data:/opt/nexusos-data
+
+  # Celery Worker for async tasks
+  celery-worker:
+    build: .
+    command: celery -A tasks.celery_app worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://nexusos:nexusos@postgres:5432/nexusos
+      - REDIS_URL=redis://redis:6379/0
+      - NEXUSOS_SECRET=${NEXUSOS_SECRET:-nexusos-v5-enterprise}
+      - OLLAMA_URL=http://nexusos-ollama:11434
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - postgres
+      - redis
+      - nexusos-ollama
+    networks:
+      - nexusos-network
+    restart: unless-stopped
+    volumes:
+      - nexusos-data:/opt/nexusos-data
+
+  # Celery Beat for scheduled tasks
+  celery-beat:
+    build: .
+    command: celery -A tasks.celery_app beat --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://nexusos:nexusos@postgres:5432/nexusos
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - celery-worker
+    networks:
+      - nexusos-network
+    restart: unless-stopped
 
   # Ollama for local LLM
   nexusos-ollama:
@@ -58,6 +97,31 @@ services:
     volumes:
       - ollama-data:/root/.ollama
 
+  # Traefik for TLS/HTTPS (Let's Encrypt)
+  traefik:
+    image: traefik:v3.0
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-acme:/acme
+    environment:
+      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL=${LETSENCRYPT_EMAIL:-admin@nexusos.ai}
+      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE=/acme/acme.json
+      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE=true
+      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE_ENTRYPOINT=http
+    networks:
+      - nexusos-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nexusos.rule=Host(`${DOMAIN:-nexusos.local}`)"
+      - "traefik.http.routers.nexusos.tls=true"
+      - "traefik.http.routers.nexusos.entrypoints=https"
+      - "traefik.http.services.nexusos.loadbalancer.server.port=8080"
+
 networks:
   nexusos-network:
     driver: bridge
@@ -67,3 +131,4 @@ volumes:
   redis-data:
   nexusos-data:
   ollama-data:
+  traefik-acme:

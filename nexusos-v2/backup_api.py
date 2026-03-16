@@ -1,19 +1,51 @@
 """
 NexusOS Backup & Restore API
+SECURED - Requires admin authentication
 """
 
 import os
 import json
 import subprocess
+from functools import wraps
 from datetime import datetime
 from flask import Flask, request, jsonify
 
 def setup_backup_routes(app):
-    """Add backup and restore routes"""
+    """Add backup and restore routes with authentication"""
+    
+    def require_admin(f):
+        """Decorator to require admin role"""
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            auth_header = request.headers.get('Authorization')
+            if not auth_header or not auth_header.startswith('Bearer '):
+                return jsonify({'status': 'error', 'message': 'Authentication required'}), 401
+            
+            token = auth_header.split(' ')[1]
+            # Verify token and admin role
+            try:
+                from flask import current_app
+                from auth import verify_token
+                
+                payload = verify_token(token)
+                if not payload:
+                    return jsonify({'status': 'error', 'message': 'Invalid token'}), 401
+                
+                # Check admin role
+                user_role = payload.get('role', 'user')
+                if user_role != 'admin':
+                    return jsonify({'status': 'error', 'message': 'Admin access required'}), 403
+                    
+            except Exception as e:
+                return jsonify({'status': 'error', 'message': f'Auth error: {str(e)}'}), 401
+            
+            return f(*args, **kwargs)
+        return decorated_function
     
     @app.route('/api/backup', methods=['POST'])
+    @require_admin
     def create_backup():
-        """Create a backup of database and agent configs"""
+        """Create a backup of database and agent configs - ADMIN ONLY"""
         from flask import current_app
         
         backup_dir = os.environ.get('NEXUSOS_BACKUP_DIR', '/opt/nexusos-data/backups')
@@ -57,8 +89,9 @@ def setup_backup_routes(app):
             return jsonify({'status': 'error', 'message': str(e)}), 500
     
     @app.route('/api/backup', methods=['GET'])
+    @require_admin
     def list_backups():
-        """List available backups"""
+        """List available backups - ADMIN ONLY"""
         backup_dir = os.environ.get('NEXUSOS_BACKUP_DIR', '/opt/nexusos-data/backups')
         
         if not os.path.exists(backup_dir):
@@ -77,8 +110,9 @@ def setup_backup_routes(app):
         return jsonify({'backups': sorted(backups, key=lambda x: x['created'], reverse=True)})
     
     @app.route('/api/backup/restore', methods=['POST'])
+    @require_admin
     def restore_backup():
-        """Restore from a backup file"""
+        """Restore from a backup file - ADMIN ONLY"""
         data = request.json or {}
         backup_file = data.get('backup_file')
         

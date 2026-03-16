@@ -997,12 +997,19 @@ from metrics_api import setup_metrics_routes
 semantic_memory = get_semantic_memory()
 setup_metrics_routes(app, _db_instance)
 
-# Setup backup routes
+# Setup backup routes (now requires admin auth)
 try:
     from backup_api import setup_backup_routes
     setup_backup_routes(app)
 except Exception as e:
     print(f"[NexusOS] Backup routes not available: {e}")
+
+# Setup SAML/SSO routes
+try:
+    from saml_api import setup_saml_routes
+    setup_saml_routes(app)
+except Exception as e:
+    print(f"[NexusOS] SAML routes not available: {e}")
 
 # Setup plugin system
 try:
