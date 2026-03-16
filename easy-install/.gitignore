@@ -1,0 +1,7 @@
+# NexusOS Easy Install
+# Dependencies only - no sensitive data
+.env
+*.log
+__pycache__/
+*.pyc
+.DS_Store

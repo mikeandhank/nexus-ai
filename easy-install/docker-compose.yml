@@ -1,0 +1,81 @@
+# NexusOS Easy Install
+# One-command self-hosted AI agent platform
+
+version: '3.8'
+
+services:
+  # PostgreSQL - Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: nexusos
+      POSTGRES_PASSWORD: ${NEXUSOS_DB_PASSWORD:-change-me-in-prod}
+      POSTGRES_DB: nexusos
+    ports:
+      - "${NEXUSOS_DB_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexusos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis - Caching & Message Queue
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${NEXUSOS_REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # NexusOS API
+  api:
+    build: 
+      context: ..
+      dockerfile: nexusos-v2/Dockerfile
+    ports:
+      - "${NEXUSOS_API_PORT:-8080}:8080"
+    environment:
+      - DATABASE_URL=postgresql://nexusos:${NEXUSOS_DB_PASSWORD:-change-me-in-prod}@postgres:5432/nexusos
+      - REDIS_URL=redis://:${NEXUSOS_REDIS_PASSWORD:-}@redis:6379/0
+      - NEXUSOS_SECRET=${NEXUSOS_SECRET:-change-me-in-prod}
+      - NEXUSOS_JWT_SECRET=${NEXUSOS_JWT_SECRET:-change-me-in-prod}
+      - OLLAMA_URL=${OLLAMA_URL:-http://ollama:11434}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Ollama - Local LLM (optional, disable via OLLAMA_ENABLED=false)
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "${NEXUSOS_OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    profiles:
+      - llm
+
+volumes:
+  postgres-data:
+  redis-data:
+  ollama-data:
+
+# Networks for isolation
+networks:
+  default:
+    name: nexusos
+    driver: bridge

@@ -18,6 +18,7 @@ import shutil
 from typing import Dict, List, Any, Callable, Optional
 from datetime import datetime
 import logging
+import asyncio
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -88,7 +89,51 @@ class ToolEngine:
         # Search
         self.register_tool("search_files", self._tool_search_files)
         
+        # Register extended tools (lazy import to avoid hard dependencies)
+        self._register_extended_tools()
+        
         logger.info(f"Registered {len(self.tools)} default tools")
+    
+    def _register_extended_tools(self):
+        """Register extended tools: browser, web search, messaging, nodes."""
+        try:
+            from tools import get_browser_tool, get_search_tool, get_fetch_tool, get_messaging_tool, get_node_tool, get_email_tool, get_cron_tool
+            
+            # Browser tools
+            self.register_tool("browser_open", self._tool_browser_open)
+            self.register_tool("browser_click", self._tool_browser_click)
+            self.register_tool("browser_type", self._tool_browser_type)
+            self.register_tool("browser_screenshot", self._tool_browser_screenshot)
+            self.register_tool("browser_get_text", self._tool_browser_get_text)
+            self.register_tool("browser_close", self._tool_browser_close)
+            
+            # Web tools
+            self.register_tool("web_search", self._tool_web_search)
+            self.register_tool("web_fetch", self._tool_web_fetch)
+            
+            # Messaging
+            self.register_tool("telegram_send", self._tool_telegram_send)
+            self.register_tool("discord_send", self._tool_discord_send)
+            
+            # Node/device
+            self.register_tool("node_list", self._tool_node_list)
+            self.register_tool("node_camera", self._tool_node_camera)
+            self.register_tool("node_photos", self._tool_node_photos)
+            self.register_tool("node_location", self._tool_node_location)
+            self.register_tool("node_notifications", self._tool_node_notifications)
+            
+            # Email
+            self.register_tool("email_send", self._tool_email_send)
+            self.register_tool("email_inbox", self._tool_email_inbox)
+            
+            # Cron
+            self.register_tool("cron_list", self._tool_cron_list)
+            self.register_tool("cron_add", self._tool_cron_add)
+            self.register_tool("cron_run", self._tool_cron_run)
+            
+            logger.info("Registered extended tools")
+        except ImportError as e:
+            logger.warning(f"Extended tools not available: {e}")
     
     def register_tool(self, name: str, func: Callable):
         """Register a custom tool."""
@@ -304,6 +349,185 @@ class ToolEngine:
                     pass
         
         return results
+    
+    # ========== Extended Tools ==========
+    
+    def _tool_browser_open(self, url: str, headless: bool = True) -> Dict:
+        """Open URL in browser."""
+        from tools import get_browser_tool
+        browser = get_browser_tool(self.workspace_dir)
+        try:
+            result = asyncio.run(browser.open(url, headless))
+            return result
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_browser_click(self, selector: str) -> Dict:
+        """Click element in browser."""
+        from tools import get_browser_tool
+        browser = get_browser_tool()
+        try:
+            return asyncio.run(browser.click(selector))
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_browser_type(self, selector: str, text: str, clear: bool = True) -> Dict:
+        """Type text in browser."""
+        from tools import get_browser_tool
+        browser = get_browser_tool()
+        try:
+            return asyncio.run(browser.type(selector, text, clear))
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_browser_screenshot(self, path: str = None) -> Dict:
+        """Take browser screenshot."""
+        from tools import get_browser_tool
+        browser = get_browser_tool()
+        try:
+            return asyncio.run(browser.screenshot(path))
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_browser_get_text(self, selector: str) -> Dict:
+        """Get text from element."""
+        from tools import get_browser_tool
+        browser = get_browser_tool()
+        try:
+            return asyncio.run(browser.get_text(selector))
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_browser_close(self) -> Dict:
+        """Close browser."""
+        from tools import get_browser_tool
+        browser = get_browser_tool()
+        try:
+            return asyncio.run(browser.close())
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_web_search(self, query: str, count: int = 5) -> Dict:
+        """Search the web."""
+        from tools import get_search_tool
+        search = get_search_tool()
+        try:
+            return search.search(query, count)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_web_fetch(self, url: str, max_chars: int = 50000) -> Dict:
+        """Fetch URL content."""
+        from tools import get_fetch_tool
+        fetch = get_fetch_tool()
+        try:
+            return fetch.fetch(url, max_chars)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_telegram_send(self, chat_id: str, text: str) -> Dict:
+        """Send Telegram message."""
+        from tools import get_messaging_tool
+        msg = get_messaging_tool()
+        try:
+            return msg.telegram_send(chat_id, text)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_discord_send(self, text: str) -> Dict:
+        """Send Discord message."""
+        from tools import get_messaging_tool
+        msg = get_messaging_tool()
+        try:
+            return msg.discord_send(text)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_node_list(self) -> Dict:
+        """List paired devices."""
+        from tools import get_node_tool
+        node = get_node_tool()
+        try:
+            return node.list_nodes()
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_node_camera(self, node_id: str, facing: str = "back") -> Dict:
+        """Take photo with device."""
+        from tools import get_node_tool
+        node = get_node_tool()
+        try:
+            return node.camera_snap(node_id, facing)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_node_photos(self, node_id: str, count: int = 5) -> Dict:
+        """Get latest photos."""
+        from tools import get_node_tool
+        node = get_node_tool()
+        try:
+            return node.photos_latest(node_id, count)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_node_location(self, node_id: str) -> Dict:
+        """Get device location."""
+        from tools import get_node_tool
+        node = get_node_tool()
+        try:
+            return node.location_get(node_id)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_node_notifications(self, node_id: str, limit: int = 20) -> Dict:
+        """List device notifications."""
+        from tools import get_node_tool
+        node = get_node_tool()
+        try:
+            return node.notifications_list(node_id, limit)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_email_send(self, to: str, subject: str, body: str) -> Dict:
+        """Send email."""
+        from tools import get_email_tool
+        email = get_email_tool()
+        try:
+            return email.send(to, subject, body)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_email_inbox(self, limit: int = 10) -> Dict:
+        """List inbox emails."""
+        from tools import get_email_tool
+        email = get_email_tool()
+        try:
+            return email.inbox(limit=limit)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_cron_list(self) -> Dict:
+        """List scheduled jobs."""
+        from tools import get_cron_tool
+        cron = get_cron_tool()
+        try:
+            return cron.list()
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _tool_cron_add(self, job_id: str, name: str, schedule: str) -> Dict:
+        """Add cron job (note: function must be registered separately)."""
+        # This is a placeholder - actual function registration needs API
+        return {"success": False, "error": "Use API to add cron jobs with actual functions"}
+    
+    def _tool_cron_run(self, job_id: str) -> Dict:
+        """Run cron job immediately."""
+        from tools import get_cron_tool
+        cron = get_cron_tool()
+        try:
+            return cron.run_now(job_id)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
 
 # Global instance

@@ -1,5 +1,5 @@
 # NexusOS Enterprise Roadmap (CONSOLIDATED)
-**Last Updated:** March 16, 2026  
+**Last Updated:** March 16, 2026 (Enterprise Audit Complete)  
 **Status:** DEPLOYED & OPERATIONAL
 
 ---
@@ -157,6 +157,12 @@
 | 61 | Dynamic RBAC (custom roles) | 🔴 NOT STARTED | Static 4 roles; enterprises need custom role definitions |
 | 62 | Rate limiting per-user/per-agent | 🔴 NOT STARTED | Network-level exists, but no granular API limits |
 | 63 | Audit log export (SIEM integration) | 🔴 NOT STARTED | Logs exist but no Splunk/ELK export |
+| 64 | **LLM Response Bug (phi3)** | ✅ FIXED | Installed 4 free LLMs: phi3, llama3, mistral, codellama (15GB total) |
+| 65 | **TLS/SSL Not Configured** | 🔴 CRITICAL | Server HTTP only; no HTTPS - cannot expose to internet |
+| 66 | Chat API Model Selection | 🔴 NOT STARTED | No way to specify different LLM models; hardcoded phi3 |
+| 67 | SSO Redirect Flow | 🔴 NOT STARTED | Only token-based; no actual SAML/OIDC redirect |
+| 68 | Connection Pool Config | 🔴 NOT STARTED | No admin UI/API for database tuning |
+| 69 | Environment Config API | 🔴 NOT STARTED | All config hardcoded; no runtime changes |
 
 ---
 
@@ -165,9 +171,9 @@
 | Category | Total | Done | Remaining |
 |----------|-------|------|-----------|
 | Critical (Must Have) | 4 | 0 | 4 |
-| Newly Discovered | 6 | 0 | 6 |
+| Newly Discovered | 12 | 0 | 12 |
 | Complete | 53 | 53 | 0 |
-| **TOTAL** | **63** | **53** | **10** |
+| **TOTAL** | **69** | **53** | **16** |
 
 ---
 
@@ -181,6 +187,8 @@
 | Backup Security | 🔴 Not started |
 | Empty LLM Response Handling | 🔴 Not started |
 | OAuth2 Redirect Flow | 🔴 Not started |
+| **LLM Response Bug (phi3 broken)** | 🔴 CRITICAL - Core AI not working |
+| **Chat API Model Selection** | 🔴 Not started |
 
 **Note:** Celery is optional - API works in sync mode without it.
 

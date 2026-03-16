@@ -189,7 +189,7 @@ class OllamaProvider(LLMProvider):
         super().__init__(Provider.OLLAMA)
         self.base_url = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11435")
     
-    def chat(self, messages: List[Dict], model: str = "phi3", **kwargs) -> LLMResponse:
+    def chat(self, messages: List[Dict], model: str = "llama3", **kwargs) -> LLMResponse:
         import time
         start = time.time()
         
@@ -428,7 +428,7 @@ class LLMManager:
         # Determine model
         if not model:
             user = self.db.get_user(user_id) if user_id else None
-            model = user.get("active_model", "phi3") if user else "phi3"
+            model = user.get("active_model", "llama3") if user else "llama3"
         
         # Get provider
         provider, provider_name, estimated_cost = self.get_provider(user_id, model)
