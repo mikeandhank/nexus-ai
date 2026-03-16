@@ -5,6 +5,12 @@ NexusOS MCP Server - Model Context Protocol Implementation
 import json
 from typing import Dict, List, Any
 
+# Import expanded tools
+try:
+    from mcp_tools_expanded import MCP_TOOLS as EXPANDED_TOOLS
+except ImportError:
+    EXPANDED_TOOLS = []
+
 
 class MCPTools:
     """MCP Tools capability."""
@@ -13,6 +19,25 @@ class MCPTools:
         self.tool_engine = tool_engine
     
     def list(self) -> List[Dict]:
+        # Use expanded tools if available, otherwise use basic set
+        if EXPANDED_TOOLS:
+            return [
+                {
+                    "name": t["name"],
+                    "description": t["description"],
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            k: {"type": v["type"], "description": v.get("description", "")}
+                            for k, v in t.get("parameters", {}).items()
+                        },
+                        "required": t.get("parameters", {}).get("required", [])
+                    }
+                }
+                for t in EXPANDED_TOOLS
+            ]
+        
+        # Fallback to basic tools
         return [
             {"name": "file_read", "description": "Read a file", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}}, "required": ["path"]}},
             {"name": "file_write", "description": "Write to a file", "inputSchema": {"type": "object", "properties": {"path": {"type": "string"}, "content": {"type": "string"}}, "required": ["path", "content"]}},
@@ -25,6 +50,13 @@ class MCPTools:
         ]
     
     def call(self, name: str, arguments: Dict) -> Dict:
+        # Try expanded tools first
+        for tool in EXPANDED_TOOLS:
+            if tool["name"] == name:
+                # Execute the tool - simplified for now
+                return {"result": f"Tool {name} called with {arguments}"}
+        
+        # Fallback to basic tool engine
         result = self.tool_engine.execute_tool(name, **arguments)
         return result.to_dict() if hasattr(result, 'to_dict') else {"result": str(result)}
 
