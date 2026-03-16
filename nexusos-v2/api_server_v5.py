@@ -899,16 +899,29 @@ def health_check():
 # ==================== MCP ====================
 @app.route('/mcp/tools')
 def mcp_tools():
-    return jsonify({'tools': [
-        {'name': 'file_read', 'description': 'Read a file'},
-        {'name': 'file_write', 'description': 'Write to a file'},
-        {'name': 'file_list', 'description': 'List directory'},
-        {'name': 'process_run', 'description': 'Run a process'},
-        {'name': 'http_get', 'description': 'HTTP GET request'},
-        {'name': 'http_post', 'description': 'HTTP POST request'},
-        {'name': 'system_info', 'description': 'Get system info'},
-        {'name': 'search_files', 'description': 'Search files'}
-    ]})
+    # Try to import expanded tools
+    try:
+        from mcp_tools_expanded import MCP_TOOLS
+        tools = [
+            {
+                'name': t['name'],
+                'description': t['description']
+            }
+            for t in MCP_TOOLS
+        ]
+    except ImportError:
+        # Fallback to basic tools
+        tools = [
+            {'name': 'file_read', 'description': 'Read a file'},
+            {'name': 'file_write', 'description': 'Write to a file'},
+            {'name': 'file_list', 'description': 'List directory'},
+            {'name': 'process_run', 'description': 'Run a process'},
+            {'name': 'http_get', 'description': 'HTTP GET request'},
+            {'name': 'http_post', 'description': 'HTTP POST request'},
+            {'name': 'system_info', 'description': 'Get system info'},
+            {'name': 'search_files', 'description': 'Search files'}
+        ]
+    return jsonify({'tools': tools})
 
 @app.route('/mcp/resources')
 def mcp_resources():
