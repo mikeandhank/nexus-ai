@@ -109,7 +109,7 @@
 |---|------|--------|
 | 30 | Message Bus (pub/sub) | ✅ Code Ready |
 | 31 | Agent-to-Agent Protocol | ✅ Code Ready |
-| 32 | Multi-Tenant Isolation (row-level security) | 🔴 NOT STARTED |
+| 32 | Multi-Tenant Isolation (row-level security) | ✅ DONE |
 
 ---
 
@@ -143,7 +143,7 @@
 
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 45 | Revenue Model | P2 | 🔴 NOT STARTED |
+| 45 | Revenue Model | P2 | ✅ DONE |
 | 46 | Usage Analytics UI | P2 | ✅ DONE |
 | 47 | SLA Monitoring | P2 | ✅ DONE |
 | 48 | Agent Marketplace | P2 | ✅ DONE |
