@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 WORKDIR /app
-RUN pip install --no-cache-dir flask requests gunicorn psycopg2-binary redis bcrypt pyjwt psutil flasgger
+RUN pip install --no-cache-dir flask requests gunicorn psycopg2-binary redis bcrypt pyjwt psutil flasgger celery alembic python3-saml flask-cors
 COPY *.py .
 COPY templates templates/
 EXPOSE 8080
