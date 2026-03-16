@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusOS Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+        .header {
+            background: #161b22;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 1.5rem; color: #58a6ff; }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            background: #238636;
+            color: white;
+        }
+        .container { padding: 2rem; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        .card-title {
+            font-size: 0.875rem;
+            color: #8b949e;
+            margin-bottom: 0.5rem;
+        }
+        .card-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #58a6ff;
+        }
+        .card-value.success { color: #3fb950; }
+        .card-value.warning { color: #d29922; }
+        .card-value.danger { color: #f85149; }
+        
+        .chart {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart h3 { margin-bottom: 1rem; }
+        
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 150px;
+            padding: 1rem 0;
+        }
+        .bar {
+            flex: 1;
+            background: linear-gradient(to top, #238636, #3fb950);
+            border-radius: 2px 2px 0 0;
+            min-height: 4px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .status-dot.green { background: #3fb950; }
+        .status-dot.red { background: #f85149; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid #30363d;
+        }
+        th { color: #8b949e; font-weight: 500; }
+        
+        .refresh-btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .refresh-btn:hover { background: #2ea043; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>NexusOS Dashboard</h1>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <span class="status-badge">System Online</span>
+            <button class="refresh-btn" onclick="refreshDashboard()">Refresh</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Overview Cards -->
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Total Requests (24h)</div>
+                <div class="card-value" id="totalRequests">-</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Active Users</div>
+                <div class="card-value" id="activeUsers">-</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Running Agents</div>
+                <div class="card-value success" id="runningAgents">-</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Avg Latency</div>
+                <div class="card-value" id="avgLatency">-</div>
+            </div>
+        </div>
+        
+        <!-- System Status -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1rem;">System Status</h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <span class="status-dot green"></span>
+                    <span>Database</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot green"></span>
+                    <span>Redis</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot green"></span>
+                    <span>Ollama</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot green"></span>
+                    <span>API Server</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot" id="cpuStatus"></span>
+                    <span>CPU: <span id="cpuPercent">-</span>%</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot" id="memStatus"></span>
+                    <span>Memory: <span id="memPercent">-</span>%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Usage Chart -->
+        <div class="chart">
+            <h3>Requests (Last 24 Hours)</h3>
+            <div class="bar-chart" id="usageChart"></div>
+        </div>
+        
+        <!-- Recent Activity -->
+        <div class="card">
+            <h3 style="margin-bottom: 1rem;">Recent Agent Activity</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Agent</th>
+                        <th>Action</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTable">
+                    <tr><td colspan="3">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = window.location.origin;
+        
+        async function fetchDashboard() {
+            try {
+                const resp = await fetch(API_BASE + '/api/dashboard/overview');
+                const data = await resp.json();
+                updateDashboard(data);
+                
+                const usage = await fetch(API_BASE + '/api/dashboard/usage?period=24h');
+                const usageData = await usage.json();
+                updateChart(usageData);
+                
+                const agents = await fetch(API_BASE + '/api/dashboard/agents');
+                const agentData = await agents.json();
+                updateAgents(agentData);
+            } catch (e) {
+                console.error('Dashboard error:', e);
+            }
+        }
+        
+        function updateDashboard(data) {
+            document.getElementById('activeUsers').textContent = data.application?.active_users || 0;
+            document.getElementById('runningAgents').textContent = data.application?.running_agents || 0;
+            
+            const cpu = data.system?.cpu_percent || 0;
+            const mem = data.system?.memory_percent || 0;
+            
+            document.getElementById('cpuPercent').textContent = cpu.toFixed(1);
+            document.getElementById('memPercent').textContent = mem.toFixed(1);
+            
+            document.getElementById('cpuStatus').className = 'status-dot ' + (cpu < 80 ? 'green' : 'red');
+            document.getElementById('memStatus').className = 'status-dot ' + (mem < 80 ? 'green' : 'red');
+        }
+        
+        function updateChart(data) {
+            const container = document.getElementById('usageChart');
+            container.innerHTML = '';
+            
+            const max = Math.max(...data.data.map(d => d.requests));
+            
+            data.data.forEach(d => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = (d.requests / max * 100) + '%';
+                bar.title = `${d.requests} requests`;
+                container.appendChild(bar);
+            });
+            
+            document.getElementById('totalRequests').textContent = data.summary.total_requests.toLocaleString();
+            document.getElementById('avgLatency').textContent = Math.round(data.summary.avg_latency_ms) + 'ms';
+        }
+        
+        function updateAgents(data) {
+            const tbody = document.getElementById('activityTable');
+            tbody.innerHTML = '';
+            
+            data.recent_activity.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${a.agent_id}</td>
+                    <td>${a.action}</td>
+                    <td>${new Date(a.timestamp).toLocaleTimeString()}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        function refreshDashboard() {
+            fetchDashboard();
+        }
+        
+        // Auto-refresh every 30 seconds
+        setInterval(fetchDashboard, 30000);
+        
+        // Initial load
+        fetchDashboard();
+    </script>
+</body>
+</html>

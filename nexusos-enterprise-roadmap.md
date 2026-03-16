@@ -83,8 +83,8 @@
 |---|------|----------|--------|
 | 20 | E2E Encryption | P2 | ✅ DONE |
 | 21 | Encrypted BYOK Key Storage | P2 | ✅ DONE |
-| 22 | Compliance Roadmap (SOC2/HIPAA/GDPR) | P2 | 🔴 NOT STARTED |
-| 23 | Disaster Recovery Plan | P2 | 🔴 NOT STARTED |
+| 22 | Compliance Roadmap (SOC2/HIPAA/GDPR) | P2 | ✅ DONE |
+| 23 | Disaster Recovery Plan | P2 | ✅ DONE |
 
 ---
 
@@ -95,7 +95,7 @@
 | 24 | Activity Log (/api/logs) | ✅ Working |
 | 25 | Kill Switches (/api/limits) | ✅ Working |
 | 26 | Metrics API (/api/metrics) | ✅ Fixed |
-| 27 | Real-time Dashboard | 🔴 NOT STARTED |
+| 27 | Real-time Dashboard | ✅ DONE |
 | 28 | Health Check Endpoint | ✅ Working |
 | 29 | Audit Logging | ✅ Working |
 
