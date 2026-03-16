@@ -1,12 +1,9 @@
 {
-  "last_check": "2026-03-14T21:08:00Z",
-  "checks_performed": ["opportunity_scan"],
-  "opportunity_findings": {
-    " SMB adoption": "58% now use gen AI (up from 40% in 2024)",
-    "ROI": "91% report positive YoY ROI",
-    "key_shift": "From AI as drafting tool to AI agents that execute work",
-    "top_use_cases": ["document classification/routing", "quote generation", "customer support", "HR screening", "procurement matching", "CRM management"],
-    "market_timing": "API costs down 90%, pre-configured agents replacing custom dev"
-  },
-  "relevance": "Direct validation - NexusOS targets this market"
+  "last_check": "2026-03-16T14:07:00Z",
+  "checks_performed": ["email_scan"],
+  "email_findings": {
+    "twilio": "Marketing email - not urgent",
+    "github_deploy_failures": "10+ failed deploys to nexus-ai repo (Mar 15) - needs attention",
+    "pending_commit": "1 commit ahead: 'Research updates'"
+  }
 }

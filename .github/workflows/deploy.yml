@@ -72,13 +72,15 @@ jobs:
             # Stop old container
             docker rm -f nexusos-api 2>/dev/null || true
             
-            # Run new container
-            docker run -d --name nexusos-api --network host \
-              -e DATABASE_URL='postgresql://nexusos:nexusos@172.19.0.4:5432/nexusos' \
-              -e REDIS_URL='redis://172.19.0.2:6379/0' \
+            # Run new container with correct network and container names (not IPs)
+            docker rm -f nexusos-api 2>/dev/null || true
+            docker run -d --name nexusos-api --network nexusos-v2_nexusos-network \
+              -e DATABASE_URL='postgresql://nexusos:nexusos@nexusos-postgres:5432/nexusos' \
+              -e REDIS_URL='redis://nexusos-redis:6379/0' \
               -e USE_PG=1 \
               -e NEXUSOS_SECRET=nexusos-v5-enterprise \
-              -e OLLAMA_URL=http://172.19.0.5:11434 \
+              -e OLLAMA_BASE_URL='http://nexusos-ollama:11434' \
+              -p 8080:8080 \
               nexusos-v\$NEXT_V
               
             sleep 3
