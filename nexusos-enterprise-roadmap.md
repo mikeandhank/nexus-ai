@@ -11,12 +11,12 @@
 | Priority | Item | Source | Status |
 |----------|------|--------|--------|
 | P0 | TLS/SSL with Let's Encrypt | Audit S1 | 🔴 NOT STARTED |
-| P0 | Remove all tar.gz files from repo | Audit A1 | 🔴 NOT STARTED |
-| P0 | Rotate ALL credentials (assume compromised) | Audit S1 | 🔴 NOT STARTED |
-| P0 | Remove exposed IP from all docs | Audit S2 | 🔴 NOT STARTED |
-| P0 | Consolidate codebase to single source | Audit A2 | 🔴 NOT STARTED |
-| P0 | Input sanitization + prompt injection defense | Audit S4 | 🔴 NOT STARTED |
-| P0 | Agent container isolation | Audit A5 | 🔴 NOT STARTED |
+| P0 | Remove all tar.gz files from repo | Audit A1 | ✅ DONE |
+| P0 | Rotate ALL credentials (assume compromised) | Audit S1 | ✅ DONE |
+| P0 | Remove exposed IP from all docs | Audit S2 | ✅ DONE |
+| P0 | Consolidate codebase to single source | Audit A2 | ✅ DONE |
+| P0 | Input sanitization + prompt injection defense | Audit S4 | ✅ DONE |
+| P0 | Agent container isolation | Audit A5 | ✅ DONE |
 
 ---
 
@@ -45,10 +45,13 @@
 
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 8 | Automated testing (auth/security paths) | P0 | 🔴 NOT STARTED |
-| 9 | CI/CD Pipeline (GitHub Actions) | P0 | 🔴 NOT STARTED |
-| 10 | Threat Model Document | P1 | 🔴 NOT STARTED |
+| 8 | Automated testing (auth/security paths) | P0 | ✅ DONE |
+| 9 | CI/CD Pipeline (GitHub Actions) | P0 | ✅ DONE |
+| 10 | Threat Model Document | P1 | ✅ DONE |
 | 11 | Database Migrations (Alembic) | P1 | 🔴 NOT STARTED |
+| 11a | **Infrastructure Health Failures (NEW)** | P0 | ✅ DONE |
+| 11b | **User Registration Service (NEW)** | P0 | ✅ DONE |
+| 11c | **MCP Tool Expansion - CRITICAL GAP (NEW)** | P0 | 🔴 NOT STARTED |
 
 ---
 
@@ -56,10 +59,10 @@
 
 | # | Item | Priority | Status |
 |---|------|----------|--------|
-| 12 | Network-level Rate Limiting | P1 | 🔴 NOT STARTED |
+| 12 | Network-level Rate Limiting | P1 | ✅ DONE |
 | 13 | Backup Endpoint Security | P1 | 🔴 NOT STARTED |
-| 14 | Webhook SSRF Protection | P1 | 🔴 NOT STARTED |
-| 15 | Agent Resource Limits (CPU/memory/network) | P1 | 🔴 NOT STARTED |
+| 14 | Webhook SSRF Protection | P1 | ✅ DONE |
+| 15 | Agent Resource Limits (CPU/memory/network) | P1 | ✅ DONE |
 
 ---
 
@@ -128,9 +131,9 @@
 |---|------|----------|--------|
 | 40 | Backup/Restore API | ✅ Working |
 | 41 | Connection Pooling | ✅ Code Ready |
-| 42 | Terms of Service | P1 | 🔴 NOT STARTED |
-| 43 | Privacy Policy | P1 | 🔴 NOT STARTED |
-| 44 | Data Processing Agreement | P1 | 🔴 NOT STARTED |
+| 42 | Terms of Service | P1 | ✅ DONE |
+| 43 | Privacy Policy | P1 | ✅ DONE |
+| 44 | Data Processing Agreement | P1 | ✅ DONE |
 
 ---
 
@@ -172,6 +175,9 @@
 | A4: No CI/CD | #9 |
 | A5: Agent isolation | #7, #15 |
 | A6: DB migrations | #11 |
+| NEW: Infrastructure Down (#11a) | PostgreSQL/Redis disconnected in production |
+| NEW: Registration Failure (#11b) | /api/auth/register returns "temporarily unavailable" |
+| NEW: MCP Tool Gap (#11c) | Only 8 tools exist (not 50+ as planned) |
 
 ---
 
