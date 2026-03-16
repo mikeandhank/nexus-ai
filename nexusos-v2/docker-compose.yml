@@ -15,6 +15,11 @@ services:
     networks:
       - nexusos-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexusos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Redis for shared state and Celery broker
   redis:
@@ -26,30 +31,70 @@ services:
     restart: unless-stopped
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  # NexusOS API behind Traefik
+  # NexusOS API behind Traefik with full TLS
   nexusos-api:
     build: .
+    expose:
+      - "8080"
     environment:
       - DATABASE_URL=postgresql://nexusos:nexusos@postgres:5432/nexusos
       - REDIS_URL=redis://redis:6379/0
       - NEXUSOS_SECRET=${NEXUSOS_SECRET:-nexusos-v5-enterprise}
       - OLLAMA_URL=http://nexusos-ollama:11434
+      - NEXUSOS_URL=https://${NEXUSOS_DOMAIN:-localhost}
     networks:
       - nexusos-network
     restart: unless-stopped
     volumes:
       - nexusos-data:/opt/nexusos-data
     labels:
+      # Traefik TLS Configuration
       - "traefik.enable=true"
-      - "traefik.http.routers.nexusos.rule=Host(nexusos.cloud)"
-      - "traefik.http.routers.nexusos.tls=true"
-      - "traefik.http.routers.nexusos.entrypoints=https"
-      - "traefik.http.services.nexusos.loadbalancer.server.port=8080"
-      - "traefik.http.routers.nexusos-http.rule=Host(nexusos.cloud)"
-      - "traefik.http.routers.nexusos-http.entrypoints=http"
-      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      
+      # HTTPS Router (main)
+      - "traefik.http.routers.nexusos-https.rule=Host(`${NEXUSOS_DOMAIN:-localhost}`)"
+      - "traefik.http.routers.nexusos-https.entrypoints=websecure"
+      - "traefik.http.routers.nexusos-https.tls=true"
+      - "traefik.http.routers.nexusos-https.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.nexusos-https.service=nexusos-api"
+      
+      # HTTP Router (redirect to HTTPS)
+      - "traefik.http.routers.nexusos-http.rule=Host(`${NEXUSOS_DOMAIN:-localhost}`)"
+      - "traefik.http.routers.nexusos-http.entrypoints=web"
       - "traefik.http.routers.nexusos-http.middlewares=https-redirect"
+      - "traefik.http.routers.nexusos-http.service=nexusos-api"
+      
+      # Middleware: Force HTTPS redirect
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+      
+      # Middleware: Security headers
+      - "traefik.http.middlewares.security-headers.headers.forceSTSHeader=true"
+      - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.security-headers.headers.frameDeny=true"
+      - "traefik.http.middlewares.security-headers.headers.contentTypeNosniff=true"
+      - "traefik.http.middlewares.security-headers.headers.browserXssFilter=true"
+      
+      # Apply security headers to HTTPS
+      - "traefik.http.routers.nexusos-https.middlewares=security-headers"
+      
+      # Service
+      - "traefik.http.services.nexusos-api.loadbalancer.server.port=8080"
+      - "traefik.http.services.nexusos-api.loadbalancer.healthcheck.path=/api/status"
+      - "traefik.http.services.nexusos-api.loadbalancer.healthcheck.interval=30s"
+      - "traefik.http.services.nexusos-api.loadbalancer.healthcheck.timeout=10s"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   # Celery Worker for async tasks
   celery-worker:
@@ -67,8 +112,8 @@ services:
   # Ollama for local LLM
   nexusos-ollama:
     image: ollama/ollama
-    ports:
-      - "11435:11434"
+    expose:
+      - "11434"
     networks:
       - nexusos-network
     restart: unless-stopped
@@ -77,21 +122,31 @@ services:
 
   # Traefik for TLS/HTTPS (Let's Encrypt)
   traefik:
-    image: traefik:v2.9
+    image: traefik:v3.0
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"  # for ACME challenges
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-acme:/acme
+      - traefik-config:/etc/traefik
     environment:
-      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL=admin@nexusos.cloud
+      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_EMAIL=${LETSENCRYPT_EMAIL:-admin@nexusos.cloud}
       - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_STORAGE=/acme/acme.json
       - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE=true
-      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE_ENTRYPOINT=http
+      - TRAEFIK_CERTIFICATESRESOLVERS_LETSENCRYPT_ACME_HTTPCHALLENGE_ENTRYPOINT=web
+      - TRAEFIK_LOG_LEVEL=INFO
+      - TRAEFIK_ACCESSLOG=true
     networks:
       - nexusos-network
     restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${NEXUSOS_DOMAIN:-localhost}`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
 
 networks:
   nexusos-network:
@@ -103,3 +158,4 @@ volumes:
   nexusos-data:
   ollama-data:
   traefik-acme:
+  traefik-config:

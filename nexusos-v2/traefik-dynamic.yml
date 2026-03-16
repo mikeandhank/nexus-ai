@@ -1,0 +1,14 @@
+http:
+  routers:
+    nexusos-api:
+      rule: "PathPrefix(`/api`)"
+      entryPoints:
+        - websecure
+      tls: {}
+      service: nexusos-api
+
+  services:
+    nexusos-api:
+      loadBalancer:
+        servers:
+          - url: "http://172.21.0.6:8080"

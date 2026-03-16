@@ -172,17 +172,136 @@
 | 73 | Per-user rate limiting | 🔴 NOT STARTED | Network-level only; no user-specific API limits |
 | 74 | SIEM export (Splunk/ELK) | 🔴 NOT STARTED | Logs exist but no structured export |
 | 75 | Chat API Model Selection | ✅ WORKING | Verified - accepts model parameter (llama3, phi3, mistral, codellama) |
+|---|------|--------|-------|
+| # | Item | Status | Notes |
+|---|------|--------|-------|
+| 76 | Bearer Token Documentation | 🔴 NOT STARTED | No API docs on Authorization: Bearer header format |
+| 77 | SSO Redirect UI | 🔴 NOT STARTED | No login page with "Sign in with Okta/Azure" button |
+|---|------|--------|-------|
+| # | Item | Status | Notes | Audited |
+|---|------|--------|-------|--------|
+| 78 | API Auth Flow Gaps | 🔴 NOT STARTED | Chat API returns "Auth required" but no clear path to obtain token in docs | 2026-03-16 |
+| 79 | RBAC GET-only API | 🔴 NOT STARTED | /api/roles returns roles but no POST/PUT/DELETE for CRUD operations | 2026-03-16 |
+| 80 | MCP Tools No Auth Layer | ⚠️ AUDIT | /mcp/tools returns full tool list without auth - potential info disclosure | 2026-03-16 |
+| 81 | Chat API Auth Documentation | 🔴 NOT STARTED | Returns "Auth required" but no API docs showing Authorization: Bearer header requirement | 2026-03-16 |
+| 82 | SSO Login Page UI | 🔴 CRITICAL | No login page with "Sign in with Okta/Azure AD" button - just token-based | 2026-03-16 |
+| 83 | Login API Documentation | 🔴 NOT STARTED | No /api/auth/login endpoint documented; unclear how to obtain JWT token | 2026-03-16 |
 
 ---
 
-## 📊 SUMMARY
+## 🚀 ENTERPRISE OS FEATURES (New)
+
+### Security & Sandboxing
+
+| # | Item | Status | Priority |
+|---|------|--------|----------|
+| 81 | Agent Security Sandbox | ✅ DEPLOYED | Implemented in kernel.py |
+| 82 | Process Isolation per Agent | ✅ DEPLOYED | Per-agent workspaces, file access control |
+| 83 | Network Isolation per Agent | ✅ DEPLOYED | Network isolation + port access control |
+| 84 | System Call Filtering | 🔴 NOT STARTED | P1 - Enterprise |
+
+### Resource Governance
+
+| # | Item | Status | Priority |
+|---|------|--------|----------|
+| 85 | CPU Limits per Agent | ✅ DEPLOYED | Implemented in agent_resources.py |
+| 86 | Memory Limits per Agent | ✅ DEPLOYED | Implemented in agent_resources.py |
+| 87 | Disk I/O Limits per Agent | ✅ DEPLOYED | Implemented in agent_resources.py |
+| 88 | API Rate Limits per Agent | ✅ DEPLOYED | Implemented in agent_resources.py |
+
+### Audit & Compliance
+
+| # | Item | Status | Priority |
+|---|------|--------|----------|
+| 89 | Per-Agent Audit Trail | 🔴 NOT STARTED | P0 - Enterprise |
+| 90 | Tool Access Audit Logs | 🔴 NOT STARTED | P0 - Enterprise |
+| 91 | SIEM Export (Splunk/ELK) | 🔴 NOT STARTED | P1 - Enterprise |
+| 92 | Retention Policy Engine | 🔴 NOT STARTED | P1 - Enterprise |
+
+### Orchestration
+
+| # | Item | Status | Priority |
+|---|------|--------|----------|
+| 93 | Multi-Agent Coordination | ✅ DEPLOYED | IPC message bus in kernel |
+| 94 | Agent Trigger Chains | 🔴 NOT STARTED | P1 - Enterprise |
+| 95 | Workflow Definitions | 🔴 NOT STARTED | P2 - Enterprise |
+
+---
+
+## 🖥️ AGENT OS KERNEL (DEPLOYED)
+
+The NexusOS Kernel treats agents as first-class OS processes.
+
+### Core Features (✅ DEPLOYED)
+
+| Feature | Implementation |
+|---------|---------------|
+| Agent Lifecycle | create, start, stop, pause, resume |
+| Process Table | In-memory + PostgreSQL persistence |
+| Resource Limits | CPU, memory, disk, network per agent |
+| IPC | Agent-to-agent messaging |
+| Events | Kernel event log |
+| Filesystem | Per-agent workspace isolation |
+| Network | Per-agent network isolation + port controls |
+
+---
+
+## 💰 SIMPLIFIED PRICING MODEL
+
+### The Model (Just Like OpenRouter)
+
+| Component | Details |
+|-----------|---------|
+| **Service Fee** | 5.5% on API reloads |
+| **Free Models** | phi3, llama3, mistral, codellama - $0 |
+| **Premium Models** | OpenAI, Anthropic, Google - Wholesale + 5.5% |
+| **No Tiers** | All features available to everyone |
+
+### Pricing Examples
+
+| Model | Wholesale | + 5.5% Fee |
+|-------|-----------|-------------|
+| phi3 (local) | $0.00 | $0.00 |
+| llama3 (local) | $0.00 | $0.00 |
+| gpt-4o-mini | $0.30/1M | $0.32/1M |
+| gpt-4o | $10/1M | $10.55/1M |
+| claude-opus | $45/1M | $47.48/1M |
+
+### Implementation
+
+| # | Item | Status |
+|---|------|--------|
+| 96 | Free Local LLMs | ✅ DEPLOYED |
+| 97 | Premium LLM Bridge | ✅ DEPLOYED - Usage metering with 5.5% fee |
+| 98 | User Balances | ✅ DEPLOYED - Credits system |
+| 99 | API Reload | ✅ DEPLOYED - Add credits with fee |
+| 100 | Usage Tracking | ✅ DEPLOYED - Per-model cost tracking |
+| 101 | Cost Calculation | ✅ DEPLOYED - Wholesale + 5.5% |
+
+### Key Points
+
+- **No tiers** - Everyone gets same features
+- **Free users** - Use local models forever
+- **Premium users** - Buy credits, we add 5.5% fee
+- **Enterprise naturally** - Use more expensive models = more revenue
+
+---
+
+## 🎯 HYBRID STRATEGY
+
+- **Indie/SMB:** Free forever, community, self-serve, no SLA
+- **Enterprise:** Security sandbox, audit, compliance, SLA, unlimited agents
+
+---
 
 | Category | Total | Done | Remaining |
 |----------|-------|------|-----------|
 | Critical (Must Have) | 4 | 0 | 4 |
-| Newly Discovered | 12 | 0 | 12 |
+| Newly Discovered | 16 | 0 | 16 |
 | Complete | 53 | 53 | 0 |
-| **TOTAL** | **69** | **53** | **16** |
+| Enterprise OS Kernel | 15 | 8 | 7 |
+| Pricing Model | 8 | 6 | 2 |
+| **TOTAL** | **96** | **67** | **29** |
 
 ---
 

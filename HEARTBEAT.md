@@ -51,11 +51,21 @@
   - `cron_tool.py` - schedule, run, list jobs
   - Integrated into `tool_engine.py`
   - Dockerfile updated with dependencies
+- ✅ **Agent OS Kernel** - True OS kernel deployed:
+  - Process lifecycle (create/start/stop/pause)
+  - Resource limits per agent
+  - IPC (agent-to-agent messaging)
+  - Per-agent workspace isolation
+  - Per-agent network isolation
+  - Event system
+- ✅ **Usage Metering** - API call tracking, token counting, cost calculation
+- ✅ **Agent Resource Limits** - CPU, memory, disk I/O, rate limits per agent
 
 # Notes
-- Positioning revised: "Self-hosted AI agent platform" not "enterprise competitor"
-- Path: PostgreSQL ✅ → Redis ✅ → JWT Auth ✅ → Agent Lifecycle ✅ → Easy-Install ✅ → Tools ✅ → Deploy → Observability
-- Cut: Subscription tiers, marketplace, SSO, SOC2 (deferred)
+- **NOW A TRUE AGENT OS** - Kernel deployed with process management, IPC, isolation
+- Hybrid strategy: Free local LLMs + paid premium bridge
+- Pricing: Free (phi3/llama3) → Basic ($29) → Pro ($99)
+- Path: Kernel ✅ → Resource Limits ✅ → Usage Metering ✅ → Security → Audit
 - Don't interrupt during quiet hours (10PM-6AM MT) unless urgent
 - Batch findings into brief bullet points
 - Always confirm when tasks complete
