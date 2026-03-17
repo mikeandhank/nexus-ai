@@ -6,8 +6,10 @@ Replaces SQLite for concurrent enterprise workloads
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from psycopg2 import pool
 from contextlib import contextmanager
 import json
+import time
 
 # Database URL from environment
 DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://nexusos:nexusos@localhost:5432/nexusos')
@@ -15,15 +17,60 @@ DATABASE_URL = os.environ.get('DATABASE_URL', 'postgresql://nexusos:nexusos@loca
 class PostgreSQL:
     def __init__(self, db_url=None):
         self.db_url = db_url or DATABASE_URL
+        self._pool = None
+        self._init_pool()
+    
+    def _init_pool(self):
+        """Initialize connection pool"""
+        try:
+            self._pool = pool.ThreadedConnectionPool(
+                minconn=1, 
+                maxconn=10, 
+                dsn=self.db_url
+            )
+        except Exception as e:
+            print(f"Failed to create connection pool: {e}")
+            self._pool = None
     
     @contextmanager
     def get_conn(self):
-        """Get database connection with context manager"""
-        conn = psycopg2.connect(self.db_url)
+        """Get database connection from pool with error recovery"""
+        conn = None
         try:
+            if self._pool:
+                conn = self._pool.getconn()
+            else:
+                conn = psycopg2.connect(self.db_url)
+            
+            # Set autocommit for simpler error handling
+            conn.autocommit = True
+            
             yield conn
+            
+        except psycopg2.OperationalError as e:
+            # Connection failed - try to recover
+            print(f"Database connection error: {e}")
+            # Reset the connection
+            if conn:
+                try:
+                    conn.rollback()
+                except:
+                    pass
+            # Try once more with a fresh connection
+            try:
+                if self._pool:
+                    self._pool.putconn(conn, close=True)
+                conn = psycopg2.connect(self.db_url)
+                conn.autocommit = True
+                yield conn
+            except:
+                # Give up
+                raise
         finally:
-            conn.close()
+            if conn and self._pool:
+                self._pool.putconn(conn)
+            elif conn:
+                conn.close()
     
     def init_db(self):
         """Initialize database schema"""

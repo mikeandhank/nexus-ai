@@ -166,12 +166,8 @@ class AgentExecutor:
         
         return tools_schema
     
-    async def execute(self, agent_id: str, message: str, 
-                      user_id: str = None,
-                      system_prompt: str = "You are a helpful AI assistant.",
-                      model: str = "phi3",
-                      history: List[AgentMessage] = None,
-                      tools: List[str] = None) -> AgentResponse:
+                      tools: List[str] = None,
+                      optimize_context: bool = True) -> AgentResponse:
         """
         Execute an agent with a message.
         
@@ -183,6 +179,7 @@ class AgentExecutor:
             model: LLM model to use
             history: Previous conversation messages
             tools: List of tool names to enable
+            optimize_context: Use local Ollama to optimize context (free)
             
         Returns:
             AgentResponse with content and metadata
@@ -218,6 +215,9 @@ class AgentExecutor:
         
         # Build initial messages
         messages = self.build_messages(enhanced_system_prompt, history, message)
+        
+        # Note: Context optimization not needed - Inner Life semantic recall
+        # already extracts only relevant memories per query
         
         # Build tools schema
         tools_schema = self.build_tools_schema()
