@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusOS</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="screen">
+      <div class="login-container">
+        <div class="logo">⬡ NexusOS</div>
+        <p class="tagline">Your Personal AI Agent Operating System</p>
+        
+        <div class="login-form">
+          <input type="email" id="loginEmail" placeholder="Email">
+          <input type="password" id="loginPassword" placeholder="Password">
+          <button id="loginBtn" class="btn-primary">Sign In</button>
+          <button id="registerBtn" class="btn-secondary">Create Account</button>
+        </div>
+        
+        <p class="api-key-label">Or enter API Key:</p>
+        <input type="text" id="apiKeyInput" placeholder="sk-nexus-xxx">
+        <button id="apiKeyBtn" class="btn-primary">Continue with API Key</button>
+      </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardScreen" class="screen hidden">
+      <!-- Sidebar -->
+      <nav class="sidebar">
+        <div class="nav-header">
+          <div class="logo">⬡</div>
+          <span class="nav-title">NexusOS</span>
+        </div>
+        
+        <div class="nav-items">
+          <button class="nav-item active" data-page="chat">
+            <span class="icon">💬</span>
+            <span>Chat</span>
+          </button>
+          <button class="nav-item" data-page="agents">
+            <span class="icon">🤖</span>
+            <span>Agents</span>
+          </button>
+          <button class="nav-item" data-page="memory">
+            <span class="icon">🧠</span>
+            <span>Memory</span>
+          </button>
+          <button class="nav-item" data-page="skills">
+            <span class="icon">🛠️</span>
+            <span>Skills</span>
+          </button>
+          <button class="nav-item" data-page="usage">
+            <span class="icon">📊</span>
+            <span>Usage</span>
+          </button>
+          <button class="nav-item" data-page="settings">
+            <span class="icon">⚙️</span>
+            <span>Settings</span>
+          </button>
+        </div>
+        
+        <div class="nav-footer">
+          <div class="credits-display">
+            <span class="credits-label">Credits</span>
+            <span class="credits-value" id="navCredits">--</span>
+          </div>
+          <button class="nav-item logout" id="logoutBtn">
+            <span class="icon">🚪</span>
+            <span>Logout</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Chat Page -->
+        <div id="chatPage" class="page active">
+          <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+              <div class="message system">
+                <span class="role">NexusOS:</span>
+                <span class="content">Hello! I'm your personal AI agent. How can I help you today?</span>
+              </div>
+            </div>
+            
+            <div class="chat-input-area">
+              <select id="modelSelect">
+                <option value="speed">⚡ Speed (gpt-4o-mini)</option>
+                <option value="balanced" selected>⚖️ Balanced (claude-sonnet)</option>
+                <option value="quality">💎 Quality (gpt-4o)</option>
+                <option value="deep">🧠 Deep (o1-preview)</option>
+              </select>
+              <input type="text" id="chatInput" placeholder="Type your message...">
+              <button id="sendBtn">↑</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agents Page -->
+        <div id="agentsPage" class="page">
+          <div class="page-header">
+            <h2>Your Agents</h2>
+            <button class="btn-primary" id="newAgentBtn">+ New Agent</button>
+          </div>
+          
+          <div class="agents-grid" id="agentsGrid">
+            <div class="agent-card">
+              <div class="agent-icon">🤖</div>
+              <div class="agent-info">
+                <h3>Assistant</h3>
+                <p>Default AI assistant</p>
+              </div>
+              <div class="agent-status running">Running</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Memory Page -->
+        <div id="memoryPage" class="page">
+          <div class="page-header">
+            <h2>Memory System</h2>
+          </div>
+          
+          <div class="memory-stats">
+            <div class="stat-card">
+              <span class="stat-value" id="semanticCount">127</span>
+              <span class="stat-label">Semantic Memories</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="episodicCount">342</span>
+              <span class="stat-label">Episodic Memories</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-value" id="workingTokens">4,000</span>
+              <span class="stat-label">Working Context</span>
+            </div>
+          </div>
+          
+          <div class="memory-list">
+            <h3>Recent Memories</h3>
+            <div id="memoryList">
+              <div class="memory-item">
+                <span class="memory-type">semantic</span>
+                <span class="memory-content">User prefers detailed responses</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skills Page -->
+        <div id="skillsPage" class="page">
+          <div class="page-header">
+            <h2>Skills & Tools</h2>
+            <button class="btn-primary" id="newSkillBtn">+ Add Skill</button>
+          </div>
+          
+          <div class="skills-grid" id="skillsGrid">
+            <div class="skill-card enabled">
+              <span class="skill-icon">📁</span>
+              <span class="skill-name">File Read</span>
+              <span class="skill-status">Enabled</span>
+            </div>
+            <div class="skill-card enabled">
+              <span class="skill-icon">🌐</span>
+              <span class="skill-name">Web Search</span>
+              <span class="skill-status">Enabled</span>
+            </div>
+            <div class="skill-card enabled">
+              <span class="skill-icon">🔗</span>
+              <span class="skill-name">HTTP</span>
+              <span class="skill-status">Enabled</span>
+            </div>
+            <div class="skill-card disabled">
+              <span class="skill-icon">📧</span>
+              <span class="skill-name">Email</span>
+              <span class="skill-status">Disabled</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Usage Page -->
+        <div id="usagePage" class="page">
+          <div class="page-header">
+            <h2>Usage Statistics</h2>
+          </div>
+          
+          <div class="usage-summary">
+            <div class="usage-card">
+              <h3>This Month</h3>
+              <div class="usage-stat">
+                <span class="value" id="totalRequests">0</span>
+                <span class="label">Requests</span>
+              </div>
+              <div class="usage-stat">
+                <span class="value" id="totalTokens">0</span>
+                <span class="label">Tokens</span>
+              </div>
+              <div class="usage-stat">
+                <span class="value" id="totalCost">$0.00</span>
+                <span class="label">Cost</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="usage-history">
+            <h3>Recent Usage</h3>
+            <table id="usageTable">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Model</th>
+                  <th>Provider</th>
+                  <th>Tokens</th>
+                  <th>Cost</th>
+                </tr>
+              </thead>
+              <tbody id="usageTableBody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settingsPage" class="page">
+          <div class="page-header">
+            <h2>Settings</h2>
+          </div>
+          
+          <div class="settings-section">
+            <h3>Account</h3>
+            <div class="setting-item">
+              <label>Email</label>
+              <span id="settingsEmail">--</span>
+            </div>
+            <div class="setting-item">
+              <label>API Key</label>
+              <code id="settingsApiKey">--</code>
+              <button class="btn-small" id="copyKeyBtn">Copy</button>
+            </div>
+          </div>
+          
+          <div class="settings-section">
+            <h3>Default Model</h3>
+            <select id="defaultModel">
+              <option value="speed">Speed (gpt-4o-mini)</option>
+              <option value="balanced" selected>Balanced (claude-sonnet)</option>
+              <option value="quality">Quality (gpt-4o)</option>
+              <option value="deep">Deep (o1-preview)</option>
+            </select>
+          </div>
+          
+          <div class="settings-section">
+            <h3>Auto-Route</h3>
+            <label class="toggle">
+              <input type="checkbox" id="autoRoute" checked>
+              <span>Automatically select best model for each task</span>
+            </label>
+          </div>
+          
+          <div class="settings-section">
+            <h3>Credits</h3>
+            <button class="btn-primary" id="buyCreditsBtn">Buy Credits</button>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

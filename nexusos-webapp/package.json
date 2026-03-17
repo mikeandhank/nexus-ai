@@ -1,0 +1,13 @@
+{
+  "name": "nexusos-webapp",
+  "version": "1.0.0",
+  "description": "NexusOS Web Dashboard",
+  "scripts": {
+    "start": "npx serve src",
+    "build": "echo 'Static build - deploy src/ folder'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}
