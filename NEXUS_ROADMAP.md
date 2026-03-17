@@ -119,6 +119,16 @@
 | 6 | Usage sync | 🔴 NOT STARTED |
 | 7 | Auto-retry on failure | 🔴 NOT STARTED |
 
+### Phase 3: Proprietary GUI 🔴 NEW
+| # | Item | Status |
+|---|------|--------|
+| 8 | **Mac-inspired chat-first UI** | 🔴 PLANNED |
+| 9 | Command bar (type to control everything) | 🔴 PLANNED |
+| 10 | "Type app name to open" - no clicking | 🔴 PLANNED |
+| 11 | AI anticipates needs, suggests actions | 🔴 PLANNED |
+| 12 | Cross-platform (Electron/Tauri) | 🔴 PLANNED |
+| 13 | Local or remote server connection | 🔴 PLANNED |
+
 ---
 
 # DATABASE TABLES
