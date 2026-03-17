@@ -187,7 +187,7 @@ class OllamaProvider(LLMProvider):
     
     def __init__(self):
         super().__init__(Provider.OLLAMA)
-        self.base_url = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11435")
+        self.base_url = os.environ.get("OLLAMA_URL") or os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11435")
     
     def chat(self, messages: List[Dict], model: str = "llama3", **kwargs) -> LLMResponse:
         import time

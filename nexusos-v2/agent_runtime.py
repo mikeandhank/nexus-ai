@@ -57,20 +57,35 @@ class AgentRuntime:
         if not self.db:
             return
         try:
+            # Use PostgreSQL-style queries (%s instead of ?)
             with self.db._get_conn() as conn:
                 c = conn.cursor()
                 c.execute("SELECT id, user_id, name, role, system_prompt, model, tools, status FROM agents")
-                for row in c.fetchall():
-                    agent = Agent(
-                        id=row[0],
-                        user_id=row[1],
-                        name=row[2],
-                        role=row[3] or "general",
-                        system_prompt=row[4] or "",
-                        model=row[5] or "phi3",
-                        tools=json.loads(row[6]) if row[6] else [],
-                        status=row[7] or "created"
-                    )
+                rows = c.fetchall()
+                for row in rows:
+                    # Handle both tuple and dict-style rows
+                    if isinstance(row, dict):
+                        agent = Agent(
+                            id=row['id'],
+                            user_id=row['user_id'],
+                            name=row['name'],
+                            role=row.get('role') or "general",
+                            system_prompt=row.get('system_prompt') or "",
+                            model=row.get('model') or "phi3",
+                            tools=json.loads(row['tools']) if row.get('tools') else [],
+                            status=row.get('status') or "created"
+                        )
+                    else:
+                        agent = Agent(
+                            id=row[0],
+                            user_id=row[1],
+                            name=row[2],
+                            role=row[3] or "general",
+                            system_prompt=row[4] or "",
+                            model=row[5] or "phi3",
+                            tools=json.loads(row[6]) if row[6] else [],
+                            status=row[7] or "created"
+                        )
                     self.agents[agent.id] = agent
                     self.agent_history[agent.id] = []
         except Exception as e:
@@ -93,12 +108,22 @@ class AgentRuntime:
         if not self.db:
             return
         try:
+            # Use PostgreSQL-style queries (%s instead of ?)
             with self.db._get_conn() as conn:
                 c = conn.cursor()
                 c.execute("""
-                    INSERT OR REPLACE INTO agents 
+                    INSERT INTO agents 
                     (id, user_id, name, role, system_prompt, model, tools, status, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET
+                        user_id = EXCLUDED.user_id,
+                        name = EXCLUDED.name,
+                        role = EXCLUDED.role,
+                        system_prompt = EXCLUDED.system_prompt,
+                        model = EXCLUDED.model,
+                        tools = EXCLUDED.tools,
+                        status = EXCLUDED.status,
+                        updated_at = EXCLUDED.updated_at
                 """, (
                     agent.id, agent.user_id, agent.name, agent.role,
                     agent.system_prompt, agent.model, json.dumps(agent.tools),

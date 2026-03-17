@@ -1,11 +1,45 @@
 """
 Agent Management API Routes
 """
+import os
+import asyncio
 from flask import jsonify, request, g
 from auth import require_auth
 from agent_runtime import get_agent_runtime
 from webhooks import get_webhook_manager
 from database_compat import DatabaseCompat as Database
+
+# Import agent executor components
+try:
+    from agent_executor import get_agent_executor
+    from tool_engine import ToolEngine
+    from llm_integration import OllamaProvider
+    EXECUTOR_AVAILABLE = True
+except ImportError as e:
+    EXECUTOR_AVAILABLE = False
+    print(f"Warning: Agent executor not available: {e}")
+
+# Per-user executor cache
+_user_executors = {}
+
+
+def get_user_executor(user_id: str):
+    """Get or create a cached executor for a user"""
+    global _user_executors
+    
+    if user_id not in _user_executors:
+        executor = get_agent_executor()
+        
+        # Set up Ollama
+        os.environ['OLLAMA_URL'] = os.environ.get('OLLAMA_BASE_URL', 'http://nexusos-v2-nexusos-ollama-1:11434')
+        executor.set_llm_provider(OllamaProvider())
+        
+        # Set up tools
+        executor.set_tool_engine(ToolEngine())
+        
+        _user_executors[user_id] = executor
+    
+    return _user_executors[user_id]
 
 # Initialize webhook manager
 _db = Database()
@@ -139,5 +173,53 @@ def setup_agent_routes(app):
             return jsonify({"error": "Not found"}), 404
         
         return jsonify(runtime.delete_agent(agent_id))
+    
+    # ===== Agent Execution Endpoint =====
+    
+    @app.route('/api/agents/<agent_id>/execute', methods=['POST'])
+    @require_auth
+    def execute_agent(agent_id):
+        """Execute an agent with a message"""
+        if not EXECUTOR_AVAILABLE:
+            return jsonify({"error": "Agent executor not available"}), 500
+        
+        agent = runtime.get_agent(agent_id)
+        if not agent or agent.user_id != g.user_id:
+            return jsonify({"error": "Not found"}), 404
+        
+        data = request.json or {}
+        message = data.get('message', '')
+        
+        if not message:
+            return jsonify({"error": "Message required"}), 400
+        
+        # Get cached executor for this user (memory persists!)
+        executor = get_user_executor(g.user_id)
+        
+        # Run the agent
+        try:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            response = loop.run_until_complete(
+                executor.execute(
+                    agent_id=agent_id,
+                    user_id=g.user_id,  # Pass actual user_id for Inner Life
+                    message=message,
+                    system_prompt=agent.system_prompt or "You are a helpful AI assistant.",
+                    model=agent.model or "llama3",
+                    tools=agent.tools
+                )
+            )
+            loop.close()
+            
+            return jsonify({
+                "success": response.success,
+                "content": response.content,
+                "error": response.error,
+                "execution_time_ms": response.execution_time_ms
+            })
+            
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
     
     return app

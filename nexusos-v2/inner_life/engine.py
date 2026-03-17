@@ -331,10 +331,10 @@ class InnerLifeEngine:
         except Exception as e:
             logger.warning(f"Pattern recording failed: {e}")
         
-        # Layer 2: Recall relevant memories
+        # Layer 2: Recall relevant memories (semantic search)
         memories = []
         try:
-            recalled = self.memory.recall(message, limit=5)
+            recalled = self.memory.recall_semantic(message, limit=5)
             memories = [{"content": m.content, "type": m.type, "confidence": m.confidence} 
                        for m, score in recalled]
         except Exception as e:

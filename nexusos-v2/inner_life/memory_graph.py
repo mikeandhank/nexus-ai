@@ -297,6 +297,88 @@ class CumulativeMemoryGraph:
         results.sort(key=lambda x: x[1], reverse=True)
         return results[:limit]
     
+    def recall_semantic(self, query: str, limit: int = 5) -> List[Tuple[MemoryNode, float]]:
+        """Semantic recall using query expansion + keyword matching."""
+        try:
+            # Expand query with related terms
+            expanded = self._expand_query(query)
+            
+            # Use expanded query for matching
+            expanded_words = set(expanded.lower().split())
+            
+            results = []
+            for node_id, node in self.nodes.items():
+                node_words = set(node.content.lower().split())
+                common = expanded_words & node_words
+                
+                if common:
+                    # Weighted score - give more weight to original query words
+                    original_words = set(query.lower().split())
+                    original_matches = len(common & original_words)
+                    expanded_matches = len(common) - original_matches
+                    
+                    base_score = (original_matches * 2 + expanded_matches) / max(len(expanded_words), 1)
+                    score = base_score * node.confidence
+                    
+                    hours_old = (datetime.utcnow() - node.last_accessed).total_seconds() / 3600
+                    recency_boost = max(0.5, 1.0 - (hours_old / (24 * 30)))
+                    score *= recency_boost
+                    
+                    results.append((node, score))
+                    
+                    node.access_count += 1
+                    node.last_accessed = datetime.utcnow()
+            
+            results.sort(key=lambda x: x[1], reverse=True)
+            return results[:limit]
+            
+        except Exception as e:
+            logger.warning(f"Semantic recall failed: {e}, falling back to keyword")
+            return self.recall(query, limit)
+    
+    def _expand_query(self, query: str) -> str:
+        """Expand query with related terms for better recall."""
+        # Common expansions for personal information
+        expansions = {
+            # Preferences
+            "like": ["love", "enjoy", "favorite", "prefer", "good", "like"],
+            "love": ["like", "enjoy", "favorite", "prefer", "adore", "love"],
+            "enjoy": ["like", "love", "favorite", "prefer", "enjoy"],
+            "favorite": ["like", "love", "best", "prefer", "favorite"],
+            "prefer": ["like", "love", "favorite", "prefer"],
+            "adore": ["love", "like", "enjoy"],
+            
+            # Food
+            "food": ["eat", "pizza", "coffee", "meal", "food", "eat"],
+            "eat": ["food", "pizza", "coffee", "meal"],
+            "pizza": ["food", "eat", "favorite"],
+            "coffee": ["drink", "food", "favorite"],
+            
+            # Activities  
+            "sport": ["basketball", "football", "soccer", "game", "sports"],
+            "game": ["sport", "basketball", "football"],
+            "hobby": ["like", "enjoy", "do", "interest", "hobbies"],
+            
+            # Questions
+            "what": ["which", "who", "where", "favorite", "like", "love"],
+            "who": ["name", "called"],
+            "name": ["who", "called"],
+            
+            # General
+            "do": ["like", "enjoy", "hobby", "activity"],
+            "my": ["i", "me"],
+            "i": ["my", "me"],
+        }
+        
+        words = query.lower().split()
+        expanded = list(words)
+        
+        for word in words:
+            if word in expansions:
+                expanded.extend(expansions[word])
+        
+        return " ".join(expanded)
+    
     def get_personality_traits(self) -> List[Dict]:
         """Extract learned personality traits"""
         traits = []
