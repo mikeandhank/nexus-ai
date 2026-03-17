@@ -1,8 +1,9 @@
 // NexusOS Webapp - Main Application
 
+// Use the correct API endpoint
 const API_URL = 'http://187.124.150.225:8080/api';
 let currentUser = null;
-let apiKey = localStorage.getItem('nexus_api_key') || '';
+let accessToken = localStorage.getItem('nexus_access_token') || '';
 
 // DOM Elements
 const loginScreen = document.getElementById('loginScreen');
@@ -48,10 +49,10 @@ function initEventListeners() {
 
 // Auth
 async function checkAuth() {
-  if (apiKey) {
+  if (accessToken) {
     try {
-      const response = await fetch(`${API_URL}/config`, {
-        headers: { 'X-Nexus-Key': apiKey }
+      const response = await fetch(`${API_URL}/usage`, {
+        headers: { 'Authorization': `Bearer ${accessToken}` }
       });
       if (response.ok) {
         showDashboard();
@@ -76,9 +77,9 @@ async function login() {
     
     const data = await response.json();
     
-    if (data.api_key) {
-      apiKey = data.api_key;
-      localStorage.setItem('nexus_api_key', apiKey);
+    if (data.access_token) {
+      accessToken = data.access_token;
+      localStorage.setItem('nexus_access_token', accessToken);
       showDashboard();
       loadUserData();
     } else {
@@ -97,15 +98,15 @@ async function register() {
     const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password, name: email.split('@')[0] })
     });
     
     const data = await response.json();
     
-    if (data.api_key) {
-      apiKey = data.api_key;
-      localStorage.setItem('nexus_api_key', apiKey);
-      alert(`Account created! You have ${data.credits} free credits.`);
+    if (data.access_token) {
+      accessToken = data.access_token;
+      localStorage.setItem('nexus_access_token', accessToken);
+      alert('Account created!');
       showDashboard();
       loadUserData();
     } else {
@@ -117,18 +118,13 @@ async function register() {
 }
 
 function loginWithApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key) return alert('Please enter an API key');
-  
-  apiKey = key;
-  localStorage.setItem('nexus_api_key', apiKey);
-  showDashboard();
-  loadUserData();
+  // Not supported in this version - use email/password
+  alert('Please use email and password to login');
 }
 
 function logout() {
-  apiKey = '';
-  localStorage.removeItem('nexus_api_key');
+  accessToken = '';
+  localStorage.removeItem('nexus_access_token');
   loginScreen.classList.remove('hidden');
   dashboardScreen.classList.add('hidden');
 }
@@ -158,8 +154,6 @@ async function sendMessage() {
   const message = input.value.trim();
   if (!message) return;
   
-  const quality = document.getElementById('modelSelect').value;
-  
   // Add user message
   addMessage('user', message);
   input.value = '';
@@ -172,16 +166,16 @@ async function sendMessage() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Nexus-Key': apiKey
+        'Authorization': `Bearer ${accessToken}`
       },
-      body: JSON.stringify({ message, quality })
+      body: JSON.stringify({ message })
     });
     
     const data = await response.json();
     typing.remove();
     
-    if (data.content) {
-      addMessage('system', data.content);
+    if (data.response) {
+      addMessage('system', data.response);
     } else if (data.error) {
       addMessage('error', data.error);
     }
@@ -204,21 +198,19 @@ function addMessage(role, content) {
 // User Data
 async function loadUserData() {
   try {
-    // Load credits
-    const creditsRes = await fetch(`${API_URL}/credits`, {
-      headers: { 'X-Nexus-Key': apiKey }
+    // Load usage (includes cost info)
+    const usageRes = await fetch(`${API_URL}/usage`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
     });
-    const creditsData = await creditsRes.json();
-    document.getElementById('navCredits').textContent = creditsData.credits?.toFixed(2) || '0';
+    const usageData = await usageRes.json();
     
-    // Load config
-    const configRes = await fetch(`${API_URL}/config`, {
-      headers: { 'X-Nexus-Key': apiKey }
+    document.getElementById('navCredits').textContent = usageData.summary?.total_requests || '0';
+    
+    // Load agents
+    const agentsRes = await fetch(`${API_URL}/agents`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
     });
-    const configData = await configRes.json();
-    
-    document.getElementById('defaultModel').value = configData.quality_preference || 'balanced';
-    document.getElementById('autoRoute').checked = configData.auto_route !== false;
+    const agentsData = await agentsRes.json();
     
   } catch (e) {
     console.error('Error loading user data:', e);
@@ -227,104 +219,33 @@ async function loadUserData() {
 
 async function loadUsage() {
   try {
-    const response = await fetch(`${API_URL}/usage?days=30`, {
-      headers: { 'X-Nexus-Key': apiKey }
+    const response = await fetch(`${API_URL}/usage`, {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
     });
     const data = await response.json();
     
     // Update summary
-    document.getElementById('totalRequests').textContent = data.usage?.length || 0;
+    document.getElementById('totalRequests').textContent = data.summary?.total_requests || 0;
+    document.getElementById('totalTokens').textContent = (data.summary?.total_tokens || 0).toLocaleString();
+    document.getElementById('totalCost').textContent = '$' + (data.summary?.total_cost_usd || 0).toFixed(4);
     
-    let totalTokens = 0;
-    let totalCost = 0;
-    
-    if (data.usage) {
-      data.usage.forEach(u => {
-        totalTokens += (u.input_tokens || 0) + (u.output_tokens || 0);
-        totalCost += u.cost || 0;
-      });
-    }
-    
-    document.getElementById('totalTokens').textContent = totalTokens.toLocaleString();
-    document.getElementById('totalCost').textContent = '$' + totalCost.toFixed(2);
-    
-    // Update table
-    const tbody = document.getElementById('usageTableBody');
-    tbody.innerHTML = '';
-    
-    if (data.usage) {
-      data.usage.slice(0, 20).forEach(u => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${new Date(u.created_at).toLocaleDateString()}</td>
-          <td>${u.model}</td>
-          <td>${u.provider}</td>
-          <td>${(u.input_tokens || 0) + (u.output_tokens || 0)}</td>
-          <td>$${(u.cost || 0).toFixed(4)}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
   } catch (e) {
     console.error('Error loading usage:', e);
   }
 }
 
 async function loadSettings() {
-  document.getElementById('settingsApiKey').textContent = apiKey.substring(0, 20) + '...';
-}
-
-async function updateConfig() {
-  const quality = document.getElementById('defaultModel').value;
-  const autoRoute = document.getElementById('autoRoute').checked;
-  
-  try {
-    await fetch(`${API_URL}/config`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Nexus-Key': apiKey
-      },
-      body: JSON.stringify({
-        quality_preference: quality,
-        auto_route: autoRoute
-      })
-    });
-  } catch (e) {
-    console.error('Error updating config:', e);
-  }
+  document.getElementById('settingsEmail').textContent = document.getElementById('loginEmail').value || 'User';
+  document.getElementById('settingsApiKey').textContent = accessToken.substring(0, 20) + '...';
 }
 
 function copyApiKey() {
-  navigator.clipboard.writeText(apiKey);
-  alert('API key copied!');
+  navigator.clipboard.writeText(accessToken);
+  alert('Token copied!');
 }
 
 async function buyCredits() {
-  const amount = prompt('Enter amount to spend (minimum $5):', '10');
-  if (!amount || parseFloat(amount) < 5) return;
-  
-  try {
-    const response = await fetch(`${API_URL}/credits/purchase`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Nexus-Key': apiKey
-      },
-      body: JSON.stringify({ amount: parseFloat(amount) })
-    });
-    
-    const data = await response.json();
-    
-    if (data.new_balance !== undefined) {
-      alert(`Purchased $${data.credits_added.toFixed(2)} credits! New balance: ${data.new_balance.toFixed(2)}`);
-      loadUserData();
-    } else {
-      alert(data.error || 'Purchase failed');
-    }
-  } catch (e) {
-    alert('Error: ' + e.message);
-  }
+  alert('Credit purchase coming soon!');
 }
 
 console.log('NexusOS Webapp loaded');
