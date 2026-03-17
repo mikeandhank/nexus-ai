@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NexusOS</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- LEFT PANEL: Chat/Prompt (1/3) -->
+    <div class="chat-panel" id="chatPanel">
+      <div class="chat-header">
+        <div class="logo">⬡ NexusOS</div>
+        <div class="credits" id="credits">Loading...</div>
+      </div>
+      
+      <div class="chat-messages" id="chatMessages">
+        <div class="message system">
+          <span class="role">NexusOS:</span>
+          <span class="content">Hello! I'm your AI assistant. Type a message or click an app tile to begin.</span>
+        </div>
+      </div>
+      
+      <div class="chat-input-area">
+        <input 
+          type="text" 
+          id="chatInput" 
+          placeholder="Type command or message..."
+          autocomplete="off"
+        >
+        <button id="sendBtn">↑</button>
+      </div>
+      
+      <button class="chat-toggle" id="chatToggle" title="Toggle Chat">
+        💬
+      </button>
+    </div>
+    
+    <!-- RIGHT PANEL: App Dock (2/3) -->
+    <div class="app-panel" id="appPanel">
+      <div class="app-header">
+        <span>Apps</span>
+        <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen">⛶</button>
+      </div>
+      
+      <div class="app-grid" id="appGrid">
+        <!-- App tiles will be generated here -->
+      </div>
+      
+      <!-- Active app view -->
+      <div class="app-view" id="appView" style="display: none;">
+        <div class="app-view-header">
+          <button class="back-btn" id="backBtn">← Back</button>
+          <span class="app-title" id="appTitle">App Name</span>
+        </div>
+        <div class="app-content" id="appContent">
+          <!-- App content loads here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

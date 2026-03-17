@@ -1,0 +1,27 @@
+{
+  "name": "nexusos-gui",
+  "version": "1.0.0",
+  "description": "NexusOS Desktop GUI - Tile-based iOS-style interface",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "author": "NexusAI",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "build": {
+    "appId": "com.nexusos.gui",
+    "productName": "NexusOS",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*"
+    ]
+  }
+}
