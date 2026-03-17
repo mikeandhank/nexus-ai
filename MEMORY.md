@@ -91,6 +91,20 @@ _Lessons, patterns, and important context that persist across sessions._
 - **API costs:** Down 90% from 2023-2026
 - **Market timing:** Pre-configured agents replacing custom development
 
+## Pricing Model - SINGLE MODEL (2026-03-17) ⚠️ CRITICAL
+
+**OpenRouter-Style (Only Model):**
+- **Software is FREE** - all features, no tiered pricing
+- **Revenue comes from routing LLM calls**
+- Users buy credits from us → We keep 5.5% fee (minimum $0.80 per purchase)
+- We route to LLM providers at COST (no markup)
+- OR users can BYOK (bring their own keys) → We charge 5% fee on provider costs
+- **No subscriptions** - pay-as-you-go only
+
+**Implication:** We are an LLM proxy/router, not a SaaS. Like OpenRouter, but self-hosted first.
+
+---
+
 ## Competitive Positioning (2026-03-14)
 
 | Platform | Key Differentiator |
@@ -116,4 +130,4 @@ _Lessons, patterns, and important context that persist across sessions._
 
 ---
 
-_Last updated: 2026-03-14_
+_Last updated: 2026-03-17_
