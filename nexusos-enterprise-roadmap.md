@@ -30,9 +30,9 @@
 | 11 | Professional pentest | 🔴 NOT STARTED |
 | 12 | Fix all CRITICAL findings | 🔴 NOT STARTED |
 | 13 | Fix all HIGH findings | 🔴 NOT STARTED |
-| 14 | Add deep health checks (DB, Redis, Ollama) | 🔴 NOT STARTED |
-| 15 | Add database foreign key constraints | 🔴 NOT STARTED |
-| 16 | Add database indexes on FK columns | 🔴 NOT STARTED |
+| 14 | Add deep health checks (DB, Redis, Ollama) | ✅ DONE |
+| 15 | Add database foreign key constraints | ✅ DONE |
+| 16 | Add database indexes on FK columns | ✅ DONE |
 
 ### Streaming & Real-Time (From Competitive Gap)
 
@@ -40,15 +40,15 @@
 |---|------|--------|
 | 17 | Implement WebSocket/SSE for chat streaming | ✅ DONE (streaming.py) | HIGH |
 | 18 | Consider FastAPI migration for native async | ✅ DONE |
-| 19 | Add Celery-based streaming via Redis pub/sub | 🔴 NOT STARTED |
+| 19 | Add Celery-based streaming via Redis pub/sub | ✅ DONE |
 
 ### GPU & Model Infrastructure (From Competitive Gap)
 
 | # | Item | Status |
 |---|------|--------|
 | 20 | Add Ollama GPU passthrough configuration | ✅ DONE |
-| 21 | Support vLLM as alternative runtime | 🔴 NOT STARTED |
-| 22 | Document GPU setup for common hardware | 🔴 NOT STARTED |
+| 21 | Support vLLM as alternative runtime | ✅ DONE |
+| 22 | Document GPU setup for common hardware | ✅ DONE (GPU_SETUP.md)|
 
 ### Inner Life Rebranding
 
