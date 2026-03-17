@@ -105,6 +105,47 @@ _Lessons, patterns, and important context that persist across sessions._
 
 ---
 
+## User Roles - TWO CLASSES (2026-03-17) ⚠️ CRITICAL
+
+**ADMIN:**
+- Controls spend
+- Manages API keys
+- Controls ALL users under their API keys
+- Example: controls 100s of agents
+
+**USER:**
+- Uses agents
+- Limited permissions
+- Assigned by admin
+
+**KEY INSIGHT:** An admin for ONE API key might be a USER for another.
+- Same person: admin for work API key, user for personal API key
+- Enables personal + work from same app
+- Family accounts, business accounts
+
+---
+
+## Ecosystem - 6 Projects (2026-03-17)
+
+| # | Project | Type | Status |
+|---|---------|------|--------|
+| 1 | NexusOS Server | Backend | ✅ Built |
+| 2 | NexusOS Webapp | Platform | ✅ Built |
+| 3 | NexusOS Desktop GUI | Platform | ✅ Built |
+| 4 | NexusOS Client (Local) | Client | 🔲 Planned |
+| 5 | NexusOS iOS App | Platform | 🔲 Planned |
+| 6 | NexusOS Android App | Platform | 🔲 Planned |
+
+**ALL CONNECTED** - Same agent, same API key, same data across all 6.
+
+**WHY IMPOSSIBLE TO LEAVE:**
+1. Your data/memory/agents are in the ecosystem
+2. Switching = starting over (no export)
+3. Cross-platform - same experience everywhere
+4. Your agents know you - memory compounds
+
+---
+
 ## Competitive Positioning (2026-03-14)
 
 | Platform | Key Differentiator |
