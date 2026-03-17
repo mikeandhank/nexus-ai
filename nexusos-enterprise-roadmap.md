@@ -17,7 +17,7 @@
 | 7 | Add CAPTCHA/rate-limiting to /api/auth/register | ✅ DONE (captcha.py) | HIGH |
 | 8 | Add real payment processor (Stripe) for balance reload | ✅ DONE (payment.py) | HIGH |
 | 9 | Add input sanitization (SQL injection, XSS) | ✅ DONE (input_sanitization.py) | HIGH |
-| 10 | Enable PostgreSQL encryption at rest | 🔴 NOT STARTED | MEDIUM |
+| 10 | Enable PostgreSQL encryption at rest | ✅ DONE (pgcrypto) | MEDIUM |
 
 ---
 
@@ -55,21 +55,18 @@
 | # | Item | Status |
 |---|------|--------|
 | 23 | Rebrand "Inner Life" → "Agent Intelligence Engine" | ✅ DONE |
-| 24 | Document enterprise-friendly framing | 🔴 NOT STARTED |
+| 24 | Document enterprise-friendly framing | ✅ DONE (ENTERPRISE.md) |
 
----
-
-## 🚀 PHASE 2: ECOSYSTEM & COMMUNITY (From Competitive Intelligence)
+### OpenRouter-Style Billing
 
 | # | Item | Status |
 |---|------|--------|
-| 25 | Open-source core agent runtime | 🔴 NOT STARTED |
-| 26 | Launch GitHub repo + Discord community | 🔴 NOT STARTED |
-| 27 | Build Plugin SDK | 🔴 NOT STARTED |
-| 28 | Ship 10 first-party skills (Slack, Gmail, GitHub, Jira) | 🔴 NOT STARTED |
-| 29 | Publish benchmark comparisons | 🔴 NOT STARTED |
-| 30 | Add OpenRouter integration as model backend | 🔴 NOT STARTED |
-| 31 | Implement A2A protocol support | 🔴 NOT STARTED |
+| 25 | Credit system (purchase, balance, deduct) | ✅ DONE (billing.py) |
+| 26 | Usage tracking (per-request logging) | ✅ DONE (billing.py) |
+| 27 | Provider key manager (master + BYOK) | ✅ DONE (billing.py) |
+| 28 | 5.5% fee calculation on purchases | ✅ DONE |
+| 29 | BYOK mode (5% fee on provider cost) | ✅ DONE |
+| 30 | OpenRouter integration | 🔴 NOT STARTED |
 
 ---
 
