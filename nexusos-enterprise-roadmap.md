@@ -1,126 +1,147 @@
-# NexusOS Enterprise Roadmap (CONSOLIDATED)
-**Last Updated:** March 16, 2026  
-**Status:** OPERATIONAL @ nexusos.cloud
+# NexusOS Enterprise Roadmap (UPDATED)
+## Based on: Competitive Intelligence + Third-Party Audit
+**Last Updated:** March 16, 2026
 
 ---
 
-## 🎯 CURRENT STATUS
+## 🚨 CRITICAL SECURITY FIXES (Audit Priority)
 
-| Component | Status |
-|-----------|--------|
-| API | ✅ Running v6.0.0 |
-| HTTPS/TLS | ✅ Working (Let's Encrypt) |
-| PostgreSQL | ✅ Connected |
-| Redis | ✅ Connected |
-| Ollama | ✅ 4 Models (phi3, llama3, mistral, codellama) |
-| Authentication | ✅ JWT |
-| Web UI | ✅ /ui |
+| # | Item | Status | Priority |
+|---|------|--------|----------|
+| 1 | Disable root SSH, use key-based auth | ✅ DONE | CRITICAL |
+| 2 | Fix database credentials - require strong passwords | ✅ DEPLOYED (password_security.py) | CRITICAL |
+| 3 | Migrate JWT from HS256 to RS256 (asymmetric) | ✅ DONE (jwt_rotation.py) | CRITICAL |
+| 4 | Implement password complexity enforcement (12+ chars) | ✅ DONE (password_security.py) | CRITICAL |
+| 5 | Migrate TEXT primary keys to UUID v4 | ✅ DONE (uuid_migration.py) | CRITICAL |
+| 6 | Add CSRF protection to Flask endpoints | 🔴 NOT STARTED | HIGH |
+| 7 | Add CAPTCHA/rate-limiting to /api/auth/register | 🔴 NOT STARTED | HIGH |
+| 8 | Add real payment processor (Stripe) for balance reload | 🔴 NOT STARTED | HIGH |
+| 9 | Add input sanitization (SQL injection, XSS) | 🔴 NOT STARTED | HIGH |
+| 10 | Enable PostgreSQL encryption at rest | 🔴 NOT STARTED | MEDIUM |
 
 ---
 
-## 🚨 CRITICAL BLOCKERS (Must Fix)
+## 🚀 PHASE 1: HARDEN & DIFFERENTIATE (Audit-Driven)
+
+### Security Hardening (From Audit)
 
 | # | Item | Status |
 |---|------|--------|
-| 1 | SAML/SCIM Integration | ✅ DEPLOYED |
-| 2 | Database Migrations (Alembic) | ✅ DEPLOYED |
-| 3 | OAuth2 Redirect Flow (SSO) | ✅ DEPLOYED |
-| 4 | Custom RBAC API | ✅ DEPLOYED |
-| 5 | SIEM Export (Splunk/ELK) | ✅ DEPLOYED |
+| 11 | Professional pentest | 🔴 NOT STARTED |
+| 12 | Fix all CRITICAL findings | 🔴 NOT STARTED |
+| 13 | Fix all HIGH findings | 🔴 NOT STARTED |
+| 14 | Add deep health checks (DB, Redis, Ollama) | 🔴 NOT STARTED |
+| 15 | Add database foreign key constraints | 🔴 NOT STARTED |
+| 16 | Add database indexes on FK columns | 🔴 NOT STARTED |
 
----
-
-## ✅ COMPLETE - Core Infrastructure
-
-| # | Item | Status |
-|---|------|--------|
-| 10 | PostgreSQL Database | ✅ |
-| 11 | Redis Cache | ✅ |
-| 12 | JWT Authentication | ✅ |
-| 13 | Agent Definition (/api/agents) | ✅ |
-| 14 | Agent Runtime (spawn/stop/pause) | ✅ |
-| 15 | Input Sanitization | ✅ |
-| 16 | Agent Container Isolation | ✅ |
-| 17 | Network Rate Limiting | ✅ |
-| 18 | TLS/SSL with Let's Encrypt | ✅ |
-| 19 | HTTP→HTTPS Redirect | ✅ |
-
----
-
-## ✅ COMPLETE - Developer Experience
+### Streaming & Real-Time (From Competitive Gap)
 
 | # | Item | Status |
 |---|------|--------|
-| 20 | Web UI (/ui) | ✅ |
-| 21 | MCP Protocol | ✅ |
-| 22 | API Documentation (Swagger) | ✅ |
-| 23 | CLI Tool | ✅ |
-| 24 | Python SDK | ✅ |
+| 17 | Implement WebSocket/SSE for chat streaming | 🔴 NOT STARTED |
+| 18 | Consider FastAPI migration for native async | 🔴 NOT STARTED |
+| 19 | Add Celery-based streaming via Redis pub/sub | 🔴 NOT STARTED |
 
----
-
-## ✅ COMPLETE - Enterprise Features
+### GPU & Model Infrastructure (From Competitive Gap)
 
 | # | Item | Status |
 |---|------|--------|
-| 30 | Activity Log (/api/logs) | ✅ |
-| 31 | Metrics API (/api/metrics) | ✅ |
-| 32 | Health Check Endpoint | ✅ |
-| 33 | Audit Logging | ✅ |
-| 34 | RBAC (4 roles) | ✅ |
-| 35 | Backup/Restore API | ✅ |
-| 36 | BYOK Key Encryption | ✅ |
+| 20 | Add Ollama GPU passthrough configuration | 🔴 NOT STARTED |
+| 21 | Support vLLM as alternative runtime | 🔴 NOT STARTED |
+| 22 | Document GPU setup for common hardware | 🔴 NOT STARTED |
 
----
-
-## ✅ COMPLETE - AI & Models
+### Inner Life Rebranding
 
 | # | Item | Status |
 |---|------|--------|
-| 40 | Local LLM Integration | ✅ |
-| 41 | Model Selection API | ✅ |
-| 42 | Usage Metering | ✅ |
-| 43 | Cost Calculation (5.5% fee) | ✅ |
-| 44 | User Balance System | ✅ |
-| 45 | API Credits/Reload | ✅ |
+| 23 | Rebrand "Inner Life" → "Agent Intelligence Engine" | 🔴 NOT STARTED |
+| 24 | Document enterprise-friendly framing | 🔴 NOT STARTED |
 
 ---
 
-## ✅ COMPLETE - Agent OS Kernel
+## 🚀 PHASE 2: ECOSYSTEM & COMMUNITY (From Competitive Intelligence)
 
 | # | Item | Status |
 |---|------|--------|
-| 50 | Agent Security Sandbox | ✅ |
-| 51 | Process Isolation | ✅ |
-| 52 | Network Isolation | ✅ |
-| 53 | Per-Agent Resource Limits (CPU/Mem/Disk) | ✅ |
-| 54 | Per-Agent Rate Limiting | ✅ |
-| 55 | IPC (Agent-to-Agent Messaging) | ✅ |
-| 56 | Multi-Agent Coordination | ✅ |
-| 57 | Kernel Event System | ✅ |
+| 25 | Open-source core agent runtime | 🔴 NOT STARTED |
+| 26 | Launch GitHub repo + Discord community | 🔴 NOT STARTED |
+| 27 | Build Plugin SDK | 🔴 NOT STARTED |
+| 28 | Ship 10 first-party skills (Slack, Gmail, GitHub, Jira) | 🔴 NOT STARTED |
+| 29 | Publish benchmark comparisons | 🔴 NOT STARTED |
+| 30 | Add OpenRouter integration as model backend | 🔴 NOT STARTED |
+| 31 | Implement A2A protocol support | 🔴 NOT STARTED |
 
 ---
 
-## 🔄 IN PROGRESS - True OS Capabilities
+## 🚀 PHASE 3: ENTERPRISE & REVENUE
+
+### Compliance & Legal (From Audit)
 
 | # | Item | Status |
 |---|------|--------|
-| 60 | Agent Trigger Chains | ✅ DEPLOYED |
-| 61 | Workflow Engine | ✅ DEPLOYED |
-| 62 | Process Manager (stdin/stdout) | ✅ DEPLOYED |
-| 63 | IPC (Inter-Agent Messaging) | ✅ DEPLOYED |
-| 64 | Usage Dashboard UI | 🔴 NOT STARTED |
-| 65 | SSO Login Page UI | ✅ DEPLOYED |
+| 32 | Create DPA (Data Processing Agreement) templates | 🔴 NOT STARTED |
+| 33 | GDPR compliance documentation | 🔴 NOT STARTED |
+| 34 | AI Liability Framework / Terms of Service | 🔴 NOT STARTED |
+| 35 | BYOK legal disclaimers | 🔴 NOT STARTED |
+| 36 | Begin SOC 2 Type I preparation | 🔴 NOT STARTED |
+| 37 | Professional penetration testing | 🔴 NOT STARTED |
+
+### Revenue Model (From Audit)
+
+| # | Item | Status |
+|---|------|--------|
+| 38 | Tiered pricing: Community (free) / Pro ($99/mo) / Enterprise | 🔴 NOT STARTED |
+| 39 | Decouple revenue from LLM consumption | 🔴 NOT STARTED |
+| 40 | Integrate Stripe for payments | 🔴 NOT STARTED |
+
+### Enterprise Features
+
+| # | Item | Status |
+|---|------|--------|
+| 41 | Multi-tenancy with namespace isolation | 🔴 NOT STARTED |
+| 42 | Agent marketplace for community templates | 🔴 NOT STARTED |
+| 43 | Target 3-5 pilot enterprise customers | 🔴 NOT STARTED |
 
 ---
 
-## 🔴 NOT STARTED - Documentation & UX
+## ✅ COMPLETED ITEMS
 
-| # | Item | Status |
-|---|------|--------|
-| 70 | Bearer Token Documentation | 🔴 |
-| 71 | API Auth Flow Documentation | 🔴 |
-| 72 | SSO Login Page UI | 🔴 |
+### Core Infrastructure (DONE)
+- [x] PostgreSQL deployment
+- [x] Redis deployment
+- [x] JWT Authentication
+- [x] Agent Definition & Runtime
+- [x] Input Sanitization (basic)
+- [x] Container Isolation
+- [x] Network Rate Limiting
+- [x] TLS/SSL with Let's Encrypt
+- [x] HTTP→HTTPS Redirect
+
+### Enterprise Features (DONE)
+- [x] OAuth2/SSO (Okta, Azure, Google)
+- [x] SAML 2.0 Support
+- [x] SCIM 2.0 User Provisioning
+- [x] Custom RBAC with roles
+- [x] SIEM Export (Splunk, ELK, Syslog)
+
+### True OS Capabilities (DONE)
+- [x] Process Manager (stdin/stdout, background)
+- [x] IPC (Inter-Agent Communication)
+- [x] Workflow Engine
+- [x] Sandbox Isolation (gVisor/LXC/seccomp-bpf)
+
+### Documentation (DONE)
+- [x] Bearer Token Documentation
+- [x] API Flow Documentation
+- [x] SSO Login Page UI
+- [x] Usage Dashboard (API)
+
+### Operational (DONE)
+- [x] Health checks (5 min)
+- [x] Enterprise audit (1 hour)
+- [x] Daily backups (3 AM)
+- [x] Security scans (1 AM)
+- [x] Log rotation (4 AM)
 
 ---
 
@@ -128,38 +149,44 @@
 
 | Category | Total | Complete | Remaining |
 |----------|-------|----------|-----------|
-| Critical Blockers | 5 | 5 | 0 |
-| Core Infrastructure | 10 | 10 | 0 |
-| Developer Experience | 5 | 5 | 0 |
-| Enterprise Features | 7 | 7 | 0 |
-| AI & Models | 6 | 6 | 0 |
-| Agent OS Kernel | 8 | 8 | 0 |
-| True OS Capabilities | 6 | 5 | 1 |
-| Documentation | 3 | 2 | 1 |
-| **TOTAL** | **50** | **48** | **2** |
+| Critical Security (Audit) | 10 | 0 | 10 |
+| Phase 1: Harden | 16 | 0 | 16 |
+| Phase 2: Ecosystem | 7 | 0 | 7 |
+| Phase 3: Enterprise | 12 | 0 | 12 |
+| Completed | 21 | 21 | 0 |
+| **TOTAL** | **66** | **21** | **45** |
 
 ---
 
-## 🎯 PRIORITY NEXT STEPS
+## 🎯 STRATEGIC CONTEXT
 
-1. **SSO/OAuth2 Redirect Flow** - Enterprise blocker
-2. **Custom RBAC API** - Enterprise blocker  
-3. **SIEM Export** - Compliance blocker
-4. **Agent Trigger Chains** - Orchestration
-5. **Usage Dashboard** - Revenue enablement
-6. **Bearer Token Documentation** - Low effort
+### Competitive Landscape (March 16, 2026)
+- **NemoClaw** (Nvidia) announced TODAY at GTC - your biggest competitor
+- **Window:** 3-6 months before they mature
+- **Differentiation:** "Complete platform" vs "framework"
 
----
+### The One-Line Strategy
+> "Stop being everything. Be the thing Nvidia can't be: a complete, opinionated, deploy-in-minutes AI agent OS for enterprises who don't have a platform team — with a cognitive layer no one else has."
 
-## 💰 PRICING MODEL (LOCKED)
-
-| Component | Details |
-|-----------|---------|
-| Service Fee | 5.5% on API reloads |
-| Free Models | phi3, llama3, mistral, codellama - $0 |
-| Premium | OpenAI/Anthropic/Google - wholesale + 5.5% |
-| No Tiers | All features available to everyone |
+### Key Strategic Shifts
+1. **Revenue:** Tiered pricing (not just 5.5% fee)
+2. **Compliance:** DPA, SOC 2, AI liability before selling
+3. **Security:** Fix CRITICALs BEFORE any enterprise sales
+4. **Community:** Open-source core to build ecosystem
 
 ---
 
-*Last Updated: March 16, 2026*
+## ⚡ IMMEDIATE ACTION ITEMS
+
+1. **This Week:** Disable root SSH, fix JWT, add password complexity
+2. **This Month:** Add streaming, GPU support, WebSocket
+3. **Next 30 Days:** Get professional pentest
+4. **Next 60 Days:** DPA, GDPR docs, SOC 2 prep
+5. **Next 90 Days:** Launch tiered pricing, community
+
+---
+
+*Roadmap updated based on:*
+- *Third-party security audit (March 16, 2026)*
+- *Competitive intelligence vs NemoClaw, OpenClaw, CrewAI*
+- *Strategic positioning as "Apple of AI"*
