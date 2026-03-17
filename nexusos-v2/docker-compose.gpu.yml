@@ -1,0 +1,41 @@
+# GPU-Accelerated NexusOS Deployment
+# Add --gpus all to enable GPU acceleration for Ollama
+
+version: '3.8'
+
+services:
+  nexusos-ollama:
+    image: ollama/ollama:latest
+    container_name: nexusos-ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    # GPU configuration
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - nexusos-network
+    restart: unless-stopped
+
+# Verify GPU is available:
+# docker exec nexusos-ollama nvidia-smi
+#
+# Install NVIDIA Container Toolkit:
+# https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
+#
+# Then add --gpus all flag to container runtime
+
+volumes:
+  ollama-data:
+
+networks:
+  nexusos-network:
+    driver: bridge

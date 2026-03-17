@@ -150,6 +150,22 @@
 
 ---
 
+## New Entrants (2026)
+
+### NemoClaw (Nvidia)
+
+**What it is:**
+- Enterprise OpenClaw announced at GTC 2026
+- Nvidia's push into enterprise AI agents
+
+**Assessment:**
+- **Window:** 3-6 months before they mature
+- **Current gaps:** streaming, GPU support, model routing, community
+- **Threat level:** MEDIUM - Enterprise focus, different market segment
+- **NexusOS advantage:** Time-to-market, SMB focus, self-hosted simplicity
+
+---
+
 ## Market Opportunity
 
 ### Why Now

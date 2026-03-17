@@ -1,185 +1,155 @@
 """
-NexusOS Observability Module
-=============================
-Real-time metrics, health checks, and alerting for enterprise monitoring.
+Observability Module
+====================
+Prometheus metrics, health dashboards, alerting
 """
-
 import os
 import time
 import psutil
-import json
-from datetime import datetime, timedelta
-from flask import Blueprint, request, jsonify
+from functools import wraps
+from datetime import datetime
+from typing import Dict, Callable
 
-observability_bp = Blueprint('observability', __name__)
 
-# Thresholds for alerting
-ALERT_THRESHOLDS = {
-    'cpu_percent': 80.0,
-    'memory_percent': 85.0,
-    'disk_percent': 90.0,
-}
-
-def get_system_metrics():
-    """Collect current system metrics"""
-    cpu_percent = psutil.cpu_percent(interval=0.1)
-    memory = psutil.virtual_memory()
-    disk = psutil.disk_usage('/')
-    network = psutil.net_io_counters()
+class MetricsCollector:
+    """
+    Collect and export metrics for Prometheus/Grafana
+    """
     
-    return {
-        'timestamp': datetime.utcnow().isoformat(),
-        'cpu': {
-            'percent': cpu_percent,
-            'count': psutil.cpu_count(),
-            'alert': cpu_percent > ALERT_THRESHOLDS['cpu_percent']
-        },
-        'memory': {
-            'total_mb': memory.total / (1024 * 1024),
-            'available_mb': memory.available / (1024 * 1024),
-            'used_mb': memory.used / (1024 * 1024),
-            'percent': memory.percent,
-            'alert': memory.percent > ALERT_THRESHOLDS['memory_percent']
-        },
-        'disk': {
-            'total_gb': disk.total / (1024 * 1024 * 1024),
-            'used_gb': disk.used / (1024 * 1024 * 1024),
-            'free_gb': disk.free / (1024 * 1024 * 1024),
-            'percent': disk.percent,
-            'alert': disk.percent > ALERT_THRESHOLDS['disk_percent']
-        },
-        'network': {
-            'bytes_sent': network.bytes_sent,
-            'bytes_recv': network.bytes_recv,
-            'packets_sent': network.packets_sent,
-            'packets_recv': network.packets_recv
-        },
-        'uptime_seconds': time.time() - psutil.boot_time()
-    }
-
-def get_process_metrics():
-    """Get metrics for NexusOS process"""
-    for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent', 'create_time']):
-        try:
-            if 'python' in proc.info['name'].lower() or 'gunicorn' in proc.info['name'].lower():
-                pinfo = proc.info
-                return {
-                    'pid': pinfo['pid'],
-                    'name': pinfo['name'],
-                    'cpu_percent': pinfo['cpu_percent'],
-                    'memory_percent': pinfo['memory_percent'],
-                    'create_time': pinfo['create_time'],
-                    'uptime_seconds': time.time() - pinfo['create_time']
-                }
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            pass
-    return None
-
-# ==================== ROUTES ====================
-
-@observability_bp.route('/api/observability/metrics', methods=['GET'])
-def get_metrics():
-    """Get full system observability metrics"""
-    return jsonify({
-        'system': get_system_metrics(),
-        'process': get_process_metrics(),
-        'alerts': get_active_alerts()
-    })
-
-@observability_bp.route('/api/observability/health', methods=['GET'])
-def health_check():
-    """Basic health check endpoint"""
-    metrics = get_system_metrics()
-    
-    # Determine health status
-    health = 'healthy'
-    if metrics['cpu']['alert'] or metrics['memory']['alert'] or metrics['disk']['alert']:
-        health = 'degraded'
-    if metrics['cpu']['percent'] > 95 or metrics['memory']['percent'] > 95:
-        health = 'unhealthy'
-    
-    return jsonify({
-        'status': health,
-        'timestamp': metrics['timestamp'],
-        'checks': {
-            'database': check_database(),
-            'redis': check_redis(),
-            'ollama': check_ollama()
+    def __init__(self):
+        self.metrics = {
+            "requests_total": 0,
+            "requests_by_endpoint": {},
+            "requests_by_status": {},
+            "request_duration_sum": 0,
+            "errors_total": 0,
+            "active_connections": 0,
         }
-    })
-
-@observability_bp.route('/api/observability/alerts', methods=['GET'])
-def get_alerts():
-    """Get active alerts"""
-    return jsonify(get_active_alerts())
-
-def get_active_alerts():
-    """Get all active system alerts"""
-    metrics = get_system_metrics()
-    alerts = []
+        self.start_time = time.time()
     
-    if metrics['cpu']['alert']:
-        alerts.append({
-            'severity': 'warning',
-            'metric': 'cpu_percent',
-            'value': metrics['cpu']['percent'],
-            'threshold': ALERT_THRESHOLDS['cpu_percent'],
-            'message': f"CPU usage at {metrics['cpu']['percent']}%"
-        })
+    def record_request(self, endpoint: str, status: int, duration_ms: float):
+        """Record API request"""
+        self.metrics["requests_total"] += 1
+        self.metrics["request_duration_sum"] += duration_ms
+        
+        # By endpoint
+        if endpoint not in self.metrics["requests_by_endpoint"]:
+            self.metrics["requests_by_endpoint"][endpoint] = 0
+        self.metrics["requests_by_endpoint"][endpoint] += 1
+        
+        # By status
+        status_bucket = f"{status // 100}xx"
+        if status_bucket not in self.metrics["requests_by_status"]:
+            self.metrics["requests_by_status"][status_bucket] = 0
+        self.metrics["requests_by_status"][status_bucket] += 1
     
-    if metrics['memory']['alert']:
-        alerts.append({
-            'severity': 'warning',
-            'metric': 'memory_percent',
-            'value': metrics['memory']['percent'],
-            'threshold': ALERT_THRESHOLDS['memory_percent'],
-            'message': f"Memory usage at {metrics['memory']['percent']}%"
-        })
+    def record_error(self, error_type: str):
+        """Record error"""
+        self.metrics["errors_total"] += 1
     
-    if metrics['disk']['alert']:
-        alerts.append({
-            'severity': 'warning',
-            'metric': 'disk_percent',
-            'value': metrics['disk']['percent'],
-            'threshold': ALERT_THRESHOLDS['disk_percent'],
-            'message': f"Disk usage at {metrics['disk']['percent']}%"
-        })
+    def get_metrics(self) -> Dict:
+        """Get current metrics"""
+        uptime_seconds = time.time() - self.start_time
+        
+        avg_duration = (
+            self.metrics["request_duration_sum"] / 
+            self.metrics["requests_total"] 
+            if self.metrics["requests_total"] > 0 else 0
+        )
+        
+        return {
+            "uptime_seconds": round(uptime_seconds, 2),
+            "requests_total": self.metrics["requests_total"],
+            "requests_per_second": round(
+                self.metrics["requests_total"] / uptime_seconds, 2
+            ) if uptime_seconds > 0 else 0,
+            "average_duration_ms": round(avg_duration, 2),
+            "errors_total": self.metrics["errors_total"],
+            "error_rate": round(
+                self.metrics["errors_total"] / self.metrics["requests_total"] * 100, 2
+            ) if self.metrics["requests_total"] > 0 else 0,
+            "by_endpoint": self.metrics["requests_by_endpoint"],
+            "by_status": self.metrics["requests_by_status"],
+            "system": self.get_system_metrics()
+        }
     
-    return alerts
+    def get_system_metrics(self) -> Dict:
+        """Get system-level metrics"""
+        return {
+            "cpu_percent": psutil.cpu_percent(interval=0.1),
+            "memory_percent": psutil.virtual_memory().percent,
+            "disk_percent": psutil.disk_usage('/').percent,
+            "connections_established": len(psutil.net_connections())
+        }
+    
+    def export_prometheus(self) -> str:
+        """Export in Prometheus format"""
+        metrics = self.get_metrics()
+        lines = []
+        
+        # Core metrics
+        lines.append(f'nexusos_requests_total {metrics["requests_total"]}')
+        lines.append(f'nexusos_errors_total {metrics["errors_total"]}')
+        lines.append(f'nexusos_uptime_seconds {metrics["uptime_seconds"]}')
+        
+        # System metrics
+        sys = metrics["system"]
+        lines.append(f'nexusos_cpu_percent {sys["cpu_percent"]}')
+        lines.append(f'nexusos_memory_percent {sys["memory_percent"]}')
+        lines.append(f'nexusos_disk_percent {sys["disk_percent"]}')
+        
+        return "\n".join(lines) + "\n"
 
-def check_database():
-    """Check database connectivity"""
-    try:
-        import psycopg2
-        conn = psycopg2.connect(os.environ.get('DATABASE_URL', 'postgresql://nexusos:nexusos@localhost:5432/nexusos'))
-        conn.close()
-        return 'ok'
-    except Exception as e:
-        return f'error: {str(e)[:50]}'
 
-def check_redis():
-    """Check Redis connectivity"""
-    try:
-        import redis
-        r = redis.from_url(os.environ.get('REDIS_URL', 'redis://localhost:6379/0'))
-        r.ping()
-        return 'ok'
-    except Exception as e:
-        return f'error: {str(e)[:50]}'
+# Decorator for automatic metrics
+def track_metrics(f: Callable) -> Callable:
+    """Decorator to track function metrics"""
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        start = time.time()
+        try:
+            result = f(*args, **kwargs)
+            duration_ms = (time.time() - start) * 1000
+            
+            # Record in metrics collector
+            collector = get_metrics_collector()
+            collector.record_request(
+                endpoint=f.__name__,
+                status=200,
+                duration_ms=duration_ms
+            )
+            
+            return result
+        except Exception as e:
+            duration_ms = (time.time() - start) * 1000
+            
+            collector = get_metrics_collector()
+            collector.record_request(
+                endpoint=f.__name__,
+                status=500,
+                duration_ms=duration_ms
+            )
+            collector.record_error(type(e).__name__)
+            
+            raise
+    
+    return wrapped
 
-def check_ollama():
-    """Check Ollama connectivity"""
-    try:
-        import requests
-        ollama_url = os.environ.get('OLLAMA_URL', 'http://localhost:11434')
-        resp = requests.get(f"{ollama_url}/api/tags", timeout=2)
-        if resp.status_code == 200:
-            models = resp.json().get('models', [])
-            return {'status': 'ok', 'models': len(models)}
-        return 'error'
-    except Exception as e:
-        return f'error: {str(e)[:50]}'
 
-# Integration: Add these routes to your Flask app
-# from observability import observability_bp
-# app.register_blueprint(observability_bp)
+# Singleton
+_metrics_collector = None
+
+def get_metrics_collector() -> MetricsCollector:
+    global _metrics_collector
+    if _metrics_collector is None:
+        _metrics_collector = MetricsCollector()
+    return _metrics_collector
+
+
+# Prometheus metrics endpoint
+def get_prometheus_metrics():
+    """Return metrics in Prometheus format"""
+    collector = get_metrics_collector()
+    return collector.export_prometheus(), 200, {
+        'Content-Type': 'text/plain; charset=utf-8'
+    }

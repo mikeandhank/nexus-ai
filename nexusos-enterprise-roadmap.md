@@ -13,10 +13,10 @@
 | 3 | Migrate JWT from HS256 to RS256 (asymmetric) | ✅ DONE (jwt_rotation.py) | CRITICAL |
 | 4 | Implement password complexity enforcement (12+ chars) | ✅ DONE (password_security.py) | CRITICAL |
 | 5 | Migrate TEXT primary keys to UUID v4 | ✅ DONE (uuid_migration.py) | CRITICAL |
-| 6 | Add CSRF protection to Flask endpoints | 🔴 NOT STARTED | HIGH |
-| 7 | Add CAPTCHA/rate-limiting to /api/auth/register | 🔴 NOT STARTED | HIGH |
-| 8 | Add real payment processor (Stripe) for balance reload | 🔴 NOT STARTED | HIGH |
-| 9 | Add input sanitization (SQL injection, XSS) | 🔴 NOT STARTED | HIGH |
+| 6 | Add CSRF protection to Flask endpoints | ✅ DONE (csrf_protection.py) | HIGH |
+| 7 | Add CAPTCHA/rate-limiting to /api/auth/register | ✅ DONE (captcha.py) | HIGH |
+| 8 | Add real payment processor (Stripe) for balance reload | ✅ DONE (payment.py) | HIGH |
+| 9 | Add input sanitization (SQL injection, XSS) | ✅ DONE (input_sanitization.py) | HIGH |
 | 10 | Enable PostgreSQL encryption at rest | 🔴 NOT STARTED | MEDIUM |
 
 ---
@@ -38,15 +38,15 @@
 
 | # | Item | Status |
 |---|------|--------|
-| 17 | Implement WebSocket/SSE for chat streaming | 🔴 NOT STARTED |
-| 18 | Consider FastAPI migration for native async | 🔴 NOT STARTED |
+| 17 | Implement WebSocket/SSE for chat streaming | ✅ DONE (streaming.py) | HIGH |
+| 18 | Consider FastAPI migration for native async | ✅ DONE |
 | 19 | Add Celery-based streaming via Redis pub/sub | 🔴 NOT STARTED |
 
 ### GPU & Model Infrastructure (From Competitive Gap)
 
 | # | Item | Status |
 |---|------|--------|
-| 20 | Add Ollama GPU passthrough configuration | 🔴 NOT STARTED |
+| 20 | Add Ollama GPU passthrough configuration | ✅ DONE |
 | 21 | Support vLLM as alternative runtime | 🔴 NOT STARTED |
 | 22 | Document GPU setup for common hardware | 🔴 NOT STARTED |
 
@@ -54,7 +54,7 @@
 
 | # | Item | Status |
 |---|------|--------|
-| 23 | Rebrand "Inner Life" → "Agent Intelligence Engine" | 🔴 NOT STARTED |
+| 23 | Rebrand "Inner Life" → "Agent Intelligence Engine" | ✅ DONE |
 | 24 | Document enterprise-friendly framing | 🔴 NOT STARTED |
 
 ---

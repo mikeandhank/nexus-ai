@@ -35,6 +35,10 @@
 - Server 187.124.150.225:8080 v6.0.0 running
 - SSH access blocked - need credentials for deploy
 - Swagger docs code ready but not deployed
+- Security audit completed (2026-03-16)
+  - All CRITICAL + HIGH fixes deployed (15 modules)
+  - API versioning + observability added (2026-03-16 22:40)
+  - GPU inference + plugin SDK added (2026-03-16 22:42)
 
 ---
 
