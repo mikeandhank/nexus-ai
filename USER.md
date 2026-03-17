@@ -5,7 +5,7 @@ _Learn about the person you're helping. Update this as you go._
 - **Name:** Michael Beal
 - **What to call them:** Michael
 - **Pronouns:** 
-- **Timezone:** America/New_York
+- **Timezone:** America/Mountain
 - **Notes:** Telegram user (8643045688)
 
 ## Context
