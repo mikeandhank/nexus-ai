@@ -69,6 +69,22 @@
 | 9 | Credit purchase flow | 🔴 NOT STARTED |
 | 10 | Usage dashboard API | 🔴 NOT STARTED |
 
+### Phase 4: Webapp & Smart Routing
+| # | Item | Status |
+|---|------|--------|
+| 11 | Webapp UI (dashboard, config, usage) | 🔴 NOT STARTED |
+| 12 | **Cost/Quality Slider** | 🔴 NOT STARTED |
+| 13 | Auto model selection based on task | 🔴 NOT STARTED |
+| 14 | Context-aware routing | 🔴 NOT STARTED |
+
+### Phase 5: Mobile Apps
+| # | Item | Status |
+|---|------|--------|
+| 15 | iOS App (App Store) | 🔴 NOT STARTED |
+| 16 | Android App (Play Store) | 🔴 NOT STARTED |
+| 17 | Push notifications | 🔴 NOT STARTED |
+| 18 | Mobile context harvesting | 🔴 NOT STARTED |
+
 ---
 
 # NEXUSOS CLIENT
@@ -178,6 +194,79 @@ User buys credits → We route to LLM → We keep 5.5% fee
                                    
 User BYOK → We route → We charge 5% of provider cost
 ```
+
+---
+
+# COST/QUALITY SLIDER
+
+## Concept
+User-facing control in webapp to balance cost vs. response quality:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Cost/Quality Slider                                        │
+│                                                             │
+│  🦉 Cheap                          Expensive 🦅            │
+│  [────●────────────]                                       │
+│                                                             │
+│  Model: gpt-4o-mini    →    Model: gpt-4o                 │
+│  Cost: $0.15/1M        →    Cost: $2.50/1M                 │
+│  Speed: Fast            →    Speed: Moderate                │
+│  Use: Quick tasks     →    Use: Complex reasoning         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Implementation
+| Setting | Model | Cost Level | Use Case |
+|---------|-------|------------|----------|
+| ⚡️ Speed | gpt-4o-mini | $0.15/1M | Quick queries, summaries |
+| ⚖️ Balanced | claude-sonnet | $3.00/1M | General tasks |
+| 💎 Quality | gpt-4o / opus | $2.50-15/1M | Complex reasoning |
+| 🧠 Deep | o1-preview | $15/1M | Hard problems |
+
+## Auto-Selection
+Based on detected task complexity:
+- Simple Q&A → cheapest model
+- Code generation → mid-tier
+- Complex reasoning → premium
+
+---
+
+# MOBILE APPS
+
+## Purpose
+- Control agents on-the-go
+- Real-time notifications
+- Harvest additional context (location, calendar, activity)
+
+## iOS / Android Features
+
+| Feature | Description |
+|---------|-------------|
+| **Agent Control** | Start/stop/pause agents |
+| **Chat Interface** | Talk to agents directly |
+| **Push Notifications** | Agent completions, alerts |
+| **Context Feed** | Calendar, location, activity |
+| **Usage Dashboard** | Credits, costs, history |
+| **Settings** | Model preferences, alerts |
+
+## Context Harvesting
+```
+┌────────────────────────────────────────────────────────┐
+│  Mobile Context (optional, user-controlled)            │
+├────────────────────────────────────────────────────────┤
+│  📍 Location    - "Near coffee shop, suggest agent"  │
+│  📅 Calendar   - "Meeting in 10min, summarize docs"   │
+│  🔔 Activity   - "Missed call, draft response"       │
+│  📸 Photos     - "Analyze this receipt"               │
+│  🎤 Voice      - "Transcribe & summarize"             │
+└────────────────────────────────────────────────────────┘
+```
+
+## Technical Stack
+- **iOS**: Swift/SwiftUI + React Native
+- **Android**: Kotlin + React Native
+- **Backend**: Existing Nexus Server APIs
 
 ---
 
