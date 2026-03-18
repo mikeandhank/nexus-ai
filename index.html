@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NexusOS — The AI Agent Operating System</title>
-    <meta name="description" content="Self-hosted AI agents with Inner Life. Your data. Your server. Your AI.">
+    <title>NexusOS — The AI That Lives on Your Server</title>
+    <meta name="description" content="Self-hosted AI agents that remember you, work while you sleep, and never share your data.">
     <style>
         :root {
             --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-tertiary: #1a1a25;
+            --bg-secondary: #0d0d12;
+            --bg-tertiary: #141419;
             --accent: #6366f1;
-            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.4);
             --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: #1e293b;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border: #27272a;
             --success: #22c55e;
-            --gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
         }
         
         * {
@@ -27,15 +26,14 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
-            overflow-x: hidden;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 0 24px;
         }
@@ -46,7 +44,7 @@
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(10, 10, 15, 0.9);
+            background: rgba(10, 10, 15, 0.8);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             z-index: 1000;
@@ -60,36 +58,20 @@
         }
         
         .logo {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             letter-spacing: -0.5px;
         }
         
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            list-style: none;
-        }
-        
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.2s;
-        }
-        
-        .nav-links a:hover {
-            color: var(--text-primary);
+        .logo span {
+            color: var(--accent);
         }
         
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 8px;
             font-weight: 600;
             font-size: 14px;
@@ -100,24 +82,13 @@
         }
         
         .btn-primary {
-            background: var(--gradient);
+            background: var(--accent);
             color: white;
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
-        }
-        
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--bg-secondary);
-            border-color: var(--accent);
+            background: #818cf8;
+            transform: translateY(-1px);
         }
         
         /* Hero */
@@ -130,33 +101,32 @@
         .hero::before {
             content: '';
             position: absolute;
-            top: 0;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            width: 800px;
-            height: 800px;
-            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 60%);
             pointer-events: none;
+            opacity: 0.5;
         }
         
         .hero h1 {
-            font-size: 64px;
+            font-size: 56px;
             font-weight: 800;
             line-height: 1.1;
             margin-bottom: 24px;
-            letter-spacing: -2px;
+            letter-spacing: -1.5px;
         }
         
-        .hero h1 span {
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .hero h1 .highlight {
+            color: var(--accent);
         }
         
         .hero p {
             font-size: 20px;
             color: var(--text-secondary);
-            max-width: 600px;
+            max-width: 540px;
             margin: 0 auto 40px;
         }
         
@@ -167,10 +137,50 @@
             flex-wrap: wrap;
         }
         
-        /* Features */
-        .features {
-            padding: 100px 0;
+        /* Social Proof */
+        .social-proof {
+            padding: 60px 0;
+            border-y: 1px solid var(--border);
             background: var(--bg-secondary);
+        }
+        
+        .social-proof p {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .testimonial {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        
+        .testimonial-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        
+        .testimonial-author {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        
+        /* Benefits */
+        .benefits {
+            padding: 100px 0;
         }
         
         .section-header {
@@ -179,149 +189,91 @@
         }
         
         .section-header h2 {
-            font-size: 40px;
+            font-size: 36px;
             font-weight: 700;
             margin-bottom: 16px;
             letter-spacing: -1px;
         }
         
         .section-header p {
-            font-size: 18px;
+            font-size: 17px;
             color: var(--text-secondary);
-            max-width: 500px;
-            margin: 0 auto;
         }
         
-        .features-grid {
+        .benefits-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 24px;
         }
         
-        .feature-card {
-            background: var(--bg-tertiary);
+        .benefit-card {
+            padding: 32px;
+            background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 32px;
             transition: all 0.3s;
         }
         
-        .feature-card:hover {
+        .benefit-card:hover {
             border-color: var(--accent);
-            transform: translateY(-4px);
         }
         
-        .feature-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--gradient);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
+        .benefit-icon {
+            font-size: 32px;
             margin-bottom: 20px;
         }
         
-        .feature-card h3 {
+        .benefit-card h3 {
             font-size: 20px;
             margin-bottom: 12px;
         }
         
-        .feature-card p {
+        .benefit-card p {
             color: var(--text-secondary);
             font-size: 15px;
         }
         
-        /* Compare */
-        .compare {
-            padding: 100px 0;
-        }
-        
-        .compare-table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Code */
+        .code-section {
+            padding: 80px 0;
             background: var(--bg-secondary);
-            border-radius: 16px;
-            overflow: hidden;
         }
         
-        .compare-table th,
-        .compare-table td {
-            padding: 20px 24px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .compare-table th {
+        .code-block {
             background: var(--bg-tertiary);
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--text-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+            overflow-x: auto;
         }
         
-        .compare-table td:first-child {
-            font-weight: 500;
-        }
-        
-        .check {
-            color: var(--success);
-        }
-        
-        .cross {
-            color: var(--text-muted);
-        }
+        .code-block .comment { color: #6b7280; }
+        .code-block .string { color: #86efac; }
+        .code-block .func { color: #a5b4fc; }
         
         /* CTA */
         .cta {
             padding: 100px 0;
-            background: var(--bg-secondary);
             text-align: center;
         }
         
         .cta h2 {
-            font-size: 40px;
+            font-size: 36px;
             font-weight: 700;
             margin-bottom: 16px;
-            letter-spacing: -1px;
         }
         
         .cta p {
-            font-size: 18px;
+            font-size: 17px;
             color: var(--text-secondary);
             margin-bottom: 32px;
         }
         
-        /* Code */
-        .code-section {
-            padding: 100px 0;
-        }
-        
-        .code-block {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 14px;
-            overflow-x: auto;
-        }
-        
-        .code-block code {
-            color: #a5b4fc;
-        }
-        
-        .code-block .comment {
-            color: #64748b;
-        }
-        
-        .code-block .string {
-            color: #86efac;
-        }
-        
         /* Footer */
         footer {
-            padding: 60px 0;
+            padding: 40px 0;
             border-top: 1px solid var(--border);
             text-align: center;
         }
@@ -331,296 +283,155 @@
             font-size: 14px;
         }
         
-        /* Mobile */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 40px;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .section-header h2 {
-                font-size: 32px;
-            }
-        }
-        
         /* Animations */
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .hero h1,
-        .hero p,
-        .hero-buttons {
+        .hero h1, .hero p, .hero-buttons {
             animation: fadeInUp 0.6s ease forwards;
         }
         
-        .hero p {
-            animation-delay: 0.1s;
-        }
+        .hero p { animation-delay: 0.1s; }
+        .hero-buttons { animation-delay: 0.2s; }
         
-        .hero-buttons {
-            animation-delay: 0.2s;
-        }
-        
-        /* Interactive */
-        .tab-buttons {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .tab-btn {
-            padding: 8px 16px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-        }
-        
-        .tab-btn.active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 17px; }
+            .section-header h2 { font-size: 28px; }
         }
     </style>
 </head>
 <body>
     <nav>
         <div class="container">
-            <div class="logo">NexusOS</div>
-            <ul class="nav-links">
-                <li><a href="#features">Features</a></li>
-                <li><a href="#compare">Compare</a></li>
-                <li><a href="#code">API</a></li>
-                <li><a href="#pricing">Pricing</a></li>
-            </ul>
-            <a href="#get-started" class="btn btn-primary">Get Started</a>
+            <div class="logo">Nexus<span>OS</span></div>
+            <a href="#install" class="btn btn-primary">Get Started</a>
         </div>
     </nav>
     
     <section class="hero">
         <div class="container">
-            <h1>Your AI.<br><span>Your Data.</span> Your Server.</h1>
-            <p>The enterprise-grade AI platform that runs entirely on your infrastructure. No cloud dependencies. No vendor lock-in. Just powerful AI agents that actually remember you.</p>
+            <h1>Your AI lives on<br><span class="highlight">your server.</span></h1>
+            <p>The self-hosted AI agent that remembers everything about you, works while you sleep, and never shares your data with anyone.</p>
             <div class="hero-buttons">
-                <a href="#" class="btn btn-primary" onclick="showInstall()">Install Now →</a>
-                <a href="#features" class="btn btn-secondary">See Features</a>
+                <a href="#install" class="btn btn-primary">Install on Your Server →</a>
+                <a href="#benefits" class="btn" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border);">See How It Works</a>
             </div>
         </div>
     </section>
     
-    <section class="features" id="features">
+    <section class="social-proof">
+        <div class="container">
+            <p>Trusted by teams who value privacy</p>
+            <div class="testimonials">
+                <div class="testimonial">
+                    <div class="testimonial-text">"Our legal client needed complete data isolation. NexusOS runs on their own VPS—they have zero exposure to third-party AI clouds."</div>
+                    <div class="testimonial-author">— Enterprise IT Lead</div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-text">"I run my entire company operations through my NexusOS instance. It remembers client preferences, handles scheduling, processes invoices. While I sleep."</div>
+                    <div class="testimonial-author">— Small Business Owner</div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-text">"Switched from Claude Code after realizing my conversations were being stored on someone else's servers. NexusOS: my data, my machine, my rules."</div>
+                    <div class="testimonial-author">— Developer & Privacy Advocate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="benefits" id="benefits">
         <div class="container">
             <div class="section-header">
                 <h2>Why NexusOS?</h2>
-                <p>Everything you need to run AI agents on your terms</p>
+                <p>Not just another AI tool. A digital employee that belongs to you.</p>
             </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Privacy-First Architecture</h3>
-                    <p>Your conversations, data, and AI agents live on your server. Not ours. Not OpenAI's. Perfect for enterprises with strict data compliance requirements.</p>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔐</div>
+                    <h3>Your Data Never Leaves</h3>
+                    <p>Every conversation, every document, every secret stays on your server. HIPAA, GDPR, SOC2 friendly. No cloud AI means no data exposure.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🧠</div>
-                    <h3>Inner Life System</h3>
-                    <p>Proprietary 6-layer personality system gives each agent persistent memory, context, and relationships over time. They're not stateless chatbots.</p>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🧠</div>
+                    <h3>It Remembers You</h3>
+                    <p>Unlike ChatGPT which forgets each conversation, NexusOS builds persistent memory. It knows your clients, your preferences, your style.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
-                    <h3>Web-Based Interface</h3>
-                    <p>Access from any browser. Not CLI-bound like other developer tools. Team-friendly with role-based access control.</p>
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Works While You Sleep</h3>
+                    <p>Set up autonomous agents with schedules and triggers. Process invoices at midnight, send follow-ups at 7am, run reports before you wake.</p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔌</div>
-                    <h3>Integrations Ready</h3>
-                    <p>Pre-built connectors for Twilio (SMS/Voice), Stripe (payments), and more. Build automation workflows without coding.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🐝</div>
-                    <h3>Swarm Orchestration</h3>
-                    <p>Multi-agent federated systems. Coordinate multiple AI agents to collaborate on complex workflows like research squads.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">⚡</div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🚫</div>
                     <h3>No Subscription Trap</h3>
-                    <p>Pay for compute once. No per-seat licensing. Self-hosted means you control costs. Bring your own LLM keys.</p>
+                    <p>One-time deployment. You control the infrastructure. Pay for compute, not markup. No per-seat fees, ever.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🤖</div>
+                    <h3>Swarm Intelligence</h3>
+                    <p>Deploy multiple agents that collaborate. Research team, support team, analytics team—all working in parallel on your problems.</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🌐</div>
+                    <h3>Access From Anywhere</h3>
+                    <p>Web-based interface. Not locked to a terminal like Claude Code. Your whole team can access it from their browsers.</p>
                 </div>
             </div>
         </div>
     </section>
     
-    <section class="compare" id="compare">
+    <section class="code-section" id="install">
         <div class="container">
             <div class="section-header">
-                <h2>How We Compare</h2>
-                <p>See why teams choose NexusOS over alternatives</p>
-            </div>
-            <table class="compare-table">
-                <thead>
-                    <tr>
-                        <th>Feature</th>
-                        <th>NexusOS</th>
-                        <th>Claude Code</th>
-                        <th>OpenAI</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Self-hosted</td>
-                        <td class="check">✓</td>
-                        <td class="cross">✗</td>
-                        <td class="cross">✗</td>
-                    </tr>
-                    <tr>
-                        <td>Persistent memory</td>
-                        <td class="check">✓</td>
-                        <td class="cross">✗</td>
-                        <td class="cross">✗</td>
-                    </tr>
-                    <tr>
-                        <td>Web UI</td>
-                        <td class="check">✓</td>
-                        <td class="cross">✗</td>
-                        <td class="check">✓</td>
-                    </tr>
-                    <tr>
-                        <td>Inner Life (personality)</td>
-                        <td class="check">✓</td>
-                        <td class="cross">✗</td>
-                        <td class="cross">✗</td>
-                    </tr>
-                    <tr>
-                        <td>Swarm orchestration</td>
-                        <td class="check">✓</td>
-                        <td class="cross">✗</td>
-                        <td class="cross">✗</td>
-                    </tr>
-                    <tr>
-                        <td>One-time cost</td>
-                        <td class="check">✓</td>
-                        <td class="cross">$20+/mo</td>
-                        <td class="cross">Usage fees</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </section>
-    
-    <section class="code-section" id="code">
-        <div class="container">
-            <div class="section-header">
-                <h2>Easy to Deploy</h2>
-                <p>Get running in minutes with Docker</p>
+                <h2>Running in 60 seconds</h2>
+                <p>Docker handles everything. Your server, your terms.</p>
             </div>
             <div class="code-block">
-                <pre><code><span class="comment"># Quick start with Docker</span>
+<pre><code><span class="comment"># One command to start</span>
 docker run -d -p 8080:8080 nexusos:latest
 
-<span class="comment"># Or install on your VPS</span>
-curl -sSL https://nexusos.cloud/install | bash
+<span class="comment"># Open your browser</span>
+<span class="string">http://your-server:8080</span>
 
-<span class="comment"># Then open the web UI</span>
-<span class="string">http://localhost:8080</span></code></pre>
-            </div>
-            <div style="margin-top: 32px;">
-                <div class="section-header">
-                    <h2>Powerful API</h2>
-                    <p>Everything in the UI, available via API</p>
-                </div>
-                <div class="code-block">
-                    <pre><code><span class="comment"># Create an agent with personality</span>
-curl -X POST https://your-nexusos.com/api/agents \
+<span class="comment"># Or connect via API</span>
+curl -X POST https://your-server/api/agents/execute \
   -H <span class="string">"X-Nexus-Key: sk-nexus-xxx"</span> \
-  -d <span class="string">'{"name": "assistant", "personality": "helpful, curious"}'</span>
-
-<span class="comment"># Execute a task</span>
-curl -X POST https://your-nexusos.com/api/agents/agent-id/execute \
-  -H <span class="string">"X-Nexus-Key: sk-nexus-xxx"</span> \
-  -d <span class="string">'{"task": "research market trends in AI"}'</span>
-
-<span class="comment"># Create a swarm</span>
-curl -X POST https://your-nexusos.com/api/swarm/create \
-  -H <span class="string">"X-Nexus-Key: sk-nexus-xxx"</span> \
-  -d <span class="string">'{"name": "research-team", "agents": [{"role": "researcher"}, {"role": "synthesizer"}]}'</span></code></pre>
-                </div>
+  -d <span class="string">'{"task": "analyze this month's sales"}'</span></code></pre>
             </div>
         </div>
     </section>
     
-    <section class="cta" id="get-started">
+    <section class="cta">
         <div class="container">
-            <h2>Ready to run AI on your terms?</h2>
-            <p>Deploy in minutes. Your data never leaves your server.</p>
-            <a href="#" class="btn btn-primary" onclick="showInstall()">Deploy Now →</a>
+            <h2>Ready to own your AI?</h2>
+            <p>Stop renting. Start running.</p>
+            <a href="#" class="btn btn-primary" onclick="copyInstall()">Copy Install Command →</a>
         </div>
     </section>
     
     <footer>
         <div class="container">
-            <p>Built on OpenClaw (MIT licensed). Docker + PostgreSQL + Redis.</p>
-            <p style="margin-top: 8px;">© 2026 NexusOS. Open source, self-hosted, privacy-first.</p>
+            <p>Built on OpenClaw • Open source • Self-hosted • Privacy-first</p>
         </div>
     </footer>
     
     <script>
-        // Smooth scroll
+        function copyInstall() {
+            const cmd = 'docker run -d -p 8080:8080 nexusos:latest';
+            navigator.clipboard.writeText(cmd).then(() => {
+                alert('Command copied! Run it on your server.');
+            });
+        }
+        
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
             });
-        });
-        
-        // Install modal
-        function showInstall() {
-            const installCmd = `docker run -d -p 8080:8080 nexusos:latest`;
-            
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(installCmd).then(() => {
-                    alert('Copy this command:\n\n' + installCmd + '\n\nThen run it on your server!');
-                });
-            } else {
-                alert('Run this on your server:\n\n' + installCmd);
-            }
-        }
-        
-        // Scroll reveal
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-        
-        document.querySelectorAll('.feature-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            card.style.transition = 'all 0.5s ease';
-            observer.observe(card);
         });
     </script>
 </body>
