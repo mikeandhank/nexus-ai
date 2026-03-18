@@ -58,9 +58,9 @@
 - ✅ Server healthy: PostgreSQL ✅ Redis ✅ Ollama ✅
 
 **What's next:**
-- Input sanitization (SQL injection, XSS)
+- ~~Input sanitization (SQL injection, XSS)~~ ✅ DONE (Mar 17)
 - ~~Database encryption at rest~~ ✅ DONE
-- Streaming/WebSocket for chat
+- ~~Streaming/WebSocket for chat~~ ✅ DONE
 
 ---
 
