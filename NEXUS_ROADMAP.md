@@ -1,6 +1,6 @@
 # NexusOS Project Roadmap
 ## Two-Project Architecture: Nexus Server + NexusOS Client
-**Last Updated:** March 17, 2026
+**Last Updated:** March 18, 2026
 
 ---
 
@@ -37,47 +37,91 @@
 ## What We Have (✅)
 | Component | File | Status |
 |-----------|------|--------|
-| Multi-provider LLM routing | llm_integration.py | ✅ DONE |
-| Credit system | billing.py | ✅ DONE |
-| Usage tracking | billing.py | ✅ DONE |
-| Encryption at rest | encryption.py, pgcrypto | ✅ DONE |
-| JWT Auth | auth.py | ✅ DONE |
-| API Key system | server_api.py | ✅ DONE |
-| Chat endpoint | server_api.py | ✅ DONE |
+| **Full Server (Flask)** | server_full.py | ✅ DONE |
+| Multi-provider LLM routing | server_full.py | ✅ DONE |
+| Cost/Quality Slider | server_full.py | ✅ DONE |
+| Credit system | server_full.py | ✅ DONE |
+| Usage tracking | server_full.py | ✅ DONE |
+| Encryption at rest | encryption.py | ✅ DONE |
+| JWT Auth with bcrypt | server_full.py | ✅ DONE |
+| API Key system | server_full.py | ✅ DONE |
+| Chat endpoint | server_full.py | ✅ DONE |
+| **Swarm Orchestration** | swarm_orchestration.py | ✅ DONE |
+| **Automation Templates** | automation_templates.py | ✅ DONE |
+| **Twilio Integration** | twilio_integration.py | ✅ DONE |
+| Landing Page | index.html | ✅ DONE |
+
+## Completed This Week (March 18)
+- ✅ Security audit fixes (bcrypt, atomic transactions, input validation)
+- ✅ Swarm multi-agent orchestration API
+- ✅ 6 automation templates (CRM sync, email parser, support triage, etc.)
+- ✅ Twilio SMS/Voice integration
+- ✅ Landing page with modern dark UI
+- ✅ Legacy code archived
 
 ## What We Need (🔴)
 
-### Phase 1: Core (This Week)
+### Phase 1: Production Ready
 | # | Item | Status |
 |---|------|--------|
-| 1 | Deploy server_api.py to production | 🔴 NOT STARTED |
-| 2 | Test /api/chat with real API key | 🔴 NOT STARTED |
-| 3 | Add provider keys (OpenAI, Anthropic) | 🔴 NOT STARTED |
-| 4 | Connect usage tracking to /chat | 🔴 NOT STARTED |
+| 1 | Deploy server_full.py to VPS | 🔴 NOT STARTED |
+| 2 | Set up PostgreSQL on VPS | 🔴 NOT STARTED |
+| 3 | Configure environment variables | 🔴 NOT STARTED |
+| 4 | Test /api/chat with real API key | 🔴 NOT STARTED |
 
-### Phase 2: Auth & Users
+### Phase 2: Integrations
 | # | Item | Status |
 |---|------|--------|
-| 5 | API key validation middleware | 🔴 NOT STARTED |
-| 6 | User dashboard API | 🔴 NOT STARTED |
-| 7 | Register/Login endpoints | 🔴 NOT STARTED |
+| 5 | Twilio credentials (production) | 🔴 NOT STARTED |
+| 6 | Stripe payment integration | 🔴 NOT STARTED |
+| 7 | Custom domain (nexusos.ai) | 🔴 NOT STARTED |
 
-### Phase 3: Billing
+### Phase 3: Scaling
 | # | Item | Status |
 |---|------|--------|
-| 8 | Stripe integration | 🔴 NOT STARTED |
-| 9 | Credit purchase flow | 🔴 NOT STARTED |
-| 10 | Usage dashboard API | 🔴 NOT STARTED |
+| 8 | Redis for sessions/cache | 🔴 NOT STARTED |
+| 9 | Celery for background tasks | 🔴 NOT STARTED |
+| 10 | Usage dashboard UI | 🔴 NOT STARTED |
 
-### Phase 4: Webapp & Smart Routing
+---
+
+# NEXUSOS CLIENT
+
+## What We Have (✅)
+| Component | File | Status |
+|-----------|------|--------|
+| Agent Runtime | agent_runtime.py | ✅ DONE |
+| Multi-agent Pool | agent_pool.py | ✅ DONE |
+| Memory System | memory_consolidation.py | ✅ DONE |
+| Skills System | skills.py | ✅ DONE |
+| Tool Engine | tool_engine.py | ✅ DONE |
+| MCP Protocol | mcp_server.py | ✅ DONE |
+| Inner Life | affect_layer.py, theory_of_mind.py, etc | ✅ DONE |
+| Background Processing | background_processor.py | ✅ DONE |
+| Process Manager | (in agent_runtime) | ✅ DONE |
+| CLI Client | client_cli.py | ✅ DONE |
+
+## What We Need (🔴)
+
+### Phase 1: Server Communication
 | # | Item | Status |
 |---|------|--------|
-| 11 | Webapp UI (dashboard, config, usage) | 🔴 NOT STARTED |
-| 12 | **Cost/Quality Slider** | 🔴 NOT STARTED |
-| 13 | Auto model selection based on task | 🔴 NOT STARTED |
-| 14 | Context-aware routing | 🔴 NOT STARTED |
+| 1 | Connect CLI to server_full.py | 🔴 NOT STARTED |
+| 2 | Nexus API Key config | 🔴 NOT STARTED |
+| 3 | /chat command (call server) | 🔴 NOT STARTED |
 
-### Phase 5: Mobile Apps
+### Phase 2: Integration
+| # | Item | Status |
+|---|------|--------|
+| 4 | Offline mode (Ollama fallback) | 🔴 NOT STARTED |
+| 5 | Usage sync | 🔴 NOT STARTED |
+
+### Phase 3: Proprietary GUI 🔴 NEW
+| # | Item | Status |
+|---|------|--------|
+| 6 | **Mac-inspired chat-first UI** | 🔴 PLANNED |
+| 7 | Command bar (type to control everything) | 🔴 PLANNED |
+| 8 | Cross-platform (Electron/Tauri) | 🔴 PLANNED |
 | # | Item | Status |
 |---|------|--------|
 | 15 | iOS App (App Store) | 🔴 NOT STARTED |

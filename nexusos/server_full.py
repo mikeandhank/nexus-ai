@@ -85,18 +85,19 @@ RATE_LIMIT_STORE = {}
 
 def get_rate_limit(credits: float) -> int:
     """Calculate rate limit based on account balance."""
-    # High cap - we WANT users to spend their credits!
-    # This is mainly to prevent infinite loops and system overload
-    if credits < 100:
-        return 100    # Minimum to prevent complete lockout
+    # Credit-based limits (requests per minute)
+    if credits <= 0:
+        return 5      # Nearly blocked
+    elif credits < 10:
+        return 10     # Very low - almost out of credits
+    elif credits < 100:
+        return 30     # Free tier / low balance
     elif credits < 1000:
-        return 1000   
+        return 100    # Has some credits
     elif credits < 10000:
-        return 2500   
-    elif credits < 100000:
-        return 5000   
+        return 500    # Substantial balance
     else:
-        return 10000  # High roller cap
+        return 5000   # High roller
 
 def check_rate_limit(user_id: str, credits: float = 0) -> bool:
     """Check if user has exceeded rate limit based on their credit balance."""
