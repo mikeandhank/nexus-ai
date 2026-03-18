@@ -10,7 +10,7 @@ import base64
 from typing import Optional, Any
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 # Get encryption key from environment - FAIL if not set in production
 def get_encryption_key() -> str:
@@ -35,7 +35,7 @@ def derive_key(password: str, salt: bytes = None) -> str:
     if salt is None:
         salt = b'nexusos-salt-v1'  # Fixed salt for deterministic derivation
     
-    kdf = PBKDF2(
+    kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
         salt=salt,

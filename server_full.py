@@ -21,6 +21,11 @@ from swarm_orchestration import create_swarm_routes
 from automation_templates import create_automation_routes
 from twilio_integration import create_twilio_routes
 from encryption import get_encryption_key, hash_key_for_storage, verify_key_hash
+from model_registry import (
+    get_models, get_free_models, get_model_by_id, 
+    get_models_by_provider, get_model_pricing_estimate,
+    get_model_for_quality, MODEL_CATEGORIES
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -1145,6 +1150,103 @@ def serve_landing_page():
     except FileNotFoundError:
         return jsonify({'error': 'Landing page not found'}), 404
     return jsonify({'status': 'ok', 'service': 'nexus-server'})
+
+
+# ============================================================================
+# MODEL REGISTRY - OpenRouter Integration
+# ============================================================================
+
+@app.route('/api/models', methods=['GET'])
+@require_nexus_key
+def list_models():
+    """List all available models with pricing."""
+    try:
+        models = get_models()
+        free_only = request.args.get('free', 'false').lower() == 'true'
+        provider = request.args.get('provider')
+        
+        result = models
+        if free_only:
+            result = [m for m in result if m.get('free')]
+        if provider:
+            result = [m for m in result if m.get('provider', '').lower() == provider.lower()]
+        
+        return jsonify({
+            'models': result[:100],  # Limit for response size
+            'total': len(result),
+            'free_count': len([m for m in models if m.get('free')]),
+            'categories': list(MODEL_CATEGORIES.keys())
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/models/free', methods=['GET'])
+@require_nexus_key
+def list_free_models():
+    """List only free models."""
+    try:
+        models = get_free_models()
+        return jsonify({
+            'models': models,
+            'count': len(models)
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/models/<path:model_id>', methods=['GET'])
+@require_nexus_key
+def get_model(model_id):
+    """Get details for a specific model."""
+    model = get_model_by_id(model_id)
+    if not model:
+        return jsonify({'error': 'Model not found'}), 404
+    
+    # Add pricing estimate examples
+    model['pricing_examples'] = {
+        '1k_input_1k_output': get_model_pricing_estimate(model_id, 1000, 1000),
+        '10k_input_5k_output': get_model_pricing_estimate(model_id, 10000, 5000),
+    }
+    
+    return jsonify(model)
+
+
+@app.route('/api/models/estimate', methods=['POST'])
+@require_nexus_key
+def estimate_cost():
+    """Estimate cost for a request before making it."""
+    data = request.get_json()
+    model_id = data.get('model')
+    input_tokens = data.get('input_tokens', 0)
+    output_tokens = data.get('output_tokens', 0)
+    
+    if not model_id:
+        return jsonify({'error': 'model required'}), 400
+    
+    estimate = get_model_pricing_estimate(model_id, input_tokens, output_tokens)
+    return jsonify(estimate)
+
+
+@app.route('/api/models/by-quality/<quality>', methods=['GET'])
+@require_nexus_key
+def get_model_by_quality(quality):
+    """Get recommended model for a quality setting."""
+    if quality not in MODEL_CATEGORIES:
+        return jsonify({
+            'error': 'Invalid quality',
+            'valid': list(MODEL_CATEGORIES.keys())
+        }), 400
+    
+    model_id = get_model_for_quality(quality)
+    model = get_model_by_id(model_id)
+    
+    return jsonify({
+        'quality': quality,
+        'model': model_id,
+        'model_info': model,
+        'alternatives': MODEL_CATEGORIES[quality]
+    })
 
 
 # Register our new modules
