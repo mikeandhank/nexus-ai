@@ -1025,6 +1025,24 @@ def health():
     return jsonify({'status': 'ok', 'service': 'nexus-server'})
 
 
+# ============================================================================
+# LANDING PAGE (Static HTML)
+# ============================================================================
+
+@app.route('/', methods=['GET'])
+def serve_landing_page():
+    """Serve the landing page at root."""
+    try:
+        with open('index.html', 'r') as f:
+            from flask import make_response
+            response = make_response(f.read())
+            response.headers['Content-Type'] = 'text/html'
+            return response
+    except FileNotFoundError:
+        return jsonify({'error': 'Landing page not found'}), 404
+    return jsonify({'status': 'ok', 'service': 'nexus-server'})
+
+
 # Register our new modules
 create_swarm_routes(app, require_nexus_key)
 create_automation_routes(app, require_nexus_key)
