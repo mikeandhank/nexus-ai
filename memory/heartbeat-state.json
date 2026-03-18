@@ -1,10 +1,7 @@
 {
-  "last_check": "2026-03-17T23:16:00Z",
-  "checks_performed": ["email_scan"],
-  "email_findings": {
-    "urgent": [],
-    "marketing": ["Stripe - checkout flow", "Etsy - travel must-haves", "Twilio - unlock experience"],
-    "github_deploy_failures": ["Last failed: Mar 16 (Node.js 20 deprecation - already tracked)"],
-    "security_note": ["Notion: new device login Mar 17 16:53 UTC - verify if expected"]
-  }
+  "last_check": "2026-03-18T09:31:00Z",
+  "server_status": "down",
+  "server_note": "Local server (localhost:8000) not responding at 5:31 AM ET",
+  "checks_performed": ["server_health"],
+  "quiet_hours": true
 }
