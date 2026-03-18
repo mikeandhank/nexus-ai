@@ -585,14 +585,18 @@ def require_nexus_key(f):
             conn = get_db_connection()
             cursor = conn.cursor()
             
+            # Support both hashed and unhashed keys for backward compatibility
+            # Try both: hash of full key, hash of key without prefix, and raw key
             key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+            key_part = api_key.replace('sk-nexus-', '')
+            key_hash_part = hashlib.sha256(key_part.encode()).hexdigest()
             
             cursor.execute("""
                 SELECT ak.user_id, u.email, u.credits, u.subscription_tier
                 FROM api_keys ak
                 JOIN users u ON u.id = ak.user_id
-                WHERE ak.key_hash = %s AND ak.is_active = true
-            """, (key_hash,))
+                WHERE (ak.key_hash = %s OR ak.key_hash = %s OR ak.key_hash = %s OR ak.key_hash = %s) AND ak.is_active = true
+            """, (key_hash, key_hash_part, api_key, key_part))
             
             row = cursor.fetchone()
             
@@ -600,10 +604,10 @@ def require_nexus_key(f):
                 conn.close()
                 return jsonify({'error': 'Invalid API key'}), 401
             
-            # Update last used
+            # Update last used - match any of the possible key formats
             cursor.execute(
-                "UPDATE api_keys SET last_used = %s WHERE key_hash = %s",
-                (datetime.now().isoformat(), key_hash)
+                "UPDATE api_keys SET last_used = %s WHERE (key_hash = %s OR key_hash = %s OR key_hash = %s OR key_hash = %s)",
+                (datetime.now().isoformat(), key_hash, key_hash_part, api_key, key_part)
             )
             conn.commit()
             conn.close()
@@ -1132,6 +1136,25 @@ def get_usage_summary():
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok', 'service': 'nexus-server'})
+
+
+# ============================================================================
+# DASHBOARD (Static HTML)
+# ============================================================================
+
+@app.route('/dashboard', methods=['GET'])
+@app.route('/ui', methods=['GET'])
+@app.route('/app', methods=['GET'])
+def serve_dashboard():
+    """Serve the dashboard."""
+    try:
+        with open('dashboard.html', 'r') as f:
+            from flask import make_response
+            response = make_response(f.read())
+            response.headers['Content-Type'] = 'text/html'
+            return response
+    except FileNotFoundError:
+        return jsonify({'error': 'Dashboard not found'}), 404
 
 
 # ============================================================================

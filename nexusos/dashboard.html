@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusOS - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0f; color: #f8fafc; min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        
+        /* Auth Forms */
+        .auth-box { max-width: 400px; margin: 80px auto; background: #141419; border: 1px solid #27272a; border-radius: 12px; padding: 32px; }
+        .auth-box h1 { font-size: 28px; margin-bottom: 8px; text-align: center; }
+        .auth-box h1 span { color: #6366f1; }
+        .auth-box .subtitle { color: #71717a; text-align: center; margin-bottom: 24px; }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 14px; color: #a1a1aa; margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; background: #0a0a0f; border: 1px solid #27272a; border-radius: 8px; color: #fff; font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #6366f1; }
+        
+        .btn { width: 100%; padding: 14px; background: #6366f1; color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .btn:hover { background: #818cf8; }
+        .btn-secondary { background: #27272a; margin-top: 12px; }
+        .btn-small { width: auto; padding: 8px 16px; font-size: 13px; }
+        .btn-outline { background: transparent; border: 1px solid #6366f1; }
+        
+        .error { background: #7f1d1d; color: #fca5a5; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: none; }
+        .success { background: #14532d; color: #86efac; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: none; }
+        
+        .toggle { text-align: center; margin-top: 16px; color: #71717a; font-size: 14px; }
+        .toggle a { color: #6366f1; text-decoration: none; }
+        
+        /* Dashboard */
+        #dashboard { display: none; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid #27272a; margin-bottom: 24px; }
+        .header h1 { font-size: 24px; }
+        .header h1 span { color: #6366f1; }
+        .logout-btn { background: #27272a; padding: 8px 16px; font-size: 14px; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        @media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        .stat-card { background: #141419; border: 1px solid #27272a; border-radius: 12px; padding: 20px; text-align: center; }
+        .stat-card .value { font-size: 28px; font-weight: 700; color: #6366f1; }
+        .stat-card .label { font-size: 12px; color: #71717a; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .section { margin-bottom: 32px; }
+        .section h2 { font-size: 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .api-key-box { background: #141419; border: 1px solid #27272a; border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+        .api-key-box code { flex: 1; font-family: monospace; color: #86efac; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+        
+        .quality-selector { display: flex; gap: 8px; margin-bottom: 16px; }
+        .quality-option { flex: 1; padding: 12px; background: #141419; border: 2px solid #27272a; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .quality-option:hover { border-color: #6366f1; }
+        .quality-option.active { border-color: #6366f1; background: rgba(99, 102, 241, 0.1); }
+        .quality-option .name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .quality-option .desc { font-size: 11px; color: #71717a; }
+        
+        .chat-container { background: #141419; border: 1px solid #27272a; border-radius: 12px; overflow: hidden; }
+        .chat-messages { height: 400px; overflow-y: auto; padding: 16px; }
+        .message { margin-bottom: 12px; padding: 12px; border-radius: 8px; max-width: 85%; }
+        .message.user { background: #6366f1; margin-left: auto; }
+        .message.assistant { background: #27272a; }
+        .message .role { font-size: 11px; color: #71717a; margin-bottom: 4px; }
+        .message .text { font-size: 14px; line-height: 1.5; }
+        .message .typing { color: #6366f1; animation: blink 1s infinite; }
+        
+        @keyframes blink { 50% { opacity: 0.5; } }
+        
+        .chat-input { display: flex; gap: 8px; padding: 16px; border-top: 1px solid #27272a; }
+        .chat-input input { flex: 1; padding: 14px; background: #0a0a0f; border: 1px solid #27272a; border-radius: 8px; color: #fff; font-size: 14px; }
+        .chat-input input:focus { border-color: #6366f1; outline: none; }
+        
+        .agents-list { display: grid; gap: 12px; }
+        .agent-card { background: #141419; border: 1px solid #27272a; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .agent-card .info h3 { font-size: 16px; margin-bottom: 4px; }
+        .agent-card .info p { font-size: 13px; color: #71717a; }
+        .agent-card .actions { display: flex; gap: 8px; }
+        
+        .status { padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .status.active { background: #166534; color: #86efac; }
+        .status.inactive { background: #27272a; color: #71717a; }
+        
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        @media (max-width: 500px) { .pricing-grid { grid-template-columns: 1fr; } }
+        .pricing-card { background: #141419; border: 1px solid #27272a; border-radius: 12px; padding: 24px; text-align: center; transition: all 0.2s; cursor: pointer; }
+        .pricing-card:hover { border-color: #6366f1; transform: translateY(-2px); }
+        .pricing-card .price { font-size: 36px; font-weight: 700; color: #6366f1; }
+        .pricing-card .price span { font-size: 16px; color: #71717a; }
+        .pricing-card .credits { font-size: 14px; color: #86efac; margin: 8px 0; }
+        .pricing-card .bonus { font-size: 12px; color: #fbbf24; margin-top: 8px; }
+        
+        .loading { display: inline-block; width: 16px; height: 16px; border: 2px solid #6366f1; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #141419; border: 1px solid #6366f1; padding: 16px 24px; border-radius: 8px; animation: slideIn 0.3s ease; z-index: 1000; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+    <!-- Auth Section -->
+    <div id="auth">
+        <div id="login-form" class="auth-box">
+            <h1>Nexus<span>OS</span></h1>
+            <p class="subtitle">Sign in to your account</p>
+            <div class="error" id="login-error"></div>
+            <form onsubmit="return handleLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn" id="login-btn">Sign In</button>
+            </form>
+            <p class="toggle">Don't have an account? <a href="#" onclick="showRegister(); return false;">Sign up</a></p>
+        </div>
+        
+        <div id="register-form" class="auth-box" style="display:none;">
+            <h1>Nexus<span>OS</span></h1>
+            <p class="subtitle">Create your account</p>
+            <div class="error" id="register-error"></div>
+            <form onsubmit="return handleRegister(event)">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="register-name" required placeholder="Your name">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="register-email" required placeholder="you@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="register-password" required placeholder="••••••••" minlength="8">
+                </div>
+                <button type="submit" class="btn" id="register-btn">Create Account</button>
+            </form>
+            <p class="toggle">Already have an account? <a href="#" onclick="showLogin(); return false;">Sign in</a></p>
+        </div>
+    </div>
+    
+    <!-- Dashboard -->
+    <div id="dashboard" class="container">
+        <div class="header">
+            <h1>Nexus<span>OS</span></h1>
+            <button class="btn btn-small logout-btn" onclick="logout()">Sign Out</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="value" id="credits">-</div>
+                <div class="label">Credits</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="requests">-</div>
+                <div class="label">Requests</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="tokens">-</div>
+                <div class="label">Tokens</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="spend">-</div>
+                <div class="label">Spent</div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>API Key</h2>
+            <div class="api-key-box">
+                <code id="api-key">Loading...</code>
+                <button class="btn btn-small" onclick="copyApiKey()">Copy</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Response Quality</h2>
+            <div class="quality-selector">
+                <div class="quality-option" data-quality="speed" onclick="setQuality('speed')">
+                    <div class="name">⚡ Speed</div>
+                    <div class="desc">Fast & cheap</div>
+                </div>
+                <div class="quality-option active" data-quality="balanced" onclick="setQuality('balanced')">
+                    <div class="name">⚖️ Balanced</div>
+                    <div class="desc">Good speed & quality</div>
+                </div>
+                <div class="quality-option" data-quality="quality" onclick="setQuality('quality')">
+                    <div class="name">🎯 Quality</div>
+                    <div class="desc">Best responses</div>
+                </div>
+                <div class="quality-option" data-quality="deep" onclick="setQuality('deep')">
+                    <div class="name">🧠 Deep</div>
+                    <div class="desc">Most capable</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Chat</h2>
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message assistant">
+                        <div class="role">NexusOS</div>
+                        <div class="text">Hello! I'm your AI assistant. Configure your quality above and start chatting!</div>
+                    </div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="if(event.key==='Enter')sendChat()">
+                    <button class="btn btn-small" style="width:auto;" onclick="sendChat()">Send</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>
+                Your Agents
+                <button class="btn btn-small btn-outline" onclick="showToast('Agent creation coming soon!')">+ New Agent</button>
+            </h2>
+            <div class="agents-list" id="agents-list">
+                <p style="color:#71717a;font-size:14px;">No agents yet.</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Purchase Credits</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card" onclick="purchaseCredits(25)">
+                    <div class="price">$25</div>
+                    <div class="credits">2,500 credits</div>
+                    <div class="bonus">+100 bonus</div>
+                </div>
+                <div class="pricing-card" onclick="purchaseCredits(50)">
+                    <div class="price">$50</div>
+                    <div class="credits">5,000 credits</div>
+                    <div class="bonus">+500 bonus</div>
+                </div>
+                <div class="pricing-card" onclick="purchaseCredits(100)">
+                    <div class="price">$100</div>
+                    <div class="credits">10,000 credits</div>
+                    <div class="bonus">+2,000 bonus</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast" style="display:none;"></div>
+    
+    <script>
+        const API = '';
+        let apiKey = localStorage.getItem('nexus_api_key') || '';
+        let currentQuality = localStorage.getItem('nexus_quality') || 'balanced';
+        
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            if (apiKey) showDashboard();
+            updateQualityUI();
+        });
+        
+        // Toast
+        function showToast(msg, isError = false) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.style.display = 'block';
+            t.style.borderColor = isError ? '#f87171' : '#6366f1';
+            setTimeout(() => t.style.display = 'none', 3000);
+        }
+        
+        // Auth
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+        }
+        function showLogin() {
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+        }
+        
+        function setLoading(id, loading) {
+            const btn = document.getElementById(id);
+            if (loading) {
+                btn.innerHTML = '<span class="loading"></span>';
+                btn.disabled = true;
+            } else {
+                btn.disabled = false;
+            }
+        }
+        
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorEl = document.getElementById('login-error');
+            
+            setLoading('login-btn', true);
+            errorEl.style.display = 'none';
+            
+            try {
+                const res = await fetch(API + '/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password})
+                });
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    errorEl.textContent = data.error || 'Login failed';
+                    errorEl.style.display = 'block';
+                    setLoading('login-btn', false);
+                    return;
+                }
+                
+                apiKey = data.api_key;
+                localStorage.setItem('nexus_api_key', apiKey);
+                showDashboard();
+            } catch (err) {
+                errorEl.textContent = 'Connection error';
+                errorEl.style.display = 'block';
+            }
+            setLoading('login-btn', false);
+            return false;
+        }
+        
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const errorEl = document.getElementById('register-error');
+            
+            setLoading('register-btn', true);
+            errorEl.style.display = 'none';
+            
+            try {
+                const res = await fetch(API + '/api/auth/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name, email, password})
+                });
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    errorEl.textContent = data.error || 'Registration failed';
+                    errorEl.style.display = 'block';
+                    setLoading('register-btn', false);
+                    return;
+                }
+                
+                apiKey = data.api_key;
+                localStorage.setItem('nexus_api_key', apiKey);
+                showToast('Welcome! 100 free credits added.');
+                showDashboard();
+            } catch (err) {
+                errorEl.textContent = 'Connection error';
+                errorEl.style.display = 'block';
+            }
+            setLoading('register-btn', false);
+            return false;
+        }
+        
+        function logout() {
+            localStorage.removeItem('nexus_api_key');
+            apiKey = '';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('auth').style.display = 'block';
+            document.getElementById('login-form').style.display = 'block';
+        }
+        
+        // Dashboard
+        async function showDashboard() {
+            document.getElementById('auth').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            await loadDashboard();
+        }
+        
+        async function loadDashboard() {
+            const headers = {'X-Nexus-Key': apiKey};
+            
+            try {
+                const res = await fetch(API + '/api/credits', {headers});
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('credits').textContent = Math.floor(data.credits || 0);
+                }
+            } catch(e) {}
+            
+            try {
+                const res = await fetch(API + '/api/usage/summary', {headers});
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('requests').textContent = data.total_requests || '0';
+                    document.getElementById('tokens').textContent = (data.total_tokens || 0).toLocaleString();
+                    document.getElementById('spend').textContent = '$' + (data.total_cost || 0).toFixed(2);
+                }
+            } catch(e) {}
+            
+            document.getElementById('api-key').textContent = apiKey.substring(0, 24) + '...';
+        }
+        
+        function copyApiKey() {
+            navigator.clipboard.writeText(apiKey);
+            showToast('API key copied!');
+        }
+        
+        // Quality
+        function setQuality(quality) {
+            currentQuality = quality;
+            localStorage.setItem('nexus_quality', quality);
+            updateQualityUI();
+            showToast(`Quality set to ${quality}`);
+        }
+        
+        function updateQualityUI() {
+            document.querySelectorAll('.quality-option').forEach(el => {
+                el.classList.toggle('active', el.dataset.quality === currentQuality);
+            });
+        }
+        
+        // Chat
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            const messagesEl = document.getElementById('chat-messages');
+            messagesEl.innerHTML += `<div class="message user"><div class="text">${escapeHtml(message)}</div></div>`;
+            messagesEl.innerHTML += `<div class="message assistant"><div class="role">NexusOS</div><div class="text"><span class="typing">Thinking...</span></div></div>`;
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+            input.value = '';
+            
+            try {
+                const res = await fetch(API + '/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Nexus-Key': apiKey
+                    },
+                    body: JSON.stringify({message, quality: currentQuality})
+                });
+                const data = await res.json();
+                
+                const lastMsg = messagesEl.querySelector('.message.assistant:last-child .text');
+                if (lastMsg) {
+                    lastMsg.innerHTML = data.response || data.error || 'No response';
+                }
+                
+                loadDashboard();
+            } catch(e) {
+                const lastMsg = messagesEl.querySelector('.message.assistant:last-child .text');
+                if (lastMsg) lastMsg.innerHTML = 'Error sending message';
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Purchase
+        async function purchaseCredits(amount) {
+            if (!confirm(`Purchase $${amount} credits? (Demo - no payment)`)) return;
+            
+            try {
+                const res = await fetch(API + '/api/credits/purchase', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Nexus-Key': apiKey
+                    },
+                    body: JSON.stringify({amount})
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    showToast(`Credits added! New balance: ${data.new_balance}`);
+                    loadDashboard();
+                } else {
+                    showToast(data.error || 'Purchase failed', true);
+                }
+            } catch(e) {
+                showToast('Connection error', true);
+            }
+        }
+    </script>
+</body>
+</html>
