@@ -15,6 +15,11 @@ from functools import wraps
 from flask import Flask, request, jsonify, g
 import requests
 
+# Import our modules
+from swarm_orchestration import create_swarm_routes
+from automation_templates import create_automation_routes
+from twilio_integration import create_twilio_routes
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -1001,6 +1006,12 @@ def get_usage_summary():
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'ok', 'service': 'nexus-server'})
+
+
+# Register our new modules
+create_swarm_routes(app, require_nexus_key)
+create_automation_routes(app, require_nexus_key)
+create_twilio_routes(app, require_nexus_key)
 
 
 if __name__ == '__main__':
