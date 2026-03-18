@@ -59,7 +59,7 @@
 
 **What's next:**
 - Input sanitization (SQL injection, XSS)
-- Database encryption at rest
+- ~~Database encryption at rest~~ ✅ DONE
 - Streaming/WebSocket for chat
 
 ---
@@ -79,6 +79,18 @@
 - ReAct Prompting: Think → Act → Observe → Answer loop
 - Validation: Checks tool availability, validates results
 - More Tools: web_search, web_fetch, http_get, shell_command
+
+**✅ NEXUSOS DISTRO BUILT (Mar 17):**
+- nexusos:full (1.07GB) - includes Debian + Python + Node + Postgres + Redis + Ollama + GUI
+- Auto-pulls phi3 model on first run
+- Ready for distribution
+
+**✅ SECURITY HARDENING (Mar 17):**
+- HTTPS redirect enforced (308)
+- Rate limiting (100 req/sec)
+- CORS restricted to nexusos.cloud
+- Database encryption at rest (pgcrypto)
+- 9 legacy cron jobs disabled
 
 **API Endpoint:** `POST /api/agents/{id}/execute`
 **Verified Working:**
