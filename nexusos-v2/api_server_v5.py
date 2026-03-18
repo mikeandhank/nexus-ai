@@ -86,6 +86,15 @@ def cors_preflight():
     """Handle CORS preflight requests"""
     return '', 204
 
+# Landing page route
+@app.route('/', methods=['GET'])
+def landing_page():
+    """Serve the public landing page"""
+    try:
+        return send_from_directory('/app', 'landing.html')
+    except:
+        return jsonify({'error': 'Landing page not found'}), 404
+
 # Database path
 db_path = os.environ.get('NEXUSOS_DB', '/opt/nexusos-data/nexusos.db')
 
@@ -958,7 +967,8 @@ def list_perms():
 from flask import send_from_directory
 @app.route('/')
 def index():
-    return send_from_directory('/app/templates', 'index.html')
+    # Serve public landing page at root
+    return send_from_directory('/app', 'landing.html')
 
 @app.route('/ui')
 def web_ui():
