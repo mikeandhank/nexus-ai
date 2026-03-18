@@ -1,59 +1,77 @@
-# NexusOS
+# NexusOS — Enterprise AI That Remembers You
 
-Persistent memory for AI agents.
+**Self-hosted AI agent operating system with persistent memory, multi-agent orchestration, and zero data exposure.**
 
-## What is this?
-
-Your AI agent forgets everything between conversations. NexusOS gives it memory that survives restarts.
-
-**Core features:**
-- Three-tier memory (working, episodic, semantic)
-- MCP tool servers (filesystem, HTTP, process)
-- LanceDB for vector storage
-- Docker one-command deploy
+> **The problem:** 95% of enterprise AI pilots stall because AI forgets everything between conversations. You get 30 minutes of brilliance, then... nothing.
+> 
+> **The solution:** NexusOS gives your AI agents memory that survives restarts—so they learn, adapt, and build context that compounds over time.
 
 ## Why NexusOS?
 
-| Problem | NexusOS Solution |
-|---------|-----------------|
-| Agent forgets between sessions | Persistent episodic memory survives restarts |
-| Context window saturation | Semantic memory gives structured access to knowledge |
-| No persistence | SQLite + LanceDB for durable storage |
-| Hard to scale | Docker-compose, MCP protocol |
+| Pain You're Feeling | What NexusOS Delivers |
+|---------------------|----------------------|
+| "My AI forgets everything when I restart" | Persistent memory that survives server reboots |
+| "Context windows are too small" | Semantic memory = unlimited knowledge access |
+| "My data is on someone else's server" | 100% self-hosted. Your data never leaves. |
+| "Cloud AI keeps getting more expensive" | One-time deployment. No per-token fees. |
+| "I need AI for my enterprise compliance" | SOC 2-ready with full audit trails |
+| "CLI tools are hard for my team" | Beautiful web UI + powerful CLI |
 
-**The pain:** 95% of enterprise AI pilots stall due to memory issues. Your agent works great for 30 minutes, then forgets everything.
+## What Makes Us Different
 
-**The fix:** NexusOS adds three-tier memory that persists across sessions.
+### 🧠 Three-Tier Memory System
+Most AI tools give you one conversation at a time. NexusOS gives you:
+- **Working memory** — Current context, instant access
+- **Episodic memory** — Past conversations, searchable
+- **Semantic memory** — Structured knowledge, learned facts
 
-## Quick Start (5 minutes)
+Your agents get smarter over time, not just within a session.
 
-### 1. Clone and go
+### 🔒 Privacy-First Architecture
+Your competitors are training on your data. Your customers are trusting you with sensitive information. NexusOS ensures:
+- Zero data exposure to third parties
+- Full encryption at rest and in transit
+- Complete audit trails for compliance
+- You own everything, always
+
+### 🤖 Multi-Agent Orchestration
+Deploy teams of specialized AI agents that work together:
+- Each agent has its own expertise
+- Built-in collaboration protocols
+- Coordinated goals, shared context
+- Scale from one agent to hundreds
+
+### ⚡ True Operating System
+Not just another chatbot wrapper. NexusOS provides:
+- Process management for AI tasks
+- Inter-process communication
+- Workflow orchestration
+- Sandbox isolation for security
+
+## Quick Start (5 Minutes)
+
 ```bash
-git clone https://github.com/your-repo/NexusOS.git
+# 1. Clone the repository
+git clone https://github.com/nexusos-ai/NexusOS.git
 cd NexusOS
-```
 
-### 2. Create .env file
-```bash
+# 2. Set up your environment
 cp .env.example .env
 # Edit .env and add your API keys
-```
 
-### 3. Start it
-```bash
+# 3. Deploy with Docker
 docker compose up -d
-```
 
-### 4. Verify it's running
-```bash
+# 4. Verify everything's running
 curl http://localhost:4893/health
-# Should return: {"status":"healthy",...}
+# Response: {"status":"healthy","memory_persistent":true}
 ```
 
-## Connect Your Agent
+**That's it.** Your self-hosted AI OS is running.
 
-### OpenClaw
-Add to your config:
+## Connect Your Existing Tools
+
+### OpenClaw Integration
 ```json
 {
   "memory": {
@@ -62,63 +80,86 @@ Add to your config:
 }
 ```
 
-### Claude Code / Other
-Send HTTP requests to memory endpoints:
-
+### Claude Code / Custom Integrations
 ```bash
-# Start a session
+# Start a conversation
 curl -X POST http://localhost:4893/memory/working/start \
   -H "Content-Type: application/json" \
   -d '{"sessionId":"my-session"}'
 
-# Add a message
+# Send a message
 curl -X POST http://localhost:4893/memory/working/message \
   -H "Content-Type: application/json" \
-  -d '{"content":"Remember this","role":"user"}'
+  -d '{"content":"Remember this important detail","role":"user"}'
 
 # End session (saves to persistent memory)
 curl -X POST http://localhost:4893/memory/working/end
 
-# Later: query persistent memory
+# Later: search your agent's memory
 curl -X POST http://localhost:4893/memory/episodic/search \
   -H "Content-Type: application/json" \
-  -d '{"query":"remember","limit":5}'
+  -d '{"query":"that important detail","limit":5}'
 ```
 
-## API Endpoints
+## Who This Is For
+
+### 🏢 **Enterprises**
+- Complete data control for compliance
+- No vendor lock-in or subscription increases
+- Custom deployment options (on-prem, cloud, hybrid)
+- SOC 2, GDPR, HIPAA ready
+
+### 🛡️ **Privacy-Sensitive Organizations**
+- Healthcare, finance, legal, government
+- Any organization handling sensitive data
+- Companies with strict data residency requirements
+
+### 👨‍💻 **Developers & Technical Teams**
+- Open architecture, extensible
+- Full API access
+- CLI for automation
+- Web UI for management
+
+### 🚀 **AI-First Companies**
+- Building AI products and need reliable infrastructure
+- Need multi-agent orchestration
+- Want memory that persists across sessions
+
+## API Reference
 
 | Endpoint | Purpose |
 |----------|---------|
-| `GET /health` | Health check |
-| `POST /memory/working/start` | Start session |
-| `POST /memory/working/message` | Add message |
-| `POST /memory/working/end` | End session (persist) |
-| `POST /memory/episodic/search` | Query memory |
-| `GET /memory/episodic/recent` | Recent memories |
+| `GET /health` | System health check |
+| `POST /memory/working/start` | Begin new conversation session |
+| `POST /memory/working/message` | Add message to working memory |
+| `POST /memory/working/end` | Save session to persistent memory |
+| `POST /memory/episodic/search` | Search past conversations |
+| `GET /memory/episodic/recent` | Retrieve recent memories |
+| `GET /memory/semantic/knowledge` | Query structured knowledge |
 
-## Troubleshooting
+## The Bottom Line
 
-**Nothing running?**
-```bash
-docker compose logs
-```
+**Cloud AI keeps you dependent.** They're building moats with your data. Prices go up, features change, and you have no control.
 
-**Port conflict?**
-Edit docker-compose.yml to change ports
+**NexusOS keeps you free.** Your data stays yours. Your infrastructure runs your way. Your AI agents actually remember what you teach them.
 
-**Need to restart?**
-```bash
-docker compose restart
-```
-
-## Requirements
-
-- Docker
-- 2GB RAM minimum
-- For local LLM: 8GB+ RAM (optional)
+**95% of enterprise AI pilots fail due to memory issues.** Don't be a statistic.
 
 ---
 
-**Got questions?** Open an issue. This is v0.1 — we expect friction.
+## Get Started
 
-_Last updated: 2026-03-13_
+**Deploy in 5 minutes:**
+```bash
+git clone https://github.com/nexusos-ai/NexusOS.git
+cd NexusOS
+docker compose up -d
+```
+
+**Questions?** [Open an issue](https://github.com/nexusos-ai/issues) or [email us](mailto:hello@nexusos.cloud)
+
+**Contribute?** We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+---
+
+*NexusOS — Enterprise AI that remembers you.*

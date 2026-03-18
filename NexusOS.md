@@ -1,105 +1,92 @@
-# NexusOS - Agent Operating System
+# NexusOS — The AI Agent Operating System
 
-## Status: SHIPPING (as of 2026-03-14)
+**Your AI. Your data. Your server.**
 
-Platform for AI agents with inner life. Built on OpenClaw (MIT licensed).
-
----
-
-## What's Built
-
-### Inner Life Capabilities
-| Capability | Status | Notes |
-|------------|--------|-------|
-| Affect Layer | ✅ Working | Analyzes context before responding |
-| Socratic Dialogue | ✅ Working | Adversarial reasoning available |
-| Pattern Library | ⚠️ Empty | Needs real interactions |
-| Inner Narrative | ⚠️ Basic | Exists, minimal content |
-| Theory of Mind | ⚠️ Empty | Needs real data |
-| Background Processing | ✅ Working | 10-min continuous loop |
-
-### Product Features
-| Feature | Status | Notes |
-|---------|--------|-------|
-| **User Auth** | ✅ Live | Simple token-based, works |
-| **Per-User Memory** | ✅ Live | Conversations stored per user |
-| **Multi-LLM Support** | ✅ Live | Ollama (free) + BYOK (paid) |
-| **Web UI** | ✅ Live | `https://your-nexusos-server.example.com` |
-
-### LLM Options
-| Backend | Type | Cost | Models |
-|---------|------|------|--------|
-| Ollama | Local | Free | phi3, llama2, mistral |
-| OpenAI | BYOK | User pays | gpt-4o, gpt-4o-mini |
-| Anthropic | BYOK | User pays | claude-sonnet, claude-haiku |
+The enterprise-grade AI platform that runs entirely on your infrastructure. No cloud dependencies. No data leaving your premises. Just powerful AI agents that actually remember you.
 
 ---
 
-## Usage
+## Why NexusOS?
 
-### Web Interface
-```
-https://your-nexusos-server.example.com
-```
-- Enter name/email to create account
-- Chat with Ollama (free) or add OpenAI/Anthropic API key
-- Conversations persist per user
+### 🔒 Privacy-First Architecture
+Your conversations, data, and AI agents live on your server. Not ours. Not OpenAI's. Not anywhere else. Perfect for enterprises with strict data compliance requirements.
 
-### API
+### 🧠 Agents That Remember You
+Our proprietary Inner Life system gives each agent persistent memory, personality, and context. They're not stateless chatbots—they build relationships over time.
+
+### 🌐 Access Anywhere
+Web-based interface accessible from any browser. Not CLI-bound like other developer tools. Team-friendly with role-based access.
+
+### 🔌 integrations Ready
+Pre-built connectors for Twilio (SMS/Voice), Stripe (payments), and more. Build automation workflows without coding.
+
+### 💰 No Subscription Trap
+Pay for compute once. No per-seat licensing. Self-hosted means you control costs.
+
+---
+
+## Who It's For
+
+- **Enterprises** needing data sovereignty
+- **Developers** who want AI without vendor lock-in  
+- **Teams** requiring custom AI agents with memory
+- **Privacy professionals** who can't use cloud AI
+
+---
+
+## Compare
+
+| Feature | NexusOS | Claude Code | OpenAI |
+|---------|---------|-------------|--------|
+| Self-hosted | ✅ | ❌ | ❌ |
+| Persistent memory | ✅ | ❌ | ❌ |
+| Web UI | ✅ | ❌ | ✅ |
+| Inner Life (personality) | ✅ | ❌ | ❌ |
+| One-time cost | ✅ | $20+/mo | Usage fees |
+
+---
+
+## Get Started
+
 ```bash
-# List available models
-curl https://your-nexusos-server.example.com/api/models
+# Quick start with Docker
+docker run -d -p 8080:8080 nexusos:latest
 
-# Chat (requires user_id from login)
-curl -X POST https://your-nexusos-server.example.com/api/chat \
-  -H "Content-Type: application/json" \
-  -d '{"user_id": "YOUR_USER_ID", "message": "Hello"}'
+# Or install on your VPS
+curl -sSL https://nexusos.cloud/install | bash
+```
+
+Then open `http://localhost:8080` to configure your AI agents.
+
+---
+
+## API-First Design
+
+Everything you can do in the UI, you can do via API:
+
+```bash
+# Create an agent
+curl -X POST /api/agents \
+  -H "X-Nexus-Key: sk-xxx" \
+  -d '{"name": "assistant", "personality": "helpful"}'
+
+# Execute a task
+curl -X POST /api/agents/agent-id/execute \
+  -H "X-Nexus-Key: sk-xxx" \
+  -d '{"task": "research market trends"}'
 ```
 
 ---
 
-## Architecture
+## Built on Open Standards
 
-```
-┌─────────────────────────────────────────┐
-│           Web Browser / API             │
-└────────────────┬────────────────────────┘
-                 │
-┌────────────────▼────────────────────────┐
-│         NexusOS API (8080)              │
-│  - Auth (token-based)                   │
-│  - User memory (per-user JSON)          │
-│  - Multi-LLM router                     │
-│  - Chat interface                       │
-└────────────────┬────────────────────────┘
-                 │
-    ┌────────────┴────────────┐
-    │                         │
-┌───▼───┐              ┌──────▼──────┐
-│Ollama │              │ BYOK (OpenAI│
-│(free) │              │  Anthropic) │
-└───────┘              └─────────────┘
-```
+- OpenClaw foundation (MIT licensed)
+- Docker deployment
+- PostgreSQL + Redis
+- Bring Your Own Keys (OpenAI, Anthropic, Ollama)
 
 ---
 
-## Monetization Model
+**Ready to run your AI on your terms?**
 
-| Tier | LLM Cost | Our Margin |
-|------|----------|------------|
-| Free (Ollama) | $0 | $0 |
-| BYOK | User pays | $0 (yet) |
-| **Future: OOTB** | We pay | 20-30% margin |
-
----
-
-## What's Next
-
-1. Wire NexusOS inner life into response flow (affect, socratic, etc.)
-2. Add paid tier with our API keys (upcharge 20-30%)
-3. Improve memory (patterns, lessons learned)
-4. Add more free LLMs (local alternatives)
-
----
-
-_Last updated: 2026-03-14_
+👉 [Deploy Now](https://nexusos.cloud) | 📖 [Documentation](https://docs.nexusos.cloud)

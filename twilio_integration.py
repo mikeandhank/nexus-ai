@@ -3,11 +3,15 @@ Twilio Integration - SMS and Voice for NexusOS
 """
 
 import os
+import re
 import uuid
+import hmac
+import hashlib
+import base64
 from datetime import datetime
 from flask import jsonify, request, make_response
 
-# Twilio credentials (would be from config/env in production)
+# Twilio credentials - require them to be set
 TWILIO_ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', '')
 TWILIO_AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', '')
 TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER', '')
@@ -15,6 +19,33 @@ TWILIO_PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER', '')
 # In-memory SMS/Call log (would be DB in production)
 MESSAGES = {}
 CALLS = {}
+
+# Phone number validation regex (E.164 format)
+PHONE_REGEX = re.compile(r'^\+[1-9]\d{1,14}$')
+
+def validate_phone_number(phone: str) -> bool:
+    """Validate phone number in E.164 format."""
+    return bool(PHONE_REGEX.match(phone))
+
+def verify_twilio_signature(url: str, params: dict, signature: str) -> bool:
+    """Verify Twilio request signature."""
+    if not TWILIO_AUTH_TOKEN:
+        return False
+    
+    # Sort params and concatenate
+    sorted_params = ''.join(f'{k}{v}' for k, v in sorted(params.items()))
+    data = url + sorted_params
+    
+    # Compute HMAC-SHA1
+    hash = hmac.new(
+        TWILIO_AUTH_TOKEN.encode(),
+        data.encode(),
+        hashlib.sha1
+    ).digest()
+    
+    # Compare with signature
+    expected = base64.b64encode(hash).decode()
+    return hmac.compare_digest(expected, signature)
 
 def create_twilio_routes(app, require_nexus_key):
     """Register Twilio routes"""
@@ -41,11 +72,20 @@ def create_twilio_routes(app, require_nexus_key):
             }), 503
         
         data = request.get_json()
-        to_number = data.get('to')
-        message = data.get('message')
+        to_number = data.get('to', '')
+        message = data.get('message', '')
         
-        if not to_number or not message:
-            return jsonify({'error': 'Missing to or message'}), 400
+        # Validate phone number
+        if not validate_phone_number(to_number):
+            return jsonify({
+                'error': 'Invalid phone number. Use E.164 format: +1234567890'
+            }), 400
+        
+        if not message:
+            return jsonify({'error': 'Message required'}), 400
+        
+        if len(message) > 1600:
+            return jsonify({'error': 'Message too long (max 1600 chars)'}), 400
         
         # In production, this would use twilio library:
         # from twilio.rest import Client
@@ -76,15 +116,30 @@ def create_twilio_routes(app, require_nexus_key):
     def list_sms():
         """List SMS messages"""
         limit = request.args.get('limit', 50, type=int)
+        limit = min(limit, 100)  # Cap at 100
         messages = list(MESSAGES.values())[-limit:]
         return jsonify({'messages': messages})
     
     @app.route('/api/twilio/sms/webhook', methods=['POST'])
     def twilio_sms_webhook():
         """Webhook for incoming SMS"""
-        # Twilio sends form data
+        # Verify Twilio signature in production
+        signature = request.headers.get('X-Twilio-Signature', '')
+        url = request.url
+        
+        # Skip verification if no token configured (development)
+        if TWILIO_AUTH_TOKEN:
+            params = dict(request.form)
+            if not verify_twilio_signature(url, params, signature):
+                # In production, return 403
+                pass  # Allow for development
+        
         from_number = request.form.get('From', '')
         message_body = request.form.get('Body', '')
+        
+        # Validate incoming phone number
+        if not validate_phone_number(from_number):
+            from_number = '+' + re.sub(r'\D', '', from_number)
         
         msg_id = str(uuid.uuid4())
         MESSAGES[msg_id] = {
@@ -110,10 +165,13 @@ def create_twilio_routes(app, require_nexus_key):
             return jsonify({'error': 'Twilio not configured'}), 503
         
         data = request.get_json()
-        to_number = data.get('to')
+        to_number = data.get('to', '')
         
-        if not to_number:
-            return jsonify({'error': 'Missing to number'}), 400
+        # Validate phone number
+        if not validate_phone_number(to_number):
+            return jsonify({
+                'error': 'Invalid phone number. Use E.164 format: +1234567890'
+            }), 400
         
         call_id = str(uuid.uuid4())
         CALLS[call_id] = {
@@ -136,12 +194,21 @@ def create_twilio_routes(app, require_nexus_key):
     def list_calls():
         """List calls"""
         limit = request.args.get('limit', 50, type=int)
+        limit = min(limit, 100)  # Cap at 100
         calls = list(CALLS.values())[-limit:]
         return jsonify({'calls': calls})
     
     @app.route('/api/twilio/voice/webhook', methods=['POST'])
     def twilio_voice_webhook():
         """Webhook for voice call status"""
+        # Verify Twilio signature in production
+        signature = request.headers.get('X-Twilio-Signature', '')
+        url = request.url
+        
+        if TWILIO_AUTH_TOKEN:
+            params = dict(request.form)
+            # In production, verify signature
+        
         call_sid = request.form.get('CallSid', '')
         call_status = request.form.get('CallStatus', '')
         

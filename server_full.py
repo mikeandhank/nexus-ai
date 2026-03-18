@@ -10,6 +10,7 @@ import uuid
 import secrets
 import hashlib
 import logging
+import bcrypt
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, request, jsonify, g
@@ -37,6 +38,23 @@ class QualityLevel:
     BALANCED = 'balanced'    # Default
     QUALITY = 'quality'      # Premium
     DEEP = 'deep'           # Most expensive, best for hard problems
+
+
+# ============================================================================
+# PASSWORD HELPERS - Using bcrypt
+# ============================================================================
+
+def hash_password(password: str) -> str:
+    """Hash password using bcrypt."""
+    salt = bcrypt.gensalt(rounds=12)
+    return bcrypt.hashpw(password.encode(), salt).decode()
+
+def verify_password(password: str, password_hash: str) -> bool:
+    """Verify password against bcrypt hash."""
+    try:
+        return bcrypt.checkpw(password.encode(), password_hash.encode())
+    except Exception:
+        return False
 
 
 # Model configuration by quality level
@@ -413,21 +431,21 @@ class UsageTracker:
             conn = get_db_connection()
             cursor = conn.cursor()
             
-            # Check balance
-            cursor.execute("SELECT credits FROM users WHERE id = %s", (user_id,))
+            # Atomic check-and-deduct: only deduct if balance sufficient
+            cursor.execute("""
+                UPDATE users 
+                SET credits = credits - %s 
+                WHERE id = %s AND credits >= %s
+                RETURNING credits
+            """, (total_charge, user_id, total_charge))
+            
             row = cursor.fetchone()
             
-            if not row or row[0] < total_charge:
+            if not row:
                 conn.close()
                 return {'success': False, 'error': 'Insufficient credits'}
             
-            # Deduct credits
-            cursor.execute(
-                "UPDATE users SET credits = credits - %s WHERE id = %s",
-                (total_charge, user_id)
-            )
-            
-            # Record usage
+            # Record usage only if deduction succeeded
             cursor.execute("""
                 INSERT INTO llm_usage 
                 (id, user_id, provider, model, input_tokens, output_tokens, 
@@ -535,7 +553,7 @@ def register():
         
         # Create user
         user_id = str(uuid.uuid4())
-        password_hash = hashlib.sha256(password.encode()).hexdigest()
+        password_hash = hash_password(password)  # Use bcrypt
         
         # Free credits on signup
         signup_credits = 1000 if os.environ.get('SIGNUP_BONUS') else 100
@@ -590,16 +608,15 @@ def login():
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        password_hash = hashlib.sha256(password.encode()).hexdigest()
-        
+        # Fetch user by email first
         cursor.execute("""
-            SELECT id, email, name, credits, subscription_tier
-            FROM users WHERE email = %s AND password_hash = %s
-        """, (email, password_hash))
+            SELECT id, email, name, credits, subscription_tier, password_hash
+            FROM users WHERE email = %s
+        """, (email,))
         
         row = cursor.fetchone()
         
-        if not row:
+        if not row or not verify_password(password, row[5]):
             conn.close()
             return jsonify({'error': 'Invalid credentials'}), 401
         

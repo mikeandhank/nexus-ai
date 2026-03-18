@@ -3,6 +3,8 @@ Automation Templates Library - Pre-built Workflows
 """
 
 import uuid
+import json
+import re
 from datetime import datetime
 from flask import jsonify, request
 
@@ -59,7 +61,7 @@ AUTOMATION_TEMPLATES = {
             'auto_approve_under': {'type': 'number', 'default': 100}
         }
     },
-    'content_publisher': {
+    'content_publish': {
         'id': 'content_publish',
         'name': 'Content Publishing Workflow',
         'description': 'Draft → Review → Schedule → Publish across platforms',
@@ -88,6 +90,58 @@ AUTOMATION_TEMPLATES = {
 # Active automations (user-instantiated)
 ACTIVE_AUTOMATIONS = {}
 
+def sanitize_input(text, max_length=1000):
+    """Sanitize string input."""
+    if not text:
+        return ''
+    return re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', str(text))[:max_length]
+
+def validate_automation_config(template_id, config):
+    """Validate config against template schema."""
+    if template_id not in AUTOMATION_TEMPLATES:
+        return {'valid': False, 'error': 'Template not found'}
+    
+    template = AUTOMATION_TEMPLATES[template_id]
+    schema = template.get('config_schema', {})
+    
+    errors = []
+    for key, value in config.items():
+        if key not in schema:
+            errors.append(f'Unknown config key: {key}')
+            continue
+        
+        expected_type = schema[key].get('type')
+        
+        # Type validation
+        if expected_type == 'integer' and not isinstance(value, int):
+            try:
+                config[key] = int(value)
+            except (ValueError, TypeError):
+                errors.append(f'{key} must be an integer')
+        
+        elif expected_type == 'number' and not isinstance(value, (int, float)):
+            try:
+                config[key] = float(value)
+            except (ValueError, TypeError):
+                errors.append(f'{key} must be a number')
+        
+        elif expected_type == 'boolean' and not isinstance(value, bool):
+            errors.append(f'{key} must be a boolean')
+        
+        elif expected_type == 'string' and not isinstance(value, str):
+            errors.append(f'{key} must be a string')
+        
+        elif expected_type == 'array' and not isinstance(value, list):
+            errors.append(f'{key} must be an array')
+        
+        elif expected_type == 'object' and not isinstance(value, dict):
+            errors.append(f'{key} must be an object')
+    
+    # Check for required fields with 'required' in schema
+    # (could be added to template definitions)
+    
+    return {'valid': len(errors) == 0, 'errors': errors}
+
 def create_automation_routes(app, require_nexus_key):
     """Register automation template routes"""
     
@@ -103,6 +157,7 @@ def create_automation_routes(app, require_nexus_key):
     @require_nexus_key
     def get_template(template_id):
         """Get template details"""
+        template_id = sanitize_input(template_id, 50)
         if template_id not in AUTOMATION_TEMPLATES:
             return jsonify({'error': 'Template not found'}), 404
         return jsonify(AUTOMATION_TEMPLATES[template_id])
@@ -111,19 +166,27 @@ def create_automation_routes(app, require_nexus_key):
     @require_nexus_key
     def activate_automation():
         """Activate an automation from a template"""
-        data = request.get_json()
-        template_id = data.get('template_id')
+        data = request.get_json() or {}
+        template_id = sanitize_input(data.get('template_id', ''), 50)
         
         if template_id not in AUTOMATION_TEMPLATES:
-            return jsonify({'error': 'Template not found'}), 404
+            return jsonify({'error': 'Template not found'}), 400
+        
+        config = data.get('config', {})
+        
+        # Validate config against schema
+        validation = validate_automation_config(template_id, config)
+        if not validation['valid']:
+            return jsonify({'error': 'Invalid config', 'details': validation['errors']}), 400
         
         automation_id = str(uuid.uuid4())
         automation = {
             'id': automation_id,
             'template_id': template_id,
             'name': AUTOMATION_TEMPLATES[template_id]['name'],
-            'config': data.get('config', {}),
+            'config': config,
             'status': 'active',
+            'owner_id': g.user_id,
             'trigger_count': 0,
             'last_triggered': None,
             'created_at': datetime.utcnow().isoformat()
@@ -139,20 +202,32 @@ def create_automation_routes(app, require_nexus_key):
     @app.route('/api/automations', methods=['GET'])
     @require_nexus_key
     def list_automations():
-        """List active automations"""
+        """List user's active automations"""
+        user_autos = [a for a in ACTIVE_AUTOMATIONS.values() if a.get('owner_id') == g.user_id]
         return jsonify({
-            'automations': list(ACTIVE_AUTOMATIONS.values())
+            'automations': user_autos
         })
     
     @app.route('/api/automations/<automation_id>/trigger', methods=['POST'])
     @require_nexus_key
     def trigger_automation(automation_id):
         """Manually trigger an automation"""
-        if automation_id not in ACTIVE_AUTOMATIONS:
+        automation_id_param = sanitize_input(automation_id, 50)
+        
+        if automation_id_param not in ACTIVE_AUTOMATIONS:
             return jsonify({'error': 'Automation not found'}), 404
         
-        automation = ACTIVE_AUTOMATIONS[automation_id]
+        automation = ACTIVE_AUTOMATIONS[automation_id_param]
+        
+        # Verify ownership
+        if automation.get('owner_id') != g.user_id:
+            return jsonify({'error': 'Access denied'}), 403
+        
         trigger_data = request.get_json() or {}
+        
+        # Validate trigger data structure
+        if not isinstance(trigger_data, dict):
+            return jsonify({'error': 'Trigger data must be an object'}), 400
         
         # Simulate automation execution
         template = AUTOMATION_TEMPLATES.get(automation['template_id'])
@@ -164,7 +239,7 @@ def create_automation_routes(app, require_nexus_key):
             'status': 'executed',
             'automation_id': automation_id,
             'actions_executed': template['actions'] if template else [],
-            'trigger_data': trigger_data,
+            'trigger_data_keys': list(trigger_data.keys()),
             'executed_at': automation['last_triggered']
         })
     
@@ -172,24 +247,47 @@ def create_automation_routes(app, require_nexus_key):
     @require_nexus_key
     def deactivate_automation(automation_id):
         """Deactivate an automation"""
-        if automation_id not in ACTIVE_AUTOMATIONS:
+        automation_id_param = sanitize_input(automation_id, 50)
+        
+        if automation_id_param not in ACTIVE_AUTOMATIONS:
             return jsonify({'error': 'Automation not found'}), 404
         
-        del ACTIVE_AUTOMATIONS[automation_id]
+        automation = ACTIVE_AUTOMATIONS[automation_id_param]
+        
+        # Verify ownership
+        if automation.get('owner_id') != g.user_id:
+            return jsonify({'error': 'Access denied'}), 403
+        
+        del ACTIVE_AUTOMATIONS[automation_id_param]
         return jsonify({'message': 'Automation deactivated'})
     
     @app.route('/api/automations/<automation_id>', methods=['PUT'])
     @require_nexus_key
     def update_automation(automation_id):
         """Update automation config"""
-        if automation_id not in ACTIVE_AUTOMATIONS:
+        automation_id_param = sanitize_input(automation_id, 50)
+        
+        if automation_id_param not in ACTIVE_AUTOMATIONS:
             return jsonify({'error': 'Automation not found'}), 404
         
-        data = request.get_json()
-        ACTIVE_AUTOMATIONS[automation_id]['config'].update(data.get('config', {}))
+        automation = ACTIVE_AUTOMATIONS[automation_id_param]
+        
+        # Verify ownership
+        if automation.get('owner_id') != g.user_id:
+            return jsonify({'error': 'Access denied'}), 403
+        
+        data = request.get_json() or {}
+        new_config = data.get('config', {})
+        
+        # Validate new config
+        validation = validate_automation_config(automation['template_id'], new_config)
+        if not validation['valid']:
+            return jsonify({'error': 'Invalid config', 'details': validation['errors']}), 400
+        
+        ACTIVE_AUTOMATIONS[automation_id_param]['config'].update(new_config)
         
         return jsonify({
-            'automation': ACTIVE_AUTOMATIONS[automation_id]
+            'automation': ACTIVE_AUTOMATIONS[automation_id_param]
         })
     
     return app
