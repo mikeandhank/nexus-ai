@@ -26,7 +26,7 @@ Before acting on consequential decisions:
 - Quiet hours: 10PM-6AM MT (but message freely - phone on DND)
 
 ## Current Projects
-1. **Nexus AI / NexusOS** - Agent operating system for SMBs
+1. **Nexus AI / Lipaira** - Agent operating system for SMBs
    - Landing page: /workspace/nexus-ai-landing/
    - Outreach draft: /workspace/outreach/sds-mike.md
    - **VPS:** 187.124.150.225:8080 (Docker: nexusos-ollama, nexusos-api)

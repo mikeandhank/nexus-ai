@@ -1,4 +1,4 @@
-# NexusOS — The AI Agent Operating System
+# Lipaira — The AI Agent Operating System
 
 **Your AI. Your data. Your server.**
 
@@ -6,7 +6,7 @@ The enterprise-grade AI platform that runs entirely on your infrastructure. No c
 
 ---
 
-## Why NexusOS?
+## Why Lipaira?
 
 ### 🔒 Privacy-First Architecture
 Your conversations, data, and AI agents live on your server. Not ours. Not OpenAI's. Not anywhere else. Perfect for enterprises with strict data compliance requirements.
@@ -36,7 +36,7 @@ Pay for compute once. No per-seat licensing. Self-hosted means you control costs
 
 ## Compare
 
-| Feature | NexusOS | Claude Code | OpenAI |
+| Feature | Lipaira | Claude Code | OpenAI |
 |---------|---------|-------------|--------|
 | Self-hosted | ✅ | ❌ | ❌ |
 | Persistent memory | ✅ | ❌ | ❌ |

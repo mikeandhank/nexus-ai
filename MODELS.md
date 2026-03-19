@@ -1,8 +1,8 @@
-# NexusOS Model Registry
+# Lipaira Model Registry
 
 ## Overview
 
-NexusOS integrates with **OpenRouter** to provide access to 300+ AI models. We route requests based on user's quality preference, charge credits, and take a 5.5% fee.
+Lipaira integrates with **OpenRouter** to provide access to 300+ AI models. We route requests based on user's quality preference, charge credits, and take a 5.5% fee.
 
 ---
 

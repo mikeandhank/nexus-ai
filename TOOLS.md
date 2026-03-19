@@ -64,8 +64,9 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 - API Key: (in memory - not in repo)
 - Use for: Transactional email (waitlist signups)
 
-### NexusOS Server
+### Lipaira Server (formerly NexusOS)
 - Production: 187.124.150.225 (port 22 SSH, root)
+- Path: /opt/lipaira
 - Version: 6.0.0 (confirmed working)
 - Status: ALL Phase 1 features operational ✅
   - Multi-Agent Orchestration: /api/agents ✅
@@ -83,4 +84,4 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 
 ---
 
-_Last updated: 2026-03-15 (Phase 1 verified complete)_
+_Last updated: 2026-03-19 (Renamed from NexusOS to Lipaira)_

@@ -1,4 +1,4 @@
-# NexusOS Enterprise Evaluation Report
+# Lipaira Enterprise Evaluation Report
 **Evaluator:** Fortune 500 C-Suite Executive  
 **Date:** March 16, 2026  
 **Contract Value:** $1,000,000

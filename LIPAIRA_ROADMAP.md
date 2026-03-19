@@ -1,5 +1,5 @@
-# NexusOS Project Roadmap
-## Two-Project Architecture: Nexus Server + NexusOS Client
+# Lipaira Project Roadmap
+## Two-Project Architecture: Nexus Server + Lipaira Client
 **Last Updated:** March 18, 2026
 
 ---

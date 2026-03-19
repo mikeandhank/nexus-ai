@@ -8,7 +8,7 @@
 
 ## Ongoing Projects
 
-- **NexusOS** - Autonomous agent operating system (paused: dependency issue)
+- **Lipaira** - Autonomous agent operating system (paused: dependency issue)
 - **Self-improvement** - Researching and implementing improvements
 - **Email repair** - Fix Gmail auth (blocked: needs new app password)
 

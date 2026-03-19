@@ -1,4 +1,4 @@
-# NexusOS Enterprise Guide
+# Lipaira Enterprise Guide
 
 ## Self-Hosted AI Agent Platform for the Enterprise
 
@@ -87,7 +87,7 @@ Email: support@nexusos.ai (placeholder)
 
 ## Migration Path
 
-Already using cloud AI agents? NexusOS provides:
+Already using cloud AI agents? Lipaira provides:
 1. Export tools for conversation history
 2. API compatibility layer for existing integrations
 3. Gradual migration (run both in parallel)

@@ -1,7 +1,7 @@
 """
-NexusOS Client CLI
-Connects to Nexus Server API for LLM access
-Usage: python client_cli.py --key sk-nexus-xxx --message "Hello"
+Lipaira Client CLI
+Connects to Lipaira Server API for LLM access
+Usage: python client_cli.py --key sk-lipaira-xxx --message "Hello"
 """
 
 import os
@@ -14,15 +14,15 @@ from datetime import datetime
 DEFAULT_SERVER = "http://localhost:8080"
 
 
-class NexusClient:
-    """Client for Nexus Server API."""
+class LipairaClient:
+    """Client for Lipaira Server API."""
     
     def __init__(self, api_key: str, server_url: str = None):
         self.api_key = api_key
         self.server_url = server_url or DEFAULT_SERVER
         self.session = requests.Session()
         self.session.headers.update({
-            'X-Nexus-Key': api_key,
+            'X-Lipaira-Key': api_key,
             'Content-Type': 'application/json'
         })
     
@@ -87,7 +87,7 @@ class NexusClient:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='NexusOS Client')
+    parser = argparse.ArgumentParser(description='Lipaira Client')
     parser.add_argument('--key', '-k', help='Nexus API Key (or set NEXUS_API_KEY)')
     parser.add_argument('--server', '-s', default=DEFAULT_SERVER, help='Server URL')
     parser.add_argument('--message', '-m', help='Message to send')
@@ -139,7 +139,7 @@ def main():
         else:
             print(f"Error: {result.get('error')}")
     else:
-        print("NexusOS Client - Type message:")
+        print("Lipaira Client - Type message:")
         while True:
             try:
                 msg = input("\n> ")

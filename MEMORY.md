@@ -138,12 +138,12 @@ _Lessons, patterns, and important context that persist across sessions._
 
 | # | Project | Type | Status |
 |---|---------|------|--------|
-| 1 | NexusOS Server | Backend | ✅ Built |
-| 2 | NexusOS Webapp | Platform | ✅ Built |
-| 3 | NexusOS Desktop GUI | Platform | ✅ Built |
-| 4 | NexusOS Client (Local) | Client | 🔲 Planned |
-| 5 | NexusOS iOS App | Platform | 🔲 Planned |
-| 6 | NexusOS Android App | Platform | 🔲 Planned |
+| 1 | Lipaira Server | Backend | ✅ Built |
+| 2 | Lipaira Webapp | Platform | ✅ Built |
+| 3 | Lipaira Desktop GUI | Platform | ✅ Built |
+| 4 | Lipaira Client (Local) | Client | 🔲 Planned |
+| 5 | Lipaira iOS App | Platform | 🔲 Planned |
+| 6 | Lipaira Android App | Platform | 🔲 Planned |
 
 **ALL CONNECTED** - Same agent, same API key, same data across all 6.
 
@@ -161,7 +161,7 @@ _Lessons, patterns, and important context that persist across sessions._
 |----------|-------------------|
 | OpenClaw | Free, open-source, CLI + basic web UI, persistent memory (weeks), no inner life |
 | Claude Code | $20-200/mo, terminal only, session-based memory, coding-focused |
-| **NexusOS** | Web-accessible self-hosted Agentic OS with Inner Life |
+| **Lipaira** | Web-accessible self-hosted Agentic OS with Inner Life |
 
 ### OS vs SaaS Benefits
 - Data ownership (on user's VPS, not ours)

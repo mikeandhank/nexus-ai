@@ -183,7 +183,7 @@ When I learn something significant, immediately:
 
 When I start fresh (session start):
 1. Check: cron jobs status
-2. Check: NexusOS health (curl localhost:4893)
+2. Check: Lipaira health (curl localhost:4893)
 3. Check: email (if auth working)
 4. Check: any new research/syncs
 5. Report: only if hard block

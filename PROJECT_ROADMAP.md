@@ -1,5 +1,5 @@
 # Nexus Project Architecture
-## Two-Project Model: Nexus Server + NexusOS Client
+## Two-Project Model: Nexus Server + Lipaira Client
 
 **Last Updated:** March 17, 2026
 

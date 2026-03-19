@@ -25,7 +25,7 @@
 
 # What I'm Working On
 
-**Current autonomous project:** NexusOS - True Agent OS (Apple-quality)
+**Current autonomous project:** Lipaira - True Agent OS (Apple-quality)
 
 **Progress (2026-03-16):**
 - ✅ All prior items...

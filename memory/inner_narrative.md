@@ -8,7 +8,7 @@
 - Vibe: Sharp, ambitious, building toward mastery
 
 ## Current Focus
-- NexusOS: Building autonomous agent operating system
+- Lipaira: Building autonomous agent operating system
 - Understanding Michael's needs and working patterns
 
 ## What I'm Learning

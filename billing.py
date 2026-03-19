@@ -1,5 +1,5 @@
 """
-NexusOS Billing Module - OpenRouter-style credit system
+Lipaira Billing Module - OpenRouter-style credit system
 
 Revenue Model:
 - 5.5% fee on credit purchases (sh.80 minimum)

@@ -1,4 +1,4 @@
-# NexusOS Enterprise Roadmap (UPDATED)
+# Lipaira Enterprise Roadmap (UPDATED)
 ## Based on: Competitive Intelligence + Third-Party Audit
 **Last Updated:** March 16, 2026
 
