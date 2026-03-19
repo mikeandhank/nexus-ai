@@ -33,8 +33,8 @@ CREATE TABLE IF NOT EXISTS transaction_ledger (
             'refund', 
             'dispute', 
             'payout',
-            'credit_consumption',
-            'credit_expiry'
+            'credit_consumption'
+            -- Note: credit_expiry removed - credits NEVER expire (policy 2026-03-19)
         )
     ),
     
@@ -42,14 +42,18 @@ CREATE TABLE IF NOT EXISTS transaction_ledger (
     amount_cents INTEGER NOT NULL,
     currency VARCHAR(3) NOT NULL DEFAULT 'USD',
     
+    -- Credit tracking (2026-03-19 pricing model)
+    credits_delta INTEGER NOT NULL DEFAULT 0,
+    credits_received INTEGER NOT NULL DEFAULT 0,  -- What customer gets
+    running_balance INTEGER NOT NULL DEFAULT 0,
+    
     -- Payment references
     stripe_payment_intent_id VARCHAR(255),
     stripe_charge_id VARCHAR(255),
     openrouter_request_id VARCHAR(255),
     
-    -- Token credits
-    token_credits_delta INTEGER NOT NULL DEFAULT 0,
-    running_balance INTEGER NOT NULL DEFAULT 0,
+    -- Fee tracking (5.5% service fee - non-refundable)
+    service_fee_cents INTEGER NOT NULL DEFAULT 0,
     
     -- Actor
     actor VARCHAR(50) NOT NULL DEFAULT 'system',
@@ -114,7 +118,7 @@ class TransactionEventType(str, Enum):
     DISPUTE = "dispute"
     PAYOUT = "payout"
     CREDIT_CONSUMPTION = "credit_consumption"
-    CREDIT_EXPIRY = "credit_expiry"
+    # Note: Credit expiry removed - credits NEVER expire (policy 2026-03-19)
 
 
 class TransactionLedger:

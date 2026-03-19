@@ -36,11 +36,30 @@
 
 ## Pending Founder Decisions (★)
 
-- [ ] Credit expiry policy
-- [ ] Refund policy (full vs partial)
+- [x] Credit expiry policy → **DECIDED: Credits do NOT expire**
+- [x] Refund policy → **DECIDED: Partial refund of unused credits only**
 - [ ] AUP content categories
 - [ ] Data retention exceptions
 - [ ] GDPR supervisory authority
+
+---
+
+## Credit & Refund Policy (as of 2026-03-19)
+
+**Credit Expiry:** Credits NEVER expire
+
+**Pricing Model:**
+- Customer purchases $X of credits → receives $X in their account
+- Service fee (5.5%) added on top: $X × 1.055
+- Example: $100 credits = $100 + $5.50 = $105.50 subtotal
+- Plus applicable sales tax
+
+**Refund Policy:** Partial refund of unused credits only
+- Refund = unused credit value (base amount)
+- **5.5% service fee is NON-REFUNDABLE (absorbed)**
+- Example: $100 purchase, 50% used → $50 refund (no fee returned)
+- Consumed credits (via OpenRouter) are not refundable
+- Event-sourced credit ledger tracks every credit for accurate calculation
 
 ---
 

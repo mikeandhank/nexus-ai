@@ -260,3 +260,96 @@ def calculate_revenue_recognized(
         "deferred": deferred,
         "consumption_ratio": consumption_ratio
     }
+
+
+# ============================================================
+# PRICING MODEL (Updated 2026-03-19)
+# ============================================================
+
+SERVICE_FEE_PERCENT = 0.055  # 5.5%
+
+
+def calculate_credit_purchase(credits_desired: int) -> dict:
+    """
+    Calculate pricing for a credit purchase.
+    
+    Customer wants $X of credits → gets $X credits
+    Fee (5.5%) added on top
+    
+    Returns:
+        - credits: what customer receives (same as desired)
+        - base_amount_cents: the credit value in cents
+        - service_fee_cents: the 5.5% fee
+        - total_charged_cents: what customer pays (before tax)
+    """
+    base_amount_cents = credits_desired * 100  # Convert dollars to cents
+    service_fee_cents = int(base_amount_cents * SERVICE_FEE_PERCENT)
+    total_charged_cents = base_amount_cents + service_fee_cents
+    
+    return {
+        "credits": credits_desired,
+        "credits_cents": base_amount_cents,
+        "base_amount_cents": base_amount_cents,
+        "service_fee_cents": service_fee_cents,
+        "total_charged_cents": total_charged_cents,
+        "total_charged_dollars": total_charged_cents / 100
+    }
+
+
+def calculate_refund(unused_credits: int, original_credits_purchased: int, 
+                     original_base_amount_cents: int) -> dict:
+    """
+    Calculate refund for unused credits.
+    
+    - Refund = value of unused credits (base amount only)
+    - Service fee is NON-REFUNDABLE
+    - Example: $100 purchase, 50% used → $50 refund (no fee returned)
+    
+    Returns:
+        - unused_credits: credits not consumed
+        - refund_base_cents: refund amount (base credit value only)
+        - fee_forfeited: the 5.5% fee is NOT returned
+    """
+    if unused_credits <= 0 or original_credits_purchased <= 0:
+        return {
+            "unused_credits": 0,
+            "refund_base_cents": 0,
+            "fee_forfeited": 0
+        }
+    
+    # Calculate proportion of unused credits
+    unused_ratio = unused_credits / original_credits_purchased
+    refund_base_cents = int(original_base_amount_cents * unused_ratio)
+    
+    # Fee is NOT refundable
+    service_fee_cents = int(original_base_amount_cents * SERVICE_FEE_PERCENT)
+    
+    return {
+        "unused_credits": unused_credits,
+        "refund_base_cents": refund_base_cents,
+        "fee_forfeited": service_fee_cents,
+        "refund_base_dollars": refund_base_cents / 100
+    }
+
+
+# Example usage
+if __name__ == "__main__":
+    # Example: Customer wants $100 of credits
+    purchase = calculate_credit_purchase(100)
+    print(f"Customer wants $100 credits:")
+    print(f"  Credits received: ${purchase['credits']}")
+    print(f"  Base amount: ${purchase['base_amount_cents']/100}")
+    print(f"  Service fee (5.5%): ${purchase['service_fee_cents']/100}")
+    print(f"  Total charged: ${purchase['total_charged_cents']/100}")
+    print()
+    
+    # Example: Customer used 50% of credits, wants refund
+    refund = calculate_refund(
+        unused_credits=50,
+        original_credits_purchased=100,
+        original_base_amount_cents=10000
+    )
+    print(f"Customer used 50%, requests refund:")
+    print(f"  Unused credits: {refund['unused_credits']}")
+    print(f"  Refund (base only): ${refund['refund_base_cents']/100}")
+    print(f"  Fee forfeited: ${refund['fee_forfeited']/100}")

@@ -180,4 +180,69 @@ _Lessons, patterns, and important context that persist across sessions._
 
 ---
 
-_Last updated: 2026-03-17_
+## Lipaira Compliance Infrastructure (2026-03-19)
+
+**AWS Server:** 3.16.216.39 (not yet accessible - needs AWS console check)
+**Rollout:** All code ready in `/data/.openclaw/workspace/lipaira-compliance/`
+
+### Security Posture (Post-OpenClaw Vulnerability Disclosure)
+
+**Context:** CVE-2026-25253 and other vulnerabilities disclosed March 2026:
+- 135,000+ exposed OpenClaw instances
+- 50,000+ vulnerable to RCE
+- Command injection, LFI, prompt injection, malicious plugins
+
+**Key Lessons Applied to Lipaira:**
+- ⏳ Default to localhost binding (never 0.0.0.0)
+- ⏳ Signed plugin/skills with hash verification
+- ⏳ Sandboxed skill execution with limited permissions
+- ⏳ Input sanitization enforced (already built)
+- ⏳ Immutable audit logs (already designed)
+- ⏳ KMS encryption for all credentials (already designed)
+- ⏳ Memory sanitization before persistence
+
+### Built Components:
+
+**Logging (Audit Trail):**
+- ✅ Structured log schema (`logging/schema.py`)
+- ✅ OpenRouter consumption logging (`logging/openrouter.py`)
+- ✅ S3 hash verification Lambda (`infrastructure/s3_hash_verification.py`)
+- ✅ CloudWatch alerts config (`infrastructure/cloudwatch_alerts.py`)
+
+**Database:**
+- ✅ Transaction ledger SQL + Python (`database/transactions.py`)
+- ✅ Stripe webhook audit storage (`database/stripe_webhook.py`)
+
+**Accounting:**
+- ✅ Revenue + COGS event streams (`accounting/revenue_cogs.py`)
+- ✅ Reconciliation jobs + chargeback defense (`accounting/reconciliation.py`)
+
+**Legal/Compliance:**
+- ✅ GDPR data inventory + PII tagging (`legal/gdpr_inventory.py`)
+- ✅ ToS version control + acceptance logging (`legal/tos_version_control.py`)
+- ✅ DSR workflow (access/deletion/portability) (`legal/dsr_workflow.py`)
+- ✅ Security + operational compliance (`legal/compliance_ops.py`)
+
+**Infrastructure:**
+- ✅ IAM policies (least privilege) + encryption config (`infrastructure/iam_policies.py`)
+
+### Pending Founder Decisions (★):
+- ~~Credit expiry policy~~ ✅ **DECIDED: Credits do NOT expire**
+- ~~Refund policy~~ ✅ **DECIDED: Partial refund of unused credits only (5.5% fee absorbed/non-refundable)**
+- Pricing: Customer gets $X credits, fee added on top ($X × 1.055), plus tax
+- AUP content categories
+- Data retention exceptions
+- GDPR supervisory authority
+
+### AWS Rollout Checklist:
+1. ⏳ Enable S3 Object Lock (COMPLIANCE mode, 7-year retention)
+2. ⏳ Create KMS keys for encryption
+3. ⏳ Run database migrations (see `database/*.py`)
+4. ⏳ Deploy IAM roles (see `infrastructure/iam_policies.py`)
+5. ⏳ Configure CloudTrail
+6. ⏳ Deploy Lambda functions (hash verification, monthly close)
+7. ⏳ Set up CloudWatch alerts
+8. ⏳ Configure SNS topic for alerts
+9. ⏳ Test S3 Object Lock compliance mode
+
+_Last updated: 2026-03-19_
