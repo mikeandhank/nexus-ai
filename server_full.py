@@ -1272,6 +1272,81 @@ def get_model_by_quality(quality):
     })
 
 
+# =============================================================================
+# LIPAIRA UNIFIED CHAT API - Single endpoint for all LLM requests
+# =============================================================================
+@app.route("/v1/chat", methods=["POST"])
+@app.route("/api/chat", methods=["POST"])
+def lipaira_chat():
+    """Unified chat endpoint - auto-selects model based on task type."""
+    import time
+    start_time = time.time()
+    
+    data = request.get_json() or {}
+    message = data.get("message", "").strip()
+    
+    if not message:
+        return jsonify({"error": "message is required"}), 400
+    
+    # Simple task detection
+    task_type = "general"
+    keywords = message.lower()
+    
+    if "code" in keywords or "python" in keywords or "function" in keywords or "javascript" in keywords:
+        task_type = "coding"
+    elif "proof" in keywords or "calculate" in keywords or "math" in keywords:
+        task_type = "reasoning"
+    elif "image" in keywords or "photo" in keywords or "picture" in keywords:
+        task_type = "vision"
+    
+    # Model selection based on task
+    model = "gpt-4o-mini"  # Default - fastest
+    if task_type == "coding":
+        model = "gpt-4o"
+    elif task_type == "reasoning":
+        model = "claude-3.5-sonnet"
+    
+    # Build messages
+    messages = [{"role": "user", "content": message}]
+    
+    # Get API key
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    if not api_key:
+        return jsonify({"error": "OpenAI API key not configured"}), 500
+    
+    try:
+        response = requests.post(
+            "https://api.openai.com/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": model,
+                "messages": messages,
+                "temperature": data.get("temperature", 0.7)
+            },
+            timeout=30
+        )
+        
+        result = response.json()
+        content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        
+        latency_ms = int((time.time() - start_time) * 1000)
+        
+        return jsonify({
+            "content": content,
+            "model": model,
+            "provider": "openai",
+            "task_type": task_type,
+            "latency_ms": latency_ms,
+            "success": True
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e), "success": False}), 500
+
+
 # Register our new modules
 create_swarm_routes(app, require_nexus_key)
 create_automation_routes(app, require_nexus_key)
