@@ -49,6 +49,11 @@ from .providers import (
     TogetherProvider,
     NvidiaProvider,
 )
+from .model_preference import CapabilityLevel, ModelPreferenceManager
+from .task_detection import TaskType, detect_task_type, resolve_model_with_task
+from .enhanced_preferences import TaskType as EnhancedTaskType, PreferenceManager, get_preferences_schema
+from .encryption import get_public_key, decrypt_request, encrypt_response
+from .unified_api import unified_bp
 
 __all__ = [
     "LipairaRouter",
@@ -70,6 +75,19 @@ __all__ = [
     "MinimaxProvider",
     "TogetherProvider",
     "NvidiaProvider",
+    # Model Preferences
+    "CapabilityLevel",
+    "ModelPreferenceManager",
+    # Task Detection
+    "TaskType",
+    "detect_task_type",
+    "resolve_model_with_task",
+    # Encryption
+    "get_public_key",
+    "decrypt_request", 
+    "encrypt_response",
+    # API
+    "unified_bp",
 ]
 
 __version__ = "0.1.0"
